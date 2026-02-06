@@ -1,0 +1,170 @@
+import { UserRole, UserStatus, Prisma } from "@prisma/client";
+
+export type Decimal = Prisma.Decimal;
+
+// ==================== USER TYPES ====================
+
+export interface SessionUser {
+    id: string;
+    email: string;
+    role: UserRole;
+    status: UserStatus;
+    companyName?: string | null;
+    discountGroupId?: string | null;
+    discountRate?: number;
+}
+
+export interface UserWithDiscount {
+    id: string;
+    email: string;
+    companyName: string | null;
+    taxNumber: string | null;
+    phone: string | null;
+    address: string | null;
+    city: string | null;
+    district: string | null;
+    role: UserRole;
+    status: UserStatus;
+    discountGroup: {
+        id: string;
+        name: string;
+        discountRate: Decimal;
+    } | null;
+}
+
+// ==================== PRODUCT TYPES ====================
+
+export interface ProductWithCategory {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    listPrice: Decimal;
+    vatRate: number;
+    minQuantity: number;
+    stock: number;
+    images: string[];
+    isFeatured: boolean;
+    isNew: boolean;
+    isBestSeller: boolean;
+    isActive: boolean;
+    category: {
+        id: string;
+        name: string;
+        slug: string;
+    } | null;
+}
+
+export interface PriceCalculation {
+    listPrice: number;
+    discountRate: number;
+    discountedPrice: number;
+    vatRate: number;
+    vatAmount: number;
+    finalPrice: number;
+}
+
+// ==================== CART TYPES ====================
+
+export interface CartItem {
+    productId: string;
+    name: string;
+    slug: string;
+    image: string;
+    quantity: number;
+    listPrice: number;
+    discountRate: number;
+    vatRate: number;
+    minQuantity: number;
+    stock: number;
+    variantId?: string;
+    variantInfo?: string;
+}
+
+export interface CartSummary {
+    items: CartItem[];
+    subtotal: number;
+    discountAmount: number;
+    vatAmount: number;
+    total: number;
+    itemCount: number;
+}
+
+// ==================== ORDER TYPES ====================
+
+export interface OrderWithItems {
+    id: string;
+    orderNumber: string;
+    subtotal: number;
+    discountAmount: number;
+    appliedDiscountRate: number;
+    vatAmount: number;
+    total: number;
+    status: string;
+    shippingAddress: unknown;
+    cargoCompany: string | null;
+    trackingUrl: string | null;
+    notes: string | null;
+    guestEmail: string | null;
+    createdAt: Date;
+    user: {
+        id: string;
+        email: string;
+        companyName: string | null;
+        phone: string | null;
+    } | null;
+    items: {
+        id: string;
+        productName: string;
+        quantity: number;
+        unitPrice: number;
+        discountRate: number;
+        vatRate: number;
+        lineTotal: number;
+    }[];
+    payment: {
+        id: string;
+        method: string;
+        status: string;
+        amount: number;
+    } | null;
+}
+
+// ==================== ADMIN TYPES ====================
+
+export interface DashboardStats {
+    totalOrders: number;
+    totalRevenue: number;
+    pendingOrders: number;
+    pendingDealers: number;
+    totalProducts: number;
+    totalDealers: number;
+}
+
+// ==================== SITE SETTINGS ====================
+
+export interface SliderItem {
+    id: string;
+    title: string | null;
+    subtitle: string | null;
+    imageUrl: string;
+    linkUrl: string | null;
+    order: number;
+    isActive: boolean;
+}
+
+export interface SiteSettingsData {
+    sliders?: SliderItem[];
+    companyInfo?: {
+        name: string;
+        address: string;
+        phone: string;
+        email: string;
+        taxNumber: string;
+    };
+    bankAccounts?: {
+        bankName: string;
+        accountHolder: string;
+        iban: string;
+    }[];
+}

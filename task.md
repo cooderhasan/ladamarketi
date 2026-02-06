@@ -1,0 +1,29 @@
+sela# Project Tasks
+
+- [x] **Phase 1: Veri Aktarımı (Migrasyon)**
+  - [x] Kategorileri aktar (`ps_category` -> `Category`)
+  - [x] Markaları aktar (`ps_manufacturer` -> `Brand`)
+  - [x] Ürünleri aktar (`ps_product` -> `Product`)
+  - [x] Resimleri aktar (`ps_image` -> S3/Local)
+- [ ] **Phase 2: B2C Dönüşümü**
+  - [ ] Bireysel üyelik kayıt formları
+  - [ ] Toptan fiyatların gizlenmesi / Perakende fiyat politikası
+  - [ ] Sepet ve Checkout süreçlerinin sadeleştirilmesi
+  - [ ] Modern UI/UX Tema Giydirme
+- [ ] **Phase 3: Admin Geliştirmeleri**
+  - [ ] Toplu Fiyat Güncelleme Modülü (Tutar/Yüzde)
+  - [ ] Toplu Stok Güncelleme Modülü
+  - [ ] İçerik Yönetimi (Slider, Hizmetlerimiz)
+- [ ] **Phase 4: Ödeme Sistemleri**
+  - [ ] PayTR Entegrasyonu
+  - [ ] Havale/EFT Bildirim Altyapısı
+  - [ ] Kapıda Ödeme (Pasif)
+  - [ ] E-Fatura Entegrasyonu (Manuel/Oto)
+- [ ] **Phase 5: Pazaryeri Altyapısı**
+  - [ ] Trendyol API Servisi
+  - [ ] Hepsiburada API Servisi
+  - [ ] N11 API Servisi
+- [ ] **Phase 6: Güvenlik ve SEO**
+  - [ ] Input Validation (Zod)
+  - [ ] Rate Limiting & Security Headers
+  - [ ] Next.js Metadata & SEO
