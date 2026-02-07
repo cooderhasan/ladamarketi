@@ -151,6 +151,8 @@ model Category {
   n11CategoryId      Int? // N11 Kategori ID
   hbCategoryId       String? // Hepsiburada Kategori ID (HB uses strings often like "telefon")
   isFeatured Boolean  @default(false)
+  isInHeader Boolean  @default(false)
+  headerOrder Int     @default(0)
   legacyProducts  Product[] @relation("LegacyCategory")
   products  Product[]
 
@@ -170,6 +172,9 @@ model Brand {
   slug      String    @unique
   logoUrl   String?
   isActive  Boolean   @default(true)
+  trendyolBrandId Int?
+  n11BrandId      Int?
+  hbBrandId       String?
   products  Product[]
   createdAt DateTime  @default(now())
 
