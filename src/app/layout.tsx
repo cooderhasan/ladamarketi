@@ -18,12 +18,17 @@ import { Providers } from "@/components/providers/session-provider";
 import { prisma } from "@/lib/db";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const generalSettings = await prisma.siteSettings.findUnique({
-    where: { key: "general" },
-  });
+  let general: any = {};
 
-  // Cast the JSON value to a typed object or any for simpler access
-  const general = (generalSettings?.value as any) || {};
+  try {
+    const generalSettings = await prisma.siteSettings.findUnique({
+      where: { key: "general" },
+    });
+    general = (generalSettings?.value as any) || {};
+  } catch (error) {
+    // Fallback to default metadata if DB is not ready (e.g. during build)
+    console.warn("Could not fetch site settings, using defaults.", error);
+  }
 
   return {
     title: {
