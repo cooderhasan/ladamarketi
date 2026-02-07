@@ -58,13 +58,22 @@ async function importData() {
     // 3. Ürünler
     console.log(`Ürünler yükleniyor (${data.products.length})...`);
     for (const product of data.products) {
-        // İlişkisel alanları temizle (categoryId, brandId vs. zaten foreign key olarak var)
-        // Ama create ederken connect gerekebilir mi? Hayır, id varsa direkt create eder.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { categories, ...productData } = product;
+
         try {
             await prisma.product.upsert({
                 where: { id: product.id },
-                update: product,
-                create: product,
+                update: {
+                    ...productData,
+                    // Kategorileri güncelle (varsa bağla)
+                    categories: categories ? { set: categories.map((c: any) => ({ id: c.id })) } : undefined
+                },
+                create: {
+                    ...productData,
+                    // Kategorileri oluştururken bağla
+                    categories: categories ? { connect: categories.map((c: any) => ({ id: c.id })) } : undefined
+                },
             });
         } catch (e) {
             console.error(`Ürün yüklenirken hata: ${product.name}`, e);

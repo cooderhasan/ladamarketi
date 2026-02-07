@@ -9,7 +9,9 @@ async function exportData() {
     const data = {
         categories: await prisma.category.findMany(),
         brands: await prisma.brand.findMany(),
-        products: await prisma.product.findMany(),
+        products: await prisma.product.findMany({
+            include: { categories: { select: { id: true } } }
+        }),
         variants: await prisma.productVariant.findMany(),
         sliders: await prisma.slider.findMany(),
         siteSettings: await prisma.siteSettings.findMany(),
