@@ -93,7 +93,7 @@ async function importData() {
     if (data.policies) {
         for (const policy of data.policies) {
             await prisma.policy.upsert({
-                where: { id: policy.id },
+                where: { slug: policy.slug },
                 update: policy,
                 create: policy,
             });
