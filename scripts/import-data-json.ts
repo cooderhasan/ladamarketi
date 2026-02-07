@@ -20,13 +20,30 @@ async function importData() {
 
     // 1. Kategoriler
     console.log(`Kategoriler yükleniyor (${data.categories.length})...`);
+
+    // Pass 1: Önce tüm kategorileri parentsız oluştur (FK hatasını önlemek için)
+    console.log("  - Aşama 1: Kategoriler oluşturuluyor (İlişkisiz)...");
     for (const cat of data.categories) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { parentId, ...catNoParent } = cat;
         await prisma.category.upsert({
             where: { id: cat.id },
-            update: cat,
-            create: cat,
+            update: { ...catNoParent }, // Mevcutsa diğer alanları güncelle, parent'a dokunma
+            create: { ...catNoParent, parentId: null }, // Yeni ise parentsız oluştur
         });
     }
+
+    // Pass 2: Parent ilişkilerini kur
+    console.log("  - Aşama 2: Kategori ağacı kuruluyor...");
+    for (const cat of data.categories) {
+        if (cat.parentId) {
+            await prisma.category.update({
+                where: { id: cat.id },
+                data: { parentId: cat.parentId },
+            });
+        }
+    }
+
 
     // 2. Markalar
     console.log(`Markalar yükleniyor (${data.brands.length})...`);
