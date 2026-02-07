@@ -100,7 +100,7 @@ export function SlidersTable({ sliders }: SlidersTableProps) {
                 await updateSlider(editSlider.id, { title, subtitle, imageUrl, linkUrl, order });
                 toast.success("Slider güncellendi.");
             } else {
-                await createSlider({ title, subtitle, imageUrl, linkUrl, order });
+                await createSlider({ title, subtitle, imageUrl, linkUrl, order, isActive: true });
                 toast.success("Slider oluşturuldu.");
             }
             setIsOpen(false);
