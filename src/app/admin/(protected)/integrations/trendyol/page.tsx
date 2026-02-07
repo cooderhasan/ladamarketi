@@ -36,7 +36,7 @@ export default async function TrendyolIntegrationPage() {
 
                     <TrendyolOrderSyncButton />
 
-                    <TrendyolDataHelper />
+                    <TrendyolDataHelper isEnabled={!!config} />
                 </div>
             </div>
         </div>
