@@ -18,8 +18,8 @@ async function main() {
     try {
         const allCategories = await prisma.category.findMany({
             take: 5,
-            orderBy: { updatedAt: 'desc' },
-            select: { id: true, name: true, isInHeader: true, updatedAt: true }
+            orderBy: { createdAt: 'desc' },
+            select: { id: true, name: true, isInHeader: true, createdAt: true }
         })
         console.log('Most recently updated categories:', JSON.stringify(allCategories, null, 2))
     } catch (error) {
