@@ -19,10 +19,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // Categories
-    const categories = await prisma.category.findMany({
-        where: { isActive: true },
-        select: { slug: true },
-    });
+    let categories: { slug: string }[] = [];
+    try {
+        categories = await prisma.category.findMany({
+            where: { isActive: true },
+            select: { slug: true },
+        });
+    } catch (error) {
+        console.warn("Could not fetch categories for sitemap, skipping.", error);
+    }
 
     const categoryUrls = categories.map((category) => ({
         url: `${baseUrl}/category/${category.slug}`,
@@ -32,10 +37,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
     // Products
-    const products = await prisma.product.findMany({
-        where: { isActive: true },
-        select: { slug: true, updatedAt: true },
-    });
+    let products: { slug: string; updatedAt: Date }[] = [];
+    try {
+        products = await prisma.product.findMany({
+            where: { isActive: true },
+            select: { slug: true, updatedAt: true },
+        });
+    } catch (error) {
+        console.warn("Could not fetch products for sitemap, skipping.", error);
+    }
 
     const productUrls = products.map((product) => ({
         url: `${baseUrl}/products/${product.slug}`,
