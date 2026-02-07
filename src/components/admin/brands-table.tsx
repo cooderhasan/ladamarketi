@@ -103,6 +103,26 @@ export function BrandsTable({ brands }: BrandsTableProps) {
         setIsOpen(true);
     };
 
+    const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+        try {
+            await updateBrand(id, { isActive: currentStatus });
+            toast.success("Marka durumu güncellendi.");
+        } catch {
+            toast.error("Durum güncellenemedi.");
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Bu markayı silmek istediğinize emin misiniz?")) return;
+
+        try {
+            await deleteBrand(id);
+            toast.success("Marka silindi.");
+        } catch {
+            toast.error("Silme işlemi başarısız.");
+        }
+    };
+
     return (
         <>
             <div className="flex justify-end mb-4">
