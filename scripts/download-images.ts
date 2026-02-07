@@ -1,3 +1,4 @@
+
 import fs from 'fs';
 import path from 'path';
 import { PrismaClient } from '@prisma/client';
@@ -112,14 +113,55 @@ async function downloadFile(url: string, destPath: string) {
         fs.mkdirSync(dir, { recursive: true });
     }
 
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    if (!response.body) throw new Error('No body');
+    const headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    };
 
-    // Node.js readable stream from fetch body
-    // @ts-ignore - Readable.fromWeb is available in recent Node versions but might need typecast
-    const stream = Readable.fromWeb(response.body as any);
-    await pipeline(stream, fs.createWriteStream(destPath));
+    try {
+        const response = await fetch(url, { headers });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.body) throw new Error('No body');
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('text/html')) {
+            throw new Error('Content-Type is text/html (WAF Block)');
+        }
+
+        // Node.js readable stream from fetch body
+        // @ts-ignore
+        const stream = Readable.fromWeb(response.body as any);
+        await pipeline(stream, fs.createWriteStream(destPath));
+    } catch (error) {
+        // Fallback to Archive.org if 404
+        if ((error as any).message.includes('404') ||
+            (error as any).message.includes('403') ||
+            (error as any).message.includes('text/html') ||
+            (error as any).message.includes('WAF Block')) {
+
+            console.log(`\n⚠️  ${url} erişilemedi, Archive.org deneniyor...`);
+            const archiveUrl = `https://web.archive.org/web/20240000000000id_/${url}`;
+
+            try {
+                const archiveResponse = await fetch(archiveUrl, { headers });
+                if (!archiveResponse.ok) throw new Error(`Archive HTTP ${archiveResponse.status}`);
+                if (!archiveResponse.body) throw new Error('No archive body');
+
+                const archiveType = archiveResponse.headers.get('content-type');
+                if (archiveType && archiveType.includes('text/html')) {
+                    console.log(`\n⚠️  Archive.org HTML döndürdü: ${url}`);
+                }
+
+                // @ts-ignore
+                const archiveStream = Readable.fromWeb(archiveResponse.body as any);
+                await pipeline(archiveStream, fs.createWriteStream(destPath));
+                // console.log(`✅  Archive.org'dan kurtarıldı: ${url}`);
+                return;
+            } catch (archiveError) {
+                throw new Error(`Orjinal ve Arşiv başarısız: ${(archiveError as Error).message}`);
+            }
+        }
+        throw error;
+    }
 }
 
 function chunk<T>(arr: T[], size: number): T[][] {
