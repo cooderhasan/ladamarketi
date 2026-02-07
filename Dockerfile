@@ -43,8 +43,8 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/full_backup.json ./full_backup.json
 
-# Create uploads directory
-RUN mkdir -p /app/public/uploads && chmod -R 777 /app/public/uploads
+# Create farmework specific directories
+RUN mkdir -p /app/public/uploads /app/public/img && chmod -R 777 /app/public/uploads /app/public/img
 
 # Set permissions
 RUN chown -R nextjs:nodejs /app

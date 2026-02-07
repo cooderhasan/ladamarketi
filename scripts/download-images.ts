@@ -22,46 +22,57 @@ const CONCURRENCY = 5;
 async function main() {
     console.log('🚀 Resim indirme aracı başlatılıyor...');
 
-    // 1. Get all products with images
-    const products = await prisma.product.findMany({
-        select: { id: true, images: true },
-        where: { images: { isEmpty: false } } // Ensure we only get products with images
-    });
+    // 1. Get all data with images
+    const [products, categories, sliders] = await Promise.all([
+        prisma.product.findMany({
+            select: { id: true, images: true },
+            where: { images: { isEmpty: false } }
+        }),
+        prisma.category.findMany({
+            select: { id: true, imageUrl: true },
+            where: {
+                AND: [
+                    { imageUrl: { not: null } },
+                    { imageUrl: { not: "" } }
+                ]
+            }
+        }),
+        prisma.slider.findMany({
+            select: { id: true, imageUrl: true },
+            where: { imageUrl: { not: "" } }
+        })
+    ]);
 
-    console.log(`📦 Toplam ${products.length} ürün bulundu.`);
+    console.log(`📦 Veriler toplandı: ${products.length} ürün, ${categories.length} kategori, ${sliders.length} slider.`);
 
     let downloadQueue: { url: string; path: string }[] = [];
 
-    // 2. Prepare download queue
+    // Products
     for (const p of products) {
-        // images stored as: ["/img/p/1/2/3/123.jpg", ...]
-        // We need to extract the ID and structure
         for (const imgUrl of p.images) {
-            // imgUrl ex: /img/p/1/2/12.jpg
-            // We want to download from: BASE_URL + imgUrl
-            // Save to: public + imgUrl
-
-            const targetPath = path.join(process.cwd(), 'public', imgUrl);
-            const sourceUrl = `${BASE_URL}${imgUrl}`;
-
-            // Check if exists
-            if (!fs.existsSync(targetPath)) {
-                downloadQueue.push({ url: sourceUrl, path: targetPath });
-            }
+            addIfMissing(imgUrl, downloadQueue);
         }
     }
 
-    console.log(`⬇️ İndirilecek resim sayısı: ${downloadQueue.length}`);
+    // Categories
+    for (const c of categories) {
+        if (c.imageUrl) addIfMissing(c.imageUrl, downloadQueue);
+    }
+
+    // Sliders
+    for (const s of sliders) {
+        if (s.imageUrl) addIfMissing(s.imageUrl, downloadQueue);
+    }
+
+    console.log(`⬇️ İndirilecek yeni resim sayısı: ${downloadQueue.length}`);
     if (downloadQueue.length === 0) {
-        console.log('✅ Tüm resimler zaten mevcut.');
+        console.log('✅ Tüm resimler zaten mevcut veya indirilecek resim bulunamadı.');
         return;
     }
 
     // 3. Process queue
     let processed = 0;
     const total = downloadQueue.length;
-
-    // Change limit as needed
     const chunked = chunk(downloadQueue, CONCURRENCY);
 
     for (const batch of chunked) {
@@ -71,12 +82,27 @@ async function main() {
                 processed++;
                 process.stdout.write(`\r✅ İlerleme: ${processed}/${total}`);
             } catch (error) {
-                console.error(`\n❌ Hata: ${item.url} -> ${(error as Error).message}`);
+                // Sadece 404 değilse hata bas, bazı resimler silinmiş olabilir
+                if (!(error as any).message.includes('404')) {
+                    console.error(`\n❌ Hata: ${item.url} -> ${(error as Error).message}`);
+                }
             }
         }));
     }
 
     console.log('\n🏁 İşlem Tamamlandı.');
+}
+
+function addIfMissing(imgUrl: string, queue: { url: string; path: string }[]) {
+    // URL kontrolü - Eğer zaten tam URL ise (https://...) indirmeyebiliriz veya başka işlem yapabiliriz
+    if (imgUrl.startsWith('http')) return;
+
+    const targetPath = path.join(process.cwd(), 'public', imgUrl);
+    const sourceUrl = `${BASE_URL}${imgUrl.startsWith('/') ? '' : '/'}${imgUrl}`;
+
+    if (!fs.existsSync(targetPath)) {
+        queue.push({ url: sourceUrl, path: targetPath });
+    }
 }
 
 async function downloadFile(url: string, destPath: string) {
