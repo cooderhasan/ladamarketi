@@ -30,7 +30,12 @@ export async function updatePolicy(slug: string, title: string, content: string)
 }
 
 export async function getAllPolicies() {
-    return await prisma.policy.findMany({
-        orderBy: { title: "asc" },
-    })
+    try {
+        return await prisma.policy.findMany({
+            orderBy: { title: "asc" },
+        })
+    } catch (error) {
+        console.warn("Could not fetch policies, returning empty array.", error)
+        return []
+    }
 }

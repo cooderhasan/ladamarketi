@@ -14,45 +14,19 @@ export default async function StorefrontLayout({
 }) {
     const session = await auth();
     const settings = await getSiteSettings();
-    // 1. Try to fetch categories explicitly marked for header
-    let categories = await prisma.category.findMany({
-        where: {
-            isActive: true,
-            isInHeader: true,
-        },
-        orderBy: [
-            { headerOrder: "asc" },
-            { order: "asc" }
-        ],
-        select: {
-            id: true,
-            name: true,
-            slug: true,
-            parentId: true,
-            imageUrl: true,
-            isInHeader: true,
-            children: {
-                where: { isActive: true },
-                select: {
-                    id: true,
-                    name: true,
-                    slug: true,
-                    imageUrl: true
-                },
-                orderBy: { order: "asc" }
-            }
-        }
-    });
+    let categories: any[] = [];
 
-    // 2. Fallback: If no header categories found, fetch default ones (Home children or root)
-    if (categories.length === 0) {
+    try {
+        // 1. Try to fetch categories explicitly marked for header
         categories = await prisma.category.findMany({
             where: {
                 isActive: true,
-                parent: { name: "Home" }
+                isInHeader: true,
             },
-            orderBy: { order: "asc" },
-            take: 10,
+            orderBy: [
+                { headerOrder: "asc" },
+                { order: "asc" }
+            ],
             select: {
                 id: true,
                 name: true,
@@ -73,12 +47,12 @@ export default async function StorefrontLayout({
             }
         });
 
-        // 3. Second Fallback: If still no categories (maybe no "Home" category exists), fetch root categories
+        // 2. Fallback: If no header categories found, fetch default ones (Home children or root)
         if (categories.length === 0) {
             categories = await prisma.category.findMany({
                 where: {
                     isActive: true,
-                    parentId: null
+                    parent: { name: "Home" }
                 },
                 orderBy: { order: "asc" },
                 take: 10,
@@ -101,22 +75,59 @@ export default async function StorefrontLayout({
                     }
                 }
             });
+
+            // 3. Second Fallback: If still no categories (maybe no "Home" category exists), fetch root categories
+            if (categories.length === 0) {
+                categories = await prisma.category.findMany({
+                    where: {
+                        isActive: true,
+                        parentId: null
+                    },
+                    orderBy: { order: "asc" },
+                    take: 10,
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        parentId: true,
+                        imageUrl: true,
+                        isInHeader: true,
+                        children: {
+                            where: { isActive: true },
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                                imageUrl: true
+                            },
+                            orderBy: { order: "asc" }
+                        }
+                    }
+                });
+            }
         }
+    } catch (error) {
+        console.warn("Could not fetch categories in StorefrontLayout, using empty array.", error);
+        categories = [];
     }
 
     const policies = await getAllPolicies();
 
     let userDiscountRate = 0;
     if (session?.user?.id) {
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: {
-                discountGroup: {
-                    select: { discountRate: true }
+        try {
+            const user = await prisma.user.findUnique({
+                where: { id: session.user.id },
+                select: {
+                    discountGroup: {
+                        select: { discountRate: true }
+                    }
                 }
-            }
-        });
-        userDiscountRate = Number(user?.discountGroup?.discountRate || 0);
+            });
+            userDiscountRate = Number(user?.discountGroup?.discountRate || 0);
+        } catch (error) {
+            console.warn("Could not fetch user discount rate, using 0.", error);
+        }
     }
 
     return (
