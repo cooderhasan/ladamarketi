@@ -347,9 +347,9 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                             </p>
                                             <div className="mt-3 text-sm grid grid-cols-2 gap-2 bg-white dark:bg-gray-900 p-2 rounded border border-gray-100 dark:border-gray-800">
                                                 <div className="text-gray-500">Kullanılabilir Limit:</div>
-                                                <div className="text-right font-medium text-gray-900 dark:text-white">{formatPrice(initialData.currentAccount.availableLimit)}</div>
+                                                <div className="text-right font-medium text-gray-900 dark:text-white">{formatPrice(initialData?.currentAccount?.availableLimit || 0)}</div>
                                                 <div className="text-gray-500">Kredi Limiti:</div>
-                                                <div className="text-right text-gray-500">{formatPrice(initialData.currentAccount.creditLimit)}</div>
+                                                <div className="text-right text-gray-500">{formatPrice(initialData?.currentAccount?.creditLimit || 0)}</div>
                                             </div>
                                         </div>
                                         <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === "CURRENT_ACCOUNT" ? "border-orange-600 bg-orange-600 text-white" : "border-gray-300"}`}>
