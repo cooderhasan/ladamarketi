@@ -11,8 +11,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Truck, Shield, HeadphonesIcon } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 async function getHomeData() {
-  const [sliders, featuredProducts, newProducts, bestSellers, categories, headerCategories, policies] =
+  const [sliders, featuredProducts, newProducts, bestSellers, categories, sidebarCategories, headerCategories, policies] =
     await Promise.all([
       prisma.slider.findMany({
         where: { isActive: true },
@@ -38,8 +40,7 @@ async function getHomeData() {
         orderBy: { order: "asc" },
         take: 4, // Limit to 4 as requested for category section
       }),
-      // Header categories with children for dropdown menus
-      // Header categories - Use Hardcoded Home ID to skip Root
+      // Sidebar categories (all active top-level)
       prisma.category.findMany({
         where: {
           isActive: true,
@@ -50,7 +51,6 @@ async function getHomeData() {
           id: true,
           name: true,
           slug: true,
-          parentId: true,
           children: {
             where: { isActive: true },
             select: { id: true, name: true, slug: true },
@@ -58,6 +58,54 @@ async function getHomeData() {
           }
         }
       }),
+      // Header categories with fallback logic
+      (async () => {
+        let cats = await prisma.category.findMany({
+          where: { isActive: true, isInHeader: true },
+          orderBy: [{ headerOrder: "asc" }, { order: "asc" }],
+          select: {
+            id: true, name: true, slug: true, isInHeader: true,
+            children: {
+              where: { isActive: true },
+              select: { id: true, name: true, slug: true },
+              orderBy: { order: "asc" }
+            }
+          }
+        });
+
+        if (cats.length === 0) {
+          cats = await prisma.category.findMany({
+            where: { isActive: true, parent: { name: "Home" } },
+            orderBy: { order: "asc" },
+            take: 10,
+            select: {
+              id: true, name: true, slug: true, isInHeader: true,
+              children: {
+                where: { isActive: true },
+                select: { id: true, name: true, slug: true },
+                orderBy: { order: "asc" }
+              }
+            }
+          });
+
+          if (cats.length === 0) {
+            cats = await prisma.category.findMany({
+              where: { isActive: true, parentId: null },
+              orderBy: { order: "asc" },
+              take: 10,
+              select: {
+                id: true, name: true, slug: true, isInHeader: true,
+                children: {
+                  where: { isActive: true },
+                  select: { id: true, name: true, slug: true },
+                  orderBy: { order: "asc" }
+                }
+              }
+            });
+          }
+        }
+        return cats;
+      })(),
       prisma.policy.findMany({
         select: { slug: true, title: true }
       }),
@@ -87,6 +135,7 @@ async function getHomeData() {
     newProducts: newProducts.map(transformProduct),
     bestSellers: bestSellers.map(transformProduct),
     categories: categories.map(transformCategory),
+    sidebarCategories: sidebarCategories,
     headerCategories: headerCategories,
     policies: policies,
   };
@@ -118,7 +167,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Left Sidebar - Desktop Only */}
             <aside className="hidden lg:block lg:col-span-1 h-fit sticky top-24 z-30">
-              <CategorySidebar categories={data.headerCategories} />
+              <CategorySidebar categories={data.sidebarCategories} />
             </aside>
 
             {/* Main Content */}
@@ -164,8 +213,10 @@ export default async function HomePage() {
                   </div>
                 </div>
               </section>
-
-
+              {/* Categories */}
+              {data.categories.length > 0 && (
+                <CategorySection categories={data.categories} />
+              )}
 
               {/* Featured Products */}
               {data.featuredProducts.length > 0 && (

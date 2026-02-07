@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth";
 
 interface BulkUpdateCriteria {
     brandId?: string;
@@ -82,23 +83,10 @@ export async function executeBulkUpdate(
     criteria: BulkUpdateCriteria,
     params: PriceUpdateParams
 ) {
-    // 1. Get preview results to know exact IDs and values
-    // Optimization: We could do this in SQL directly, but Prisma doesn't support 
-    // "update where X set price = price * 1.1" natively without raw query.
-    // For safety and detailed logging, lets fetch-then-update or allow raw query if performance is key.
-    // Given < 10k products, fetch-then-update in transaction or chunks is safer.
-
-    // Actually, simple batch update is limited in Prisma if value depends on current row value.
-    // We MUST use raw query for atomic updates or loop. 
-
-    // Let's use individual updates for now to ensure correctness and log changes, 
-    // unless the user complains about speed. 
-    // But wait, for 5000 products, individual updates is too slow. 
-
-    // Better approach: Calculate in DB using executeRaw used carefully.
-
-    // Construct WHERE clause text for Raw Query? 
-    // Or just iterate. 5000 updates might take 10-20 seconds. Acceptable for admin task.
+    const session = await auth();
+    if (!session?.user?.id) {
+        throw new Error("Unauthorized");
+    }
 
     const preview = await previewBulkUpdate(criteria, params);
 
@@ -126,7 +114,7 @@ export async function executeBulkUpdate(
                 details: `Updated ${preview.length} products. Criteria: ${JSON.stringify(criteria)}, Params: ${JSON.stringify(params)}`,
                 entityId: "BULK",
                 entityType: "PRODUCT",
-                userId: "ADMIN", // TODO: Get actual user ID
+                adminId: session.user.id,
             }
         });
 
@@ -203,6 +191,11 @@ export async function executeBulkStockUpdate(
     criteria: BulkUpdateCriteria,
     params: StockUpdateParams
 ) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        throw new Error("Unauthorized");
+    }
+
     const preview = await previewBulkStockUpdate(criteria, params);
     const CHUNK_SIZE = 50;
 
@@ -225,7 +218,7 @@ export async function executeBulkStockUpdate(
                 details: `Updated ${preview.length} products. Criteria: ${JSON.stringify(criteria)}, Params: ${JSON.stringify(params)}`,
                 entityId: "BULK",
                 entityType: "PRODUCT",
-                userId: "ADMIN",
+                adminId: session.user.id,
             }
         });
 

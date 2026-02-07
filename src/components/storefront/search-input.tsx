@@ -29,7 +29,7 @@ export function SearchInput() {
 
     return (
         <form onSubmit={handleSearch} className="relative w-full">
-            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all overflow-hidden">
+            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus-within:border-[#009AD0] focus-within:ring-2 focus-within:ring-[#009AD0]/20 transition-all overflow-hidden">
                 <div className="pl-4 text-gray-400">
                     {isPending ? (
                         <Loader2 className="h-5 w-5 animate-spin" />

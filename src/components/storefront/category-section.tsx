@@ -48,7 +48,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
                             <h3 className="text-xl font-bold text-white mb-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                                 {category.name}
                             </h3>
-                            <div className="flex items-center text-sm text-blue-300 font-medium translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                            <div className="flex items-center text-sm text-[#B3E5FC] font-medium translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                                 Şimdi İncele
                                 <ArrowRight className="h-4 w-4 ml-2" />
                             </div>

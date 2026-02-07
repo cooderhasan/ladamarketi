@@ -20,7 +20,7 @@
 - **Migration:** Şema değişikliklerinde **yalnızca** `prisma migrate` kullan.
 - **Güvenlik:** Kullanıcı şifreleri her zaman hash'lenmiş olmalı.
 - **Dosya Yolu:** Windows ortamındayız, path'lere dikkat et.
-- **Repo:** https://github.com/cooderhasan/lada.git  
+- **Repo:** https://github.com/cooderhasan/ladamarketi.git
   Aşama kaydettikçe bu repoya düzenli push yapılır.
 - “Sonra düzeltiriz” yaklaşımı yasaktır.
 

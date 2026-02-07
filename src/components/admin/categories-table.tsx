@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,25 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { createCategory, updateCategory, deleteCategory, toggleCategoryStatus } from "@/app/admin/(protected)/categories/actions";
+import { createCategory, updateCategory, deleteCategory, toggleCategoryStatus, updateCategoriesSidebarOrder, updateCategoriesHeaderOrder } from "@/app/admin/(protected)/categories/actions";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 
 interface Category {
     id: string;
@@ -43,6 +61,8 @@ interface Category {
     createdAt: Date;
     parentId?: string | null;
     imageUrl?: string | null;
+    isInHeader: boolean;
+    headerOrder: number;
     isFeatured: boolean;
     trendyolCategoryId?: number | null;
     n11CategoryId?: number | null;
@@ -53,6 +73,99 @@ interface Category {
     _count: {
         products: number;
     };
+}
+
+interface SortableRowProps {
+    category: Category;
+    onEdit: (category: Category) => void;
+    onDelete: (id: string) => void;
+    onToggleStatus: (id: string, isActive: boolean) => void;
+    reorderMode: "none" | "sidebar" | "header";
+}
+
+function SortableRow({ category, onEdit, onDelete, onToggleStatus, reorderMode }: SortableRowProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: category.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : 0,
+        position: "relative" as const,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <TableRow ref={setNodeRef} style={style}>
+            <TableCell className="w-[80px]">
+                {reorderMode !== "none" ? (
+                    <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
+                        <GripVertical className="h-4 w-4 text-gray-400" />
+                    </div>
+                ) : (
+                    category.order
+                )}
+            </TableCell>
+            <TableCell>
+                <div className="flex flex-col">
+                    <span className="font-medium">{category.name}</span>
+                    {category.parent && (
+                        <span className="text-xs text-gray-400">
+                            ↳ {category.parent.name}
+                        </span>
+                    )}
+                </div>
+            </TableCell>
+            <TableCell className="text-gray-500">{category.slug}</TableCell>
+            <TableCell>
+                {reorderMode === "header" ? (
+                    <Badge variant={category.isInHeader ? "default" : "secondary"}>
+                        {category.isInHeader ? "Üst Menüde" : "Değil"}
+                    </Badge>
+                ) : (
+                    <Badge variant="secondary">
+                        {category._count.products} ürün
+                    </Badge>
+                )}
+            </TableCell>
+            <TableCell>
+                <Switch
+                    checked={category.isActive}
+                    onCheckedChange={(checked) =>
+                        onToggleStatus(category.id, checked)
+                    }
+                    disabled={reorderMode !== "none"}
+                />
+            </TableCell>
+            <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => onEdit(category)}
+                        disabled={reorderMode !== "none"}
+                    >
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => onDelete(category.id)}
+                        disabled={reorderMode !== "none" || category._count.products > 0}
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </div>
+            </TableCell>
+        </TableRow>
+    );
 }
 
 interface CategoriesTableProps {
@@ -79,6 +192,8 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
     const [order, setOrder] = useState(0);
+    const [isInHeader, setIsInHeader] = useState(false);
+    const [headerOrder, setHeaderOrder] = useState(0);
     const [parentId, setParentId] = useState<string | null>(null);
     const [imageUrl, setImageUrl] = useState("");
     const [isFeatured, setIsFeatured] = useState(false);
@@ -87,19 +202,90 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
     const [hbCategoryId, setHbCategoryId] = useState<string | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 10;
+    const [reorderMode, setReorderMode] = useState<"none" | "sidebar" | "header">("none");
+    const [localCategories, setLocalCategories] = useState<Category[]>(categories);
+
+    // Sync local state when server data updates
+    useEffect(() => {
+        setLocalCategories(categories);
+    }, [categories]);
+
+    const ITEMS_PER_PAGE = reorderMode === "none" ? 10 : 1000; // Show all when reordering
 
     // Filter categories based on search
-    const filteredCategories = categories.filter(category =>
-        category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (category.parent?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        category.slug.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCategories = localCategories.filter(category => {
+        if (reorderMode === "header" && !category.isInHeader && !searchTerm) return false;
+
+        return category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (category.parent?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+            category.slug.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
+    // Sort based on mode
+    const sortedCategories = [...filteredCategories].sort((a, b) => {
+        if (reorderMode === "header") return a.headerOrder - b.headerOrder;
+        return a.order - b.order;
+    });
 
     // Pagination logic
-    const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(sortedCategories.length / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const paginatedCategories = filteredCategories.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    const paginatedCategories = sortedCategories.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = sortedCategories.findIndex((c) => c.id === active.id);
+            const newIndex = sortedCategories.findIndex((c) => c.id === over.id);
+
+            const newArray = arrayMove(sortedCategories, oldIndex, newIndex);
+
+            // Update local state first for immediate UI response
+            const updatedLocal = localCategories.map(cat => {
+                const index = newArray.findIndex(n => n.id === cat.id);
+                if (index !== -1) {
+                    return {
+                        ...cat,
+                        [reorderMode === "sidebar" ? "order" : "headerOrder"]: index
+                    };
+                }
+                return cat;
+            });
+            setLocalCategories(updatedLocal);
+
+            try {
+                if (reorderMode === "sidebar") {
+                    const updates = newArray.map((cat, index) => ({
+                        id: cat.id,
+                        order: index
+                    }));
+                    await updateCategoriesSidebarOrder(updates);
+                } else if (reorderMode === "header") {
+                    const updates = newArray.map((cat, index) => ({
+                        id: cat.id,
+                        headerOrder: index
+                    }));
+                    await updateCategoriesHeaderOrder(updates);
+                }
+                toast.success("Sıralama güncellendi.");
+            } catch {
+                toast.error("Sıralama kaydedilirken bir hata oluştu.");
+                setLocalCategories(categories); // Rollback
+            }
+        }
+    };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -140,10 +326,34 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
 
         try {
             if (editCategory) {
-                await updateCategory(editCategory.id, { name, slug, order, parentId, imageUrl, isFeatured, trendyolCategoryId, n11CategoryId, hbCategoryId });
+                await updateCategory(editCategory.id, {
+                    name,
+                    slug,
+                    order,
+                    parentId: parentId || null,
+                    imageUrl,
+                    isFeatured,
+                    isInHeader,
+                    headerOrder,
+                    trendyolCategoryId,
+                    n11CategoryId,
+                    hbCategoryId
+                });
                 toast.success("Kategori güncellendi.");
             } else {
-                await createCategory({ name, slug, order, parentId, imageUrl, isFeatured, trendyolCategoryId, n11CategoryId, hbCategoryId });
+                await createCategory({
+                    name,
+                    slug,
+                    order,
+                    parentId: parentId || null,
+                    imageUrl,
+                    isFeatured,
+                    isInHeader,
+                    headerOrder,
+                    trendyolCategoryId,
+                    n11CategoryId,
+                    hbCategoryId
+                });
                 toast.success("Kategori oluşturuldu.");
             }
             setIsOpen(false);
@@ -180,6 +390,8 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setName("");
         setSlug("");
         setOrder(0);
+        setIsInHeader(false);
+        setHeaderOrder(0);
         setParentId(null);
         setImageUrl("");
         setIsFeatured(false);
@@ -194,6 +406,8 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setName(category.name);
         setSlug(category.slug);
         setOrder(category.order);
+        setIsInHeader(category.isInHeader);
+        setHeaderOrder(category.headerOrder);
         setParentId(category.parentId || null);
         setImageUrl(category.imageUrl || "");
         setIsFeatured(category.isFeatured);
@@ -211,14 +425,38 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
     return (
         <>
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-                <div className="relative w-full sm:w-72">
-                    <Input
-                        placeholder="Kategori Ara..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="pl-8"
-                    />
-                    {/* Search Icon can be added here if imported */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="relative w-72">
+                        <Input
+                            placeholder="Kategori Ara..."
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            className="pl-8"
+                        />
+                    </div>
+                    <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                        <Button
+                            variant={reorderMode === "none" ? "secondary" : "ghost"}
+                            size="sm"
+                            onClick={() => setReorderMode("none")}
+                        >
+                            Liste
+                        </Button>
+                        <Button
+                            variant={reorderMode === "sidebar" ? "secondary" : "ghost"}
+                            size="sm"
+                            onClick={() => setReorderMode("sidebar")}
+                        >
+                            Yan Menü Sırası
+                        </Button>
+                        <Button
+                            variant={reorderMode === "header" ? "secondary" : "ghost"}
+                            size="sm"
+                            onClick={() => setReorderMode("header")}
+                        >
+                            Üst Menü Sırası
+                        </Button>
+                    </div>
                 </div>
 
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -349,13 +587,23 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                                         />
                                     </div>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <Switch
-                                        id="featured"
-                                        checked={isFeatured}
-                                        onCheckedChange={setIsFeatured}
-                                    />
-                                    <Label htmlFor="featured">Ana Sayfada Göster</Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch
+                                            id="featured"
+                                            checked={isFeatured}
+                                            onCheckedChange={setIsFeatured}
+                                        />
+                                        <Label htmlFor="featured">Ana Sayfada Göster</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch
+                                            id="inHeader"
+                                            checked={isInHeader}
+                                            onCheckedChange={setIsInHeader}
+                                        />
+                                        <Label htmlFor="inHeader">Üst Menüde Göster</Label>
+                                    </div>
                                 </div>
                             </div>
                             <DialogFooter>
@@ -371,79 +619,51 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                 </Dialog>
             </div>
 
-            <div className="rounded-lg border bg-white dark:bg-gray-800">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Sıra</TableHead>
-                            <TableHead>Kategori Adı</TableHead>
-                            <TableHead>Slug</TableHead>
-                            <TableHead>Ürün Sayısı</TableHead>
-                            <TableHead>Durum</TableHead>
-                            <TableHead className="text-right">İşlemler</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {paginatedCategories.length === 0 ? (
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <div className="rounded-lg border bg-white dark:bg-gray-800">
+                    <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                                    {searchTerm ? "Sonuç bulunamadı." : "Henüz kategori bulunmuyor."}
-                                </TableCell>
+                                <TableHead>Sıra</TableHead>
+                                <TableHead>Kategori Adı</TableHead>
+                                <TableHead>Slug</TableHead>
+                                <TableHead>Ürün Sayısı</TableHead>
+                                <TableHead>Durum</TableHead>
+                                <TableHead className="text-right">İşlemler</TableHead>
                             </TableRow>
-                        ) : (
-                            paginatedCategories.map((category) => (
-                                <TableRow key={category.id}>
-                                    <TableCell>{category.order}</TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{category.name}</span>
-                                            {category.parent && (
-                                                <span className="text-xs text-gray-400">
-                                                    ↳ {category.parent.name}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-gray-500">{category.slug}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="secondary">
-                                            {category._count.products} ürün
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Switch
-                                            checked={category.isActive}
-                                            onCheckedChange={(checked) =>
-                                                handleToggleStatus(category.id, checked)
-                                            }
-                                        />
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={() => openEditDialog(category)}
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="text-red-600 hover:text-red-700"
-                                                onClick={() => handleDelete(category.id)}
-                                                disabled={category._count.products > 0}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedCategories.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                                        {searchTerm ? "Sonuç bulunamadı." : "Henüz kategori bulunmuyor."}
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+                            ) : (
+                                <SortableContext
+                                    items={paginatedCategories.map((c) => c.id)}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    {paginatedCategories.map((category) => (
+                                        <SortableRow
+                                            key={category.id}
+                                            category={category}
+                                            onEdit={openEditDialog}
+                                            onDelete={handleDelete}
+                                            onToggleStatus={handleToggleStatus}
+                                            reorderMode={reorderMode}
+                                        />
+                                    ))}
+                                </SortableContext>
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
+            </DndContext>
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
