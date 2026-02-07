@@ -55,6 +55,7 @@ export async function updateSlider(
     }
 }
 
+
 export async function deleteSlider(id: string) {
     try {
         await prisma.slider.delete({
@@ -66,5 +67,20 @@ export async function deleteSlider(id: string) {
     } catch (error) {
         console.error("Delete slider error:", error);
         return { success: false, error: "Slider silinemedi." };
+    }
+}
+
+export async function toggleSliderStatus(id: string, isActive: boolean) {
+    try {
+        await prisma.slider.update({
+            where: { id },
+            data: { isActive },
+        });
+        revalidatePath("/");
+        revalidatePath("/admin/sliders");
+        return { success: true };
+    } catch (error) {
+        console.error("Toggle slider status error:", error);
+        return { success: false, error: "Slider durumu güncellenemedi." };
     }
 }
