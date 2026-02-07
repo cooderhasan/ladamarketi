@@ -29,6 +29,8 @@ interface Category {
     name: string;
     slug: string;
     parentId?: string | null;
+    isInHeader?: boolean;
+    headerOrder?: number;
     children?: Category[];
 }
 
@@ -130,7 +132,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                             {phone && (
                                 <a
                                     href={`tel:${phone.replace(/\s/g, '')}`}
-                                    className="hidden lg:flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100"
+                                    className="hidden lg:flex items-center gap-2 text-gray-600 hover:text-[#009AD0] transition-colors px-3 py-2 rounded-lg hover:bg-gray-100"
                                 >
                                     <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center">
                                         <Phone className="h-4 w-4 text-green-600" />
@@ -150,7 +152,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                             href={facebookUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-8 h-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full flex items-center justify-center transition-colors"
+                                            className="w-8 h-8 text-gray-500 hover:text-[#009AD0] hover:bg-[#009AD0]/10 rounded-full flex items-center justify-center transition-colors"
                                             title="Facebook"
                                         >
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -189,7 +191,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                             href={linkedinUrl}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-8 h-8 text-gray-500 hover:text-blue-700 hover:bg-blue-50 rounded-full flex items-center justify-center transition-colors"
+                                            className="w-8 h-8 text-gray-500 hover:text-[#009AD0] hover:bg-[#009AD0]/10 rounded-full flex items-center justify-center transition-colors"
                                             title="LinkedIn"
                                         >
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -207,7 +209,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                 className="relative"
                             >
                                 {!mounted ? (
-                                    <button className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100">
+                                    <button className="flex items-center gap-3 text-gray-700 hover:text-[#009AD0] transition-colors px-3 py-2 rounded-lg hover:bg-gray-100">
                                         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                                             <User className="h-5 w-5" />
                                         </div>
@@ -219,9 +221,9 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                 ) : (
                                     <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen} modal={false}>
                                         <DropdownMenuTrigger asChild>
-                                            <button className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 outline-none">
-                                                <div className={`w-10 h-10 ${user ? 'bg-blue-100' : 'bg-gray-100'} rounded-full flex items-center justify-center`}>
-                                                    <User className={`h-5 w-5 ${user ? 'text-blue-600' : ''}`} />
+                                            <button className="flex items-center gap-3 text-gray-700 hover:text-[#009AD0] transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 outline-none">
+                                                <div className={`w-10 h-10 ${user ? 'bg-[#009AD0]/10' : 'bg-gray-100'} rounded-full flex items-center justify-center`}>
+                                                    <User className={`h-5 w-5 ${user ? 'text-[#009AD0]' : ''}`} />
                                                 </div>
                                                 <div className="hidden sm:flex flex-col items-start">
                                                     <span className="text-[10px] text-gray-500">Kullanıcı</span>
@@ -339,106 +341,65 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
             </div>
 
             {/* Bottom Row: Category Navigation (Desktop) - STRIKING DESIGN */}
-            {categories.length > 0 && (
-                <div
-                    className="hidden md:block relative overflow-hidden bg-gradient-to-r from-blue-800 via-blue-700 to-blue-800"
-                >
-                    {/* Glowing Line Effect */}
-                    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50" />
-                    <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50" />
+            <div
+                className="hidden md:block relative overflow-hidden bg-gradient-to-r from-[#0081AF] via-[#009AD0] to-[#0081AF]"
+            >
+                {/* Glowing Line Effect */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#4FC3F7] to-transparent opacity-50" />
+                <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#4FC3F7] to-transparent opacity-50" />
 
-                    <div className="container mx-auto px-4 relative z-10">
-                        <div className="flex items-center">
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="flex items-center">
 
 
-                            {/* Horizontal Links with Icons - Premium Style */}
-                            <nav className="flex items-center justify-between w-full py-3">
-                                <Link
-                                    href="/"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:from-blue-500/40 group-hover:to-purple-500/40 transition-all">
-                                        <Home className="h-5 w-5 text-blue-300 group-hover:text-white group-hover:scale-110 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Ana Sayfa</span>
-                                </Link>
-                                <Link
-                                    href="/products?category=samara-1500i-12"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:from-blue-500/40 group-hover:to-purple-500/40 transition-all">
-                                        <Cog className="h-5 w-5 text-blue-300 group-hover:text-white group-hover:scale-110 group-hover:rotate-45 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Samara 1500i Yedek Parçalar</span>
-                                </Link>
-                                <Link
-                                    href="/products?category=lada-samarayedek-paralar-23"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:from-blue-500/40 group-hover:to-purple-500/40 transition-all">
-                                        <Cog className="h-5 w-5 text-blue-300 group-hover:text-white group-hover:scale-110 group-hover:rotate-45 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Samara 1100-1500 Yedek Parçalar</span>
-                                </Link>
-                                <Link
-                                    href="/products?category=lada-vega-500-8v-36"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:from-blue-500/40 group-hover:to-purple-500/40 transition-all">
-                                        <Cog className="h-5 w-5 text-blue-300 group-hover:text-white group-hover:scale-110 group-hover:rotate-45 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Vega 8V Yedek Parçalar</span>
-                                </Link>
-                                <Link
-                                    href="/products?category=lada-vega-16v-yedek-paralar-37"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:from-blue-500/40 group-hover:to-purple-500/40 transition-all">
-                                        <Cog className="h-5 w-5 text-blue-300 group-hover:text-white group-hover:scale-110 group-hover:rotate-45 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Vega 16V Yedek Parçalar</span>
-                                </Link>
-                                <Link
-                                    href="/products?category=lada-kalina-yedek-paralar-38"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 group-hover:from-blue-500/40 group-hover:to-purple-500/40 transition-all">
-                                        <Cog className="h-5 w-5 text-blue-300 group-hover:text-white group-hover:scale-110 group-hover:rotate-45 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Kalina Yedek Parçalar</span>
-                                </Link>
-                                <Link
-                                    href="/products?category=lada-niva-1700-i-yedek-paralar-41"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500/20 to-red-500/20 group-hover:from-orange-500/40 group-hover:to-red-500/40 transition-all">
-                                        <Truck className="h-5 w-5 text-orange-300 group-hover:text-white group-hover:scale-110 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Niva Yedek Parçalar</span>
-                                </Link>
-                                <Link
-                                    href="/about"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 group-hover:from-emerald-500/40 group-hover:to-teal-500/40 transition-all">
-                                        <Building2 className="h-5 w-5 text-emerald-300 group-hover:text-white group-hover:scale-110 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Hakkımızda</span>
-                                </Link>
-                                <Link
-                                    href="/contact"
-                                    className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:-translate-y-0.5"
-                                >
-                                    <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500/20 to-rose-500/20 group-hover:from-pink-500/40 group-hover:to-rose-500/40 transition-all">
-                                        <Phone className="h-5 w-5 text-pink-300 group-hover:text-white group-hover:scale-110 transition-all" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">İletişim</span>
-                                </Link>
-                            </nav>
-                        </div>
+                        <nav className="flex items-center justify-center w-full py-3 gap-2 lg:gap-8">
+                            <Link
+                                href="/"
+                                className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
+                            >
+                                <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+                                    <Home className="h-5 w-5 text-white group-hover:scale-110 transition-all" />
+                                </div>
+                                <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Ana Sayfa</span>
+                            </Link>
+                            {categories
+                                .filter(c => c.name !== "Home" && c.name !== "Root")
+                                .map((category) => (
+                                    <Link
+                                        key={category.id}
+                                        href={`/products?category=${category.slug}`}
+                                        className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
+                                    >
+                                        <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+                                            <Cog className="h-5 w-5 text-white group-hover:scale-110 group-hover:rotate-45 transition-all" />
+                                        </div>
+                                        <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap line-clamp-1 max-w-[120px]">
+                                            {category.name}
+                                        </span>
+                                    </Link>
+                                ))}
+                            <Link
+                                href="/about"
+                                className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
+                            >
+                                <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+                                    <Building2 className="h-5 w-5 text-white group-hover:scale-110 transition-all" />
+                                </div>
+                                <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Hakkımızda</span>
+                            </Link>
+                            <Link
+                                href="/contact"
+                                className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
+                            >
+                                <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
+                                    <Phone className="h-5 w-5 text-white group-hover:scale-110 transition-all" />
+                                </div>
+                                <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">İletişim</span>
+                            </Link>
+                        </nav>
                     </div>
                 </div>
-            )}
+            </div>
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
