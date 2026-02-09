@@ -54,6 +54,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     const serializedProduct = {
         ...product,
         listPrice: Number(product.listPrice),
+        salePrice: product.salePrice ? Number(product.salePrice) : null,
         origin: product.origin, // Explicitly pass origin
         variants: product.variants.map(v => ({
             id: v.id,
@@ -101,6 +102,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 relatedProducts={relatedProducts.map(p => ({
                     ...p,
                     listPrice: Number(p.listPrice),
+                    salePrice: p.salePrice ? Number(p.salePrice) : null,
                     origin: p.origin, // Explicitly pass origin
                 }))}
                 discountRate={discountRate}

@@ -17,6 +17,7 @@ interface Product {
     slug: string;
     images: string[];
     listPrice: number;
+    salePrice?: number | null;
     vatRate: number;
     minQuantity: number;
     stock: number;
@@ -55,6 +56,22 @@ export function ProductCardV2({
         product.vatRate
     );
 
+    // Sale Price Logic
+    const hasSalePrice = product.salePrice != null && product.salePrice < product.listPrice;
+
+    // Calculate discount percentage for badge
+    const saleDiscountRate = hasSalePrice && product.salePrice != null
+        ? Math.round(((product.listPrice - product.salePrice) / product.listPrice) * 100)
+        : 0;
+
+    // Determine which price to display
+    const displayPrice = hasSalePrice && product.salePrice != null ? product.salePrice : (isDealer ? price.finalPrice : product.listPrice);
+    const showStrikethrough = hasSalePrice || (isDealer && discountRate > 0);
+    const strikethroughPrice = product.listPrice;
+
+    // Badge rate: sale discount takes precedence, otherwise dealer discount (if dealer)
+    const discountBadgeRate = hasSalePrice ? saleDiscountRate : 0;
+
     const hasVariants = product._count?.variants && product._count.variants > 0;
 
     const handleAddToCart = (e: React.MouseEvent) => {
@@ -62,7 +79,7 @@ export function ProductCardV2({
         e.stopPropagation();
 
         if (hasVariants) {
-            return; // Link handles variant navigation
+            return;
         }
 
         addItem({
@@ -75,7 +92,7 @@ export function ProductCardV2({
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,
-            discountRate: discountRate,
+            discountRate: hasSalePrice ? saleDiscountRate : discountRate,
         });
 
         toast.success("Ürün sepete eklendi");
@@ -94,146 +111,93 @@ export function ProductCardV2({
 
     return (
         <Link href={`/products/${product.slug}`} className="group block h-full">
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col relative group/card">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col relative group/card">
 
-                {/* Image Section */}
-                <div className="relative aspect-[4/5] bg-white overflow-hidden p-4">
-                    {/* Overlay Icons */}
-
+                {/* Image Section - Cleaner Aspect Ratio */}
+                <div className="relative aspect-square bg-white p-6 flex items-center justify-center">
+                    {/* Discount Badge (Dealer or Sale) */}
+                    {(isDealer && discountRate > 0 || hasSalePrice) && (
+                        <div className="absolute top-3 left-3 z-10 bg-[#E31E24] text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
+                            %{Math.max(discountRate, saleDiscountRate)} İNDİRİM
+                        </div>
+                    )}
+                    {/* Badge */}
+                    {badge && (
+                        <div className="absolute top-3 right-3 z-10 bg-[#009AD0] text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
+                            {badge}
+                        </div>
+                    )}
+                    {/* Stock Badge */}
+                    {product.stock === 0 && (
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 bg-gray-900/80 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                            Tükendi
+                        </div>
+                    )}
 
                     {product.images[0] ? (
                         <Image
                             src={product.images[0]}
                             alt={product.name}
                             fill
-                            className="object-contain group-hover:scale-105 transition-transform duration-300"
+                            className={cn(
+                                "object-contain p-4 transition-transform duration-500 group-hover:scale-110",
+                                product.stock === 0 && "opacity-50 grayscale"
+                            )}
                         />
                     ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400">
-                            <span className="text-4xl">📦</span>
+                        <div className="text-gray-300">
+                            <span className="text-5xl">📦</span>
                         </div>
                     )}
-
-                    {/* Left Top Badges (Stock/New) */}
-                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                        {badge && (
-                            <Badge className="bg-blue-600">{badge}</Badge>
-                        )}
-                        {product.stock === 0 && (
-                            <Badge variant="destructive">Stokta Yok</Badge>
-                        )}
-                    </div>
                 </div>
 
                 {/* Content Section */}
-                <div className="p-4 flex-1 flex flex-col">
+                <div className="p-5 flex-1 flex flex-col bg-gray-50/50 dark:bg-gray-800/50">
                     {/* Brand */}
                     {product.brand && (
-                        <p className="font-bold text-gray-900 dark:text-white text-sm mb-1">
+                        <p className="text-[#009AD0] font-bold text-xs uppercase tracking-wider mb-1">
                             {product.brand.name}
                         </p>
                     )}
 
                     {/* Product Name */}
-                    <h3 className="font-medium text-gray-700 dark:text-gray-300 text-sm line-clamp-2 mb-2 h-10">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm leading-snug line-clamp-2 h-10 mb-3 group-hover:text-[#009AD0] transition-colors">
                         {product.name}
                     </h3>
 
-                    {/* Rating placehoder */}
-                    <div className="flex items-center gap-1 mb-3">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <Star key={i} className="w-3 h-3 text-gray-300 fill-gray-300" />
-                        ))}
-                        <span className="text-xs text-gray-400 ml-1">0 Yorum</span>
-                    </div>
-
                     {/* Price Section */}
-                    <div className="mt-auto space-y-1">
-                        {isDealer ? (
-                            <div className="flex flex-col items-start gap-1">
-                                {discountRate > 0 && (
-                                    <div className="flex items-center gap-2">
-                                        <Badge className="bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 rounded-sm px-1.5 py-0.5 h-auto text-[10px] font-bold">
-                                            %{discountRate} İndirim
-                                        </Badge>
-                                        <p className="text-sm text-gray-400 line-through">
-                                            {formatPrice(price.listPrice)}
-                                        </p>
-                                    </div>
-                                )}
-                                <div className="flex flex-col">
-                                    <p className="text-xl font-bold text-red-600">
-                                        {formatPrice(price.finalPrice)}
-                                    </p>
-                                    <p className="text-[10px] text-gray-500 font-bold tracking-wide">
-                                        KDV DAHİL
-                                    </p>
-                                </div>
+                    <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <div className="flex flex-col">
+                            {showStrikethrough && (
+                                <span className="text-xs text-gray-400 line-through mb-0.5">
+                                    {formatPrice(strikethroughPrice)}
+                                </span>
+                            )}
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                                    {formatPrice(displayPrice)}
+                                </span>
+                                <span className="text-[10px] text-gray-500 font-medium">KDV Dahil</span>
                             </div>
-                        ) : (
-                            <div className="flex flex-col">
-                                <p className="text-xl font-bold text-gray-900 dark:text-white">
-                                    {formatPrice(product.listPrice)}
-                                </p>
-                                <p className="text-[10px] text-gray-500 font-bold tracking-wide">
-                                    KDV DAHİL
-                                </p>
-                            </div>
-                        )}
+                        </div>
                     </div>
 
-                    {/* Min Quantity Info */}
-                    {product.minQuantity > 1 && (
-                        <p className="text-xs text-amber-600 mt-2 font-medium">
-                            Min. sipariş: {product.minQuantity} adet
-                        </p>
-                    )}
-
-                    {/* Action Section (Quantity & Button) */}
-                    <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    {/* Action Section - Always Visible */}
+                    <div className="mt-4">
                         {product.stock > 0 && !hasVariants ? (
-                            <>
-                                <div className="flex items-center justify-center border border-gray-200 dark:border-gray-600 rounded-md h-10 w-full xl:w-24 shrink-0">
-                                    <button
-                                        onClick={(e) => handleQuantityChange(e, -1)}
-                                        className="w-10 xl:w-8 h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
-                                    >
-                                        <Minus className="w-3 h-3" />
-                                    </button>
-                                    <div className="flex-1 h-full flex items-center justify-center font-semibold text-sm">
-                                        {quantity}
-                                    </div>
-                                    <button
-                                        onClick={(e) => handleQuantityChange(e, 1)}
-                                        className="w-10 xl:w-8 h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
-                                    >
-                                        <Plus className="w-3 h-3" />
-                                    </button>
-                                </div>
-                                <Button
-                                    onClick={handleAddToCart}
-                                    className="w-full xl:flex-1 h-10 bg-[#E31E24] hover:bg-[#c4151a] text-white font-medium text-sm"
-                                >
-                                    <ShoppingCart className="w-4 h-4 mr-2" />
-                                    Sepete Ekle
-                                </Button>
-                            </>
-                        ) : hasVariants ? (
                             <Button
-                                variant="outline"
-                                className="w-full h-10 border-blue-500 text-blue-600 hover:bg-blue-50"
+                                onClick={handleAddToCart}
+                                className="w-full h-10 bg-[#009AD0] hover:bg-[#007EA8] text-white font-semibold rounded-lg shadow-sm flex items-center justify-center gap-2"
                             >
-                                <Eye className="w-4 h-4 mr-2" />
-                                Seçenekleri Gör
+                                <ShoppingCart className="w-4 h-4" />
+                                <span>Sepete Ekle</span>
                             </Button>
                         ) : (
-                            <Button
-                                variant="secondary"
-                                className="w-full h-10"
-                                disabled
-                            >
-                                Stokta Yok
-                            </Button>
+                            <div className="h-10 flex items-center justify-center">
+                                <span className="text-xs text-gray-500 font-medium w-full text-center py-2.5 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                    {hasVariants ? "Seçenekleri Gör" : "Stokta Yok"}
+                                </span>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -241,4 +205,3 @@ export function ProductCardV2({
         </Link>
     );
 }
-

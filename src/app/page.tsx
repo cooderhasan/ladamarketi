@@ -115,6 +115,10 @@ async function getHomeData() {
   const transformProduct = (product: any) => ({
     ...product,
     listPrice: Number(product.listPrice),
+    salePrice: product.salePrice ? Number(product.salePrice) : null,
+    trendyolPrice: product.trendyolPrice ? Number(product.trendyolPrice) : null,
+    n11Price: product.n11Price ? Number(product.n11Price) : null,
+    hepsiburadaPrice: product.hepsiburadaPrice ? Number(product.hepsiburadaPrice) : null,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
   });

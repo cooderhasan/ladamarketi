@@ -64,9 +64,9 @@ export default function CartPage() {
                     {items.map((item) => (
                         <Card key={item.productId}>
                             <CardContent className="p-4">
-                                <div className="flex gap-4">
+                                <div className="flex flex-col sm:flex-row gap-4">
                                     {/* Image */}
-                                    <div className="relative w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0">
+                                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
                                         {item.image ? (
                                             <Image
                                                 src={item.image}
@@ -85,11 +85,11 @@ export default function CartPage() {
                                     <div className="flex-1 min-w-0">
                                         <Link
                                             href={`/products/${item.slug}`}
-                                            className="font-medium text-gray-900 dark:text-white hover:text-blue-600 line-clamp-2"
+                                            className="font-medium text-gray-900 dark:text-white hover:text-blue-600 line-clamp-2 text-sm sm:text-base"
                                         >
                                             {item.name}
                                         </Link>
-                                        <p className="text-sm text-gray-500 mt-1">
+                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
                                             Birim fiyat:{" "}
                                             {formatPrice(
                                                 item.listPrice *
@@ -100,9 +100,9 @@ export default function CartPage() {
                                             Min. {item.minQuantity} adet | KDV: %{item.vatRate}
                                         </p>
 
-                                        {/* Quantity */}
-                                        <div className="flex items-center gap-4 mt-3">
-                                            <div className="flex items-center gap-2">
+                                        {/* Quantity & Price Row */}
+                                        <div className="flex items-center justify-between gap-2 mt-3 flex-wrap">
+                                            <div className="flex items-center gap-1 sm:gap-2">
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
@@ -123,7 +123,7 @@ export default function CartPage() {
                                                             Number(e.target.value)
                                                         )
                                                     }
-                                                    className="w-16 h-8 text-center"
+                                                    className="w-12 sm:w-16 h-8 text-center text-sm"
                                                     min={item.minQuantity}
                                                     max={item.stock}
                                                 />
@@ -138,27 +138,25 @@ export default function CartPage() {
                                                 >
                                                     <Plus className="h-4 w-4" />
                                                 </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="text-red-500 hover:text-red-600 h-8 w-8"
+                                                    onClick={() => removeItem(item.productId)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
                                             </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="text-red-500 hover:text-red-600"
-                                                onClick={() => removeItem(item.productId)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
 
-                                    {/* Line Total */}
-                                    <div className="text-right">
-                                        <p className="font-bold text-gray-900 dark:text-white">
-                                            {formatPrice(
-                                                item.listPrice *
-                                                item.quantity *
-                                                (1 - (item.discountRate || discountRate) / 100)
-                                            )}
-                                        </p>
+                                            {/* Line Total */}
+                                            <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">
+                                                {formatPrice(
+                                                    item.listPrice *
+                                                    item.quantity *
+                                                    (1 - (item.discountRate || discountRate) / 100)
+                                                )}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>
@@ -179,7 +177,7 @@ export default function CartPage() {
                             </div>
                             {summary.discountAmount > 0 && (
                                 <div className="flex justify-between text-green-600">
-                                    <span>İskonto (%{discountRate})</span>
+                                    <span>İskonto ({Math.round((summary.discountAmount / (summary.total + summary.discountAmount)) * 100)}%)</span>
                                     <span>-{formatPrice(summary.discountAmount)}</span>
                                 </div>
                             )}

@@ -263,6 +263,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                                         product={{
                                             ...product,
                                             listPrice: Number(product.listPrice),
+                                            salePrice: product.salePrice ? Number(product.salePrice) : null,
                                         }}
                                         discountRate={discountRate}
                                         isDealer={isDealer}

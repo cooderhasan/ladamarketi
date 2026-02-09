@@ -59,7 +59,8 @@ interface Product {
     trendyolPrice?: number | null;
     n11Price?: number | null;
     hepsiburadaPrice?: number | null;
-    vatRate: number;
+    salePrice?: number | null;
+    vatRate: number | null;
     minQuantity: number;
     stock: number;
     criticalStock: number;
@@ -98,6 +99,7 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         trendyolPrice: product?.trendyolPrice || "",
         n11Price: product?.n11Price || "",
         hepsiburadaPrice: product?.hepsiburadaPrice || "",
+        salePrice: product?.salePrice || "",
         vatRate: product?.vatRate?.toString() || "20",
         minQuantity: product?.minQuantity || 1,
         stock: product?.stock || 0,
@@ -317,6 +319,19 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                         onChange={(e) => handleChange("listPrice", e.target.value)}
                                         required
                                     />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="salePrice" className="text-red-600 font-bold">İndirimli Fiyat (₺)</Label>
+                                    <Input
+                                        id="salePrice"
+                                        type="number"
+                                        step="0.01"
+                                        value={formData.salePrice}
+                                        onChange={(e) => handleChange("salePrice", e.target.value)}
+                                        placeholder="İndirimli satış fiyatı"
+                                        className="border-red-200 focus:border-red-500 bg-red-50/50"
+                                    />
+                                    <p className="text-[10px] text-gray-500">Girilirse bu fiyat geçerli olur, liste fiyatı üstü çizili görünür.</p>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="trendyolPrice" className="text-orange-600">Trendyol Fiyatı (₺)</Label>

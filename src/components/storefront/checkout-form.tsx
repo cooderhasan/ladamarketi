@@ -213,10 +213,11 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="district">İlçe</Label>
+                                        <Label htmlFor="district">İlçe *</Label>
                                         <Input
                                             id="district"
                                             name="district"
+                                            required
                                             defaultValue={initialData?.district}
                                         />
                                     </div>
@@ -417,7 +418,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                                     {formatPrice(
                                                         item.listPrice *
                                                         item.quantity *
-                                                        (1 - discountRate / 100)
+                                                        (1 - (item.discountRate || discountRate) / 100)
                                                     )}
                                                 </div>
                                             </div>
@@ -434,7 +435,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                     </div>
                                     {summary.discountAmount > 0 && (
                                         <div className="flex justify-between text-green-600 font-medium">
-                                            <span>İskonto (%{discountRate})</span>
+                                            <span>İskonto ({Math.round((summary.discountAmount / (summary.total + summary.discountAmount)) * 100)}%)</span>
                                             <span>-{formatPrice(summary.discountAmount)}</span>
                                         </div>
                                     )}

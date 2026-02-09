@@ -29,22 +29,22 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                                 <img src={settings.logoUrl} alt={settings?.siteName || "Logo"} className="h-10 w-auto object-contain" />
                             ) : (
                                 <div className="flex items-center gap-2">
-                                    <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg">
+                                    <div className="w-10 h-10 bg-[#009AD0] rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg">
                                         <span className="text-white font-extrabold text-xl">B</span>
                                     </div>
                                     <div className="flex flex-col leading-none">
                                         <span className="font-black text-2xl text-white tracking-tight uppercase">
                                             BAGAJ
                                         </span>
-                                        <span className="font-bold text-sm text-orange-600 tracking-widest uppercase">
+                                        <span className="font-bold text-sm text-[#009AD0] tracking-widest uppercase">
                                             LASTİĞİ
                                         </span>
                                     </div>
                                 </div>
                             )}
                         </div>
-                        <p className="text-sm">
-                            {settings?.seoDescription || "Bayilerimize özel fiyatlarla toptan satış platformu."}
+                        <p className="text-sm text-gray-400">
+                            {settings?.seoDescription || "Lada ve Samara yedek parça, aksesuar ve modifiye ürünlerinde güvenilir adres."}
                         </p>
                         <div className="flex gap-3 pt-2">
                             {/* Social Icons */}
@@ -53,7 +53,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                                     href={settings.facebookUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-9 h-9 bg-gray-800 hover:bg-blue-600 rounded-full flex items-center justify-center transition-colors"
+                                    className="w-9 h-9 bg-gray-800 hover:bg-[#009AD0] rounded-full flex items-center justify-center transition-colors"
                                     title="Facebook"
                                 >
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                                     href={settings.twitterUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-9 h-9 bg-gray-800 hover:bg-black rounded-full flex items-center justify-center transition-colors"
+                                    className="w-9 h-9 bg-gray-800 hover:bg-[#009AD0] rounded-full flex items-center justify-center transition-colors"
                                     title="X (Twitter)"
                                 >
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                                     href={settings.linkedinUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-9 h-9 bg-gray-800 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors"
+                                    className="w-9 h-9 bg-gray-800 hover:bg-[#009AD0] rounded-full flex items-center justify-center transition-colors"
                                     title="LinkedIn"
                                 >
                                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -108,17 +108,17 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                         <h4 className="font-semibold text-white mb-4">Hızlı Bağlantılar</h4>
                         <ul className="space-y-2 text-sm">
                             <li>
-                                <Link href="/products" className="hover:text-white">
+                                <Link href="/products" className="text-gray-400 hover:text-[#009AD0] transition-colors">
                                     Ürünler
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/about" className="hover:text-white">
+                                <Link href="/about" className="text-gray-400 hover:text-[#009AD0] transition-colors">
                                     Hakkımızda
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/contact" className="hover:text-white">
+                                <Link href="/contact" className="text-gray-400 hover:text-[#009AD0] transition-colors">
                                     İletişim
                                 </Link>
                             </li>
@@ -131,7 +131,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                         <ul className="space-y-2 text-sm">
                             {footerPolicies.map((policy) => (
                                 <li key={policy.slug}>
-                                    <Link href={`/policies/${policy.slug}`} className="hover:text-white">
+                                    <Link href={`/policies/${policy.slug}`} className="text-gray-400 hover:text-[#009AD0] transition-colors">
                                         {policy.title}
                                     </Link>
                                 </li>
@@ -142,7 +142,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                     {/* Contact */}
                     <div>
                         <h4 className="font-semibold text-white mb-4">İletişim</h4>
-                        <ul className="space-y-2 text-sm">
+                        <ul className="space-y-2 text-sm text-gray-400">
                             {settings?.phone && <li>{settings.phone}</li>}
                             {settings?.email && <li>{settings.email}</li>}
                             {settings?.address && <li className="whitespace-pre-wrap">{settings.address}</li>}
@@ -159,7 +159,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                                 href="https://www.hasandurmus.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-orange-500 hover:text-orange-400 transition-colors"
+                                className="text-[#009AD0] hover:text-[#007EA8] transition-colors"
                             >
                                 Hasan Durmuş
                             </a>

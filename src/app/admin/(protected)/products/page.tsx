@@ -76,6 +76,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     const serializedProducts = products.map((product) => ({
         ...product,
         listPrice: product.listPrice.toNumber(),
+        salePrice: product.salePrice ? product.salePrice.toNumber() : null,
+        trendyolPrice: product.trendyolPrice ? product.trendyolPrice.toNumber() : null,
+        n11Price: product.n11Price ? product.n11Price.toNumber() : null,
+        hepsiburadaPrice: product.hepsiburadaPrice ? product.hepsiburadaPrice.toNumber() : null,
     }));
 
     return (

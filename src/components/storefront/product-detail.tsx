@@ -29,6 +29,7 @@ interface Product {
     slug: string;
     images: string[];
     listPrice: number;
+    salePrice?: number | null;
     vatRate: number;
     minQuantity: number;
     stock: number;
@@ -102,6 +103,30 @@ export function ProductDetail({
         product.vatRate
     );
 
+    // Sale Price Logic
+    // If variant has price adjustment, we need to apply it to sale price too? 
+    // Usually Sale Price is "per product", variants might add to it.
+    // Let's assume salePrice is base price.
+    const baseSalePrice = product.salePrice;
+    const hasSalePrice = baseSalePrice != null && baseSalePrice < product.listPrice;
+
+    // Calculate effective sale price with variant adjustment
+    const effectiveSalePrice = hasSalePrice ? (baseSalePrice! + priceAdjustment) : null;
+
+    // Calculate discount percentage for badge
+    const saleDiscountRate = hasSalePrice && baseSalePrice != null
+        ? Math.round(((product.listPrice - baseSalePrice) / product.listPrice) * 100)
+        : 0;
+
+    // Determine display values
+    const displayFinalPrice = hasSalePrice ? effectiveSalePrice! : (isDealer ? price.finalPrice : (product.listPrice + priceAdjustment));
+    const showStrikethrough = hasSalePrice || (isDealer && discountRate > 0);
+    const strikethroughPrice = product.listPrice + priceAdjustment;
+
+    const vatAmount = hasSalePrice
+        ? (displayFinalPrice - (displayFinalPrice / (1 + product.vatRate / 100)))
+        : price.vatAmount;
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setInputValue(value);
@@ -170,7 +195,7 @@ export function ProductDetail({
             image: product.images[0] || "",
             quantity,
             listPrice: product.listPrice + priceAdjustment,
-            discountRate,
+            discountRate: hasSalePrice ? saleDiscountRate : discountRate,
             vatRate: product.vatRate,
             minQuantity: product.minQuantity,
             stock: effectiveStock,
@@ -297,8 +322,6 @@ export function ProductDetail({
                         {product.name}
                     </h1>
 
-
-
                     {/* Variant Selection */}
                     {hasVariants && (
                         <div className="space-y-4 border p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
@@ -378,33 +401,28 @@ export function ProductDetail({
 
                     {/* Pricing */}
                     <div className="space-y-2">
-                        {isDealer ? (
-                            <>
-                                {discountRate > 0 && (
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-lg text-gray-400 line-through">
-                                            {formatPrice(product.listPrice)}
-                                        </span>
-                                        <Badge className="bg-green-600">%{discountRate} İndirim</Badge>
-                                    </div>
-                                )}
-                                <div className="text-4xl font-bold text-blue-600">
-                                    {formatPrice(price.finalPrice)}
-                                </div>
-                                <p className="text-sm text-gray-500">
-                                    KDV Dahil ({product.vatRate}% KDV: {formatPrice(price.vatAmount)})
-                                </p>
-                            </>
-                        ) : (
-                            <>
-                                <div className="text-4xl font-bold text-gray-900 dark:text-white">
-                                    {formatPrice(product.listPrice)}
-                                </div>
-                                <p className="text-sm text-gray-500">
-                                    KDV Dahil (%{product.vatRate})
-                                </p>
-                            </>
+                        {/* Discount Badge */}
+                        {(isDealer && discountRate > 0 || hasSalePrice) && (
+                            <div className="mb-2">
+                                <Badge className="bg-[#E31E24] hover:bg-[#c4191f] text-white">
+                                    %{Math.max(discountRate, saleDiscountRate)} İndirim
+                                </Badge>
+                            </div>
                         )}
+
+                        <div className="flex flex-col">
+                            {showStrikethrough && (
+                                <span className="text-xl text-gray-400 line-through">
+                                    {formatPrice(strikethroughPrice)}
+                                </span>
+                            )}
+                            <div className="text-4xl font-bold text-[#009AD0] dark:text-white">
+                                {formatPrice(displayFinalPrice)}
+                            </div>
+                            <p className="text-sm text-gray-500">
+                                KDV Dahil (%{product.vatRate} KDV: {formatPrice(vatAmount)})
+                            </p>
+                        </div>
                     </div>
 
                     {/* Product Details (SKU, Barcode, Origin) */}
@@ -435,8 +453,6 @@ export function ProductDetail({
                             </div>
                         )}
                     </div>
-
-
 
                     {/* Add to Cart */}
                     {product.stock > 0 && (
@@ -475,7 +491,7 @@ export function ProductDetail({
 
                             <div className="flex items-center gap-4">
                                 <div className="text-lg font-bold">
-                                    Toplam: {formatPrice(price.finalPrice * quantity)}
+                                    Toplam: {formatPrice(displayFinalPrice * quantity)}
                                 </div>
                             </div>
 

@@ -47,7 +47,7 @@ export async function sendOrderConfirmationEmail(props: SendOrderConfirmationPro
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Sipariş <siparis@bagajlastigi.com>',
+            from: 'Sipariş <siparis@ladamarketi.com>',
             to: [props.to],
             subject: `Siparişiniz Alındı - #${props.orderNumber}`,
             react: OrderConfirmationEmail({
@@ -85,7 +85,7 @@ export async function sendAdminNewOrderEmail(props: SendAdminNewOrderProps) {
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Sipariş Bildirim <siparis@bagajlastigi.com>',
+            from: 'Sipariş Bildirim <siparis@ladamarketi.com>',
             to: [ADMIN_EMAIL],
             subject: `Yeni Sipariş: #${props.orderNumber} - ${props.companyName}`,
             react: AdminNewOrderEmail({
