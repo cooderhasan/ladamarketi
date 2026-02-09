@@ -105,17 +105,17 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                             {/* Logo */}
                             <Link href="/" className="flex items-center gap-2">
                                 {logoUrl ? (
-                                    <img src={logoUrl} alt={siteName || "Logo"} className="h-14 w-auto object-contain" />
+                                    <img src={logoUrl} alt={siteName || "Logo"} className="h-10 md:h-14 w-auto object-contain" />
                                 ) : (
                                     <div className="flex items-center gap-2">
-                                        <div className="w-14 h-14 bg-[#009AD0] rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg">
-                                            <span className="text-white font-extrabold text-3xl">L</span>
+                                        <div className="w-10 h-10 md:w-14 md:h-14 bg-[#009AD0] rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg">
+                                            <span className="text-white font-extrabold text-xl md:text-3xl">L</span>
                                         </div>
                                         <div className="flex flex-col leading-none">
-                                            <span className="font-black text-3xl text-gray-900 dark:text-white tracking-tight uppercase">
+                                            <span className="font-black text-xl md:text-3xl text-gray-900 dark:text-white tracking-tight uppercase">
                                                 LADA
                                             </span>
-                                            <span className="font-bold text-base text-[#009AD0] tracking-widest uppercase">
+                                            <span className="font-bold text-[10px] md:text-base text-[#009AD0] tracking-widest uppercase">
                                                 MARKETİ
                                             </span>
                                         </div>

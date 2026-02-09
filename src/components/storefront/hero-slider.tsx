@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Slider {
     id: string;
@@ -61,22 +62,25 @@ export function HeroSlider({ sliders }: HeroSliderProps) {
 
     return (
         <div className="relative h-[400px] md:h-[500px] overflow-hidden">
-            {sliders.map((slider, index) => (
-                <div
-                    key={slider.id}
-                    className={`absolute inset-0 transition-opacity duration-500 ${index === current ? "opacity-100" : "opacity-0"
-                        }`}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={sliders[current].id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.7 }}
+                    className="absolute inset-0"
                 >
                     {/* Background */}
                     <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-gray-900/30 z-10" />
                     <div className="absolute inset-0 bg-[#009AD0]">
-                        {slider.imageUrl && (
+                        {sliders[current].imageUrl && (
                             <Image
-                                src={slider.imageUrl}
-                                alt={slider.title || ""}
+                                src={sliders[current].imageUrl}
+                                alt={sliders[current].title || ""}
                                 fill
                                 className="object-cover object-right"
-                                priority={index === 0}
+                                priority={true}
                             />
                         )}
                     </div>
@@ -85,26 +89,42 @@ export function HeroSlider({ sliders }: HeroSliderProps) {
                     <div className="relative z-20 h-full flex items-center">
                         <div className="container mx-auto px-4 pl-16 md:pl-24">
                             <div className="max-w-2xl">
-                                {slider.title && (
-                                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
-                                        {slider.title}
-                                    </h2>
+                                {sliders[current].title && (
+                                    <motion.h2
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.3, duration: 0.5 }}
+                                        className="text-3xl md:text-5xl font-bold text-white mb-4"
+                                    >
+                                        {sliders[current].title}
+                                    </motion.h2>
                                 )}
-                                {slider.subtitle && (
-                                    <p className="text-xl text-gray-200 mb-6">
-                                        {slider.subtitle}
-                                    </p>
+                                {sliders[current].subtitle && (
+                                    <motion.p
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.5, duration: 0.5 }}
+                                        className="text-xl text-gray-200 mb-6"
+                                    >
+                                        {sliders[current].subtitle}
+                                    </motion.p>
                                 )}
-                                {slider.linkUrl && (
-                                    <Link href={slider.linkUrl}>
-                                        <Button size="lg">Keşfet</Button>
-                                    </Link>
+                                {sliders[current].linkUrl && (
+                                    <motion.div
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.7, duration: 0.5 }}
+                                    >
+                                        <Link href={sliders[current].linkUrl}>
+                                            <Button size="lg">Keşfet</Button>
+                                        </Link>
+                                    </motion.div>
                                 )}
                             </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                </motion.div>
+            </AnimatePresence>
 
             {/* Navigation */}
             {sliders.length > 1 && (
