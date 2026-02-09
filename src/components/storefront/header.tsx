@@ -239,12 +239,12 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                                 <div className="flex flex-col gap-3">
                                                     <Link href="/login" className="w-full">
                                                         <Button variant="default" className="w-full">
-                                                            Bayi Girişi
+                                                            Giriş Yap
                                                         </Button>
                                                     </Link>
                                                     <Link href="/register" className="w-full">
                                                         <Button variant="outline" className="w-full">
-                                                            Bayi Ol
+                                                            Üye Ol
                                                         </Button>
                                                     </Link>
                                                 </div>
