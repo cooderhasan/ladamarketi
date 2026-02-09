@@ -39,3 +39,19 @@ export async function getAllPolicies() {
         return []
     }
 }
+
+export async function deletePolicy(slug: string) {
+    try {
+        await prisma.policy.delete({
+            where: { slug },
+        })
+
+        revalidatePath("/admin/policies")
+        revalidatePath(`/policies/${slug}`)
+
+        return { success: true }
+    } catch (error) {
+        console.error("Policy delete error:", error)
+        return { success: false, error: "Silme işlemi başarısız oldu" }
+    }
+}
