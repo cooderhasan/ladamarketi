@@ -18,29 +18,44 @@ export default async function OrderPage({ params }: OrderPageProps) {
     const { id } = await params;
     const session = await auth();
 
-    if (!session?.user) {
-        redirect("/login");
-    }
+    // if (!session?.user) {
+    //    redirect("/login");
+    // }
 
-    const [order, generalSettings] = await Promise.all([
-        prisma.order.findUnique({
-            where: {
-                id: id,
-                userId: session.user.id,
-            },
-            include: {
-                items: true,
-                payment: true,
-            },
-        }),
-        prisma.siteSettings.findUnique({
-            where: { key: "general" },
-        }),
-    ]);
+    // First fetch the order without user constraint to check if it exists and who it belongs to
+    const order = await prisma.order.findUnique({
+        where: {
+            id: id,
+        },
+        include: {
+            items: true,
+            payment: true,
+        },
+    });
 
     if (!order) {
         notFound();
     }
+
+    // Security check:
+    // 1. If order has a userId, ONLY that user can view it.
+    // 2. If order has NO userId (guest order), ANYONE with the link can view it (assuming UUID security).
+    if (order.userId) {
+        if (!session?.user || session.user.id !== order.userId) {
+            // If user is not logged in, or logged in as wrong user -> Redirect to login or 403
+            // For better UX, redirect to login might be better, or just 404 to hide existence
+            if (!session?.user) {
+                redirect(`/login?callbackUrl=/orders/${id}`);
+            } else {
+                notFound(); // Hide order from wrong signed-in user
+            }
+        }
+    }
+
+    const generalSettings = await prisma.siteSettings.findUnique({
+        where: { key: "general" },
+    });
+
 
     const settings = (generalSettings?.value as Record<string, string>) || {};
     const isBankTransfer = order.payment?.method === "BANK_TRANSFER";

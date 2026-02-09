@@ -21,9 +21,9 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
     return (
         <footer className="bg-gray-900 text-gray-300">
             <div className="container mx-auto px-4 py-12 pb-24 md:pb-12 text-center md:text-left">
-                <div className="grid gap-8 grid-cols-1 md:grid-cols-4">
+                <div className="grid gap-8 grid-cols-2 md:grid-cols-4">
                     {/* Company Info */}
-                    <div className="space-y-4 md:col-span-1">
+                    <div className="space-y-4 col-span-2 md:col-span-1">
                         <div className="flex items-center justify-center md:justify-start gap-2">
                             {settings?.logoUrl ? (
                                 <img src={settings.logoUrl} alt={settings?.siteName || "Logo"} className="h-10 w-auto object-contain" />
@@ -141,7 +141,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
 
                     {/* Contact */}
                     <div>
-                        <div className="md:col-span-1">
+                        <div className="col-span-2 md:col-span-1">
                             <h4 className="font-semibold text-white mb-4">İletişim</h4>
                             <ul className="space-y-2 text-sm text-gray-400">
                                 {settings?.phone && <li>{settings.phone}</li>}

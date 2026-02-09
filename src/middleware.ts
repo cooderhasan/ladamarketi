@@ -37,11 +37,14 @@ export async function middleware(request: NextRequest) {
     // Protected routes - require authentication
     // Orders should probably require auth or a special token, but for now let's keep orders protected
     // Cart and Checkout should be public for B2C guests
+    // Orders should be accessible to guests (verification happens in page)
+    /* 
     if (pathname.startsWith("/orders")) {
         if (!token) {
             return NextResponse.redirect(new URL("/login", request.url));
         }
     }
+    */
 
     const response = NextResponse.next();
 
