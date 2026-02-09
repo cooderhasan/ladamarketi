@@ -182,7 +182,7 @@ export default async function HomePage() {
               </div>
 
               {/* Features */}
-              <section className="grid gap-6 md:grid-cols-3">
+              <section className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-3">
                 <div className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:-translate-y-1">
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                     <Truck className="h-6 w-6 text-blue-600" />

@@ -18,12 +18,12 @@ export function CategorySection({ categories }: CategorySectionProps) {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 pl-4 border-l-4 border-[#009AD0]">
                 Kategoriler
             </h2>
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 sm:gap-6 grid-cols-2 lg:grid-cols-4">
                 {categories.map((category) => (
                     <Link
                         key={category.id}
                         href={`/products?category=${category.slug}`}
-                        className="group relative h-64 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1"
+                        className="group relative h-40 sm:h-64 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1"
                     >
                         {/* Background Image */}
                         <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
