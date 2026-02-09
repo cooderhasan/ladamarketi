@@ -44,10 +44,10 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-4 py-8">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-4 py-8">
             {/* Decorative Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-200/30 dark:bg-orange-500/10 rounded-full blur-3xl" />
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200/30 dark:bg-blue-500/10 rounded-full blur-3xl" />
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200/30 dark:bg-blue-500/10 rounded-full blur-3xl" />
             </div>
 
@@ -55,16 +55,16 @@ export default function LoginPage() {
                 {/* Glass Card */}
                 <div className="backdrop-blur-xl bg-white/80 dark:bg-gray-800/80 rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700/50 overflow-hidden">
                     {/* Header Section */}
-                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-8 py-10 text-center">
+                    <div className="bg-gradient-to-r from-[#009AD0] to-[#007EA8] px-8 py-10 text-center">
                         {/* Logo */}
                         <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transform hover:scale-105 transition-transform">
-                            <span className="text-orange-500 font-black text-3xl">B</span>
+                            <span className="text-[#009AD0] font-black text-3xl">L</span>
                         </div>
                         <h1 className="text-2xl font-bold text-white mb-1">
-                            Bayi Girişi
+                            Hoş Geldiniz
                         </h1>
-                        <p className="text-orange-100 text-sm">
-                            Hesabınıza giriş yaparak devam edin
+                        <p className="text-blue-100 text-sm">
+                            Alışverişe başlamak için giriş yapın
                         </p>
                     </div>
 
@@ -74,7 +74,7 @@ export default function LoginPage() {
                             {/* Email Field */}
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="text-gray-700 dark:text-gray-300 font-medium flex items-center gap-2">
-                                    <Mail className="h-4 w-4 text-orange-500" />
+                                    <Mail className="h-4 w-4 text-[#009AD0]" />
                                     E-posta Adresi
                                 </Label>
                                 <div className="relative">
@@ -84,7 +84,7 @@ export default function LoginPage() {
                                         type="email"
                                         placeholder="ornek@firma.com"
                                         required
-                                        className="h-12 pl-4 pr-4 bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                        className="h-12 pl-4 pr-4 bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#009AD0]/20 focus:border-[#009AD0] transition-all"
                                     />
                                 </div>
                             </div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
                             {/* Password Field */}
                             <div className="space-y-2">
                                 <Label htmlFor="password" className="text-gray-700 dark:text-gray-300 font-medium flex items-center gap-2">
-                                    <Lock className="h-4 w-4 text-orange-500" />
+                                    <Lock className="h-4 w-4 text-[#009AD0]" />
                                     Şifre
                                 </Label>
                                 <div className="relative">
@@ -102,7 +102,7 @@ export default function LoginPage() {
                                         type="password"
                                         placeholder="••••••••"
                                         required
-                                        className="h-12 pl-4 pr-4 bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                                        className="h-12 pl-4 pr-4 bg-gray-50 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-[#009AD0]/20 focus:border-[#009AD0] transition-all"
                                     />
                                 </div>
                             </div>
@@ -110,7 +110,7 @@ export default function LoginPage() {
                             {/* Submit Button */}
                             <Button
                                 type="submit"
-                                className="w-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 flex items-center justify-center gap-2"
+                                className="w-full h-12 bg-gradient-to-r from-[#009AD0] to-[#007EA8] hover:from-[#007EA8] hover:to-[#006282] text-white font-semibold rounded-xl shadow-lg shadow-[#009AD0]/25 hover:shadow-[#009AD0]/40 transition-all duration-300 flex items-center justify-center gap-2"
                                 disabled={loading}
                             >
                                 {loading ? (
@@ -140,11 +140,11 @@ export default function LoginPage() {
                         {/* Register Link */}
                         <Link
                             href="/register"
-                            className="flex items-center justify-center gap-3 w-full h-12 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-orange-300 dark:hover:border-orange-500/50 transition-all duration-300 group"
+                            className="flex items-center justify-center gap-3 w-full h-12 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-[#009AD0] dark:hover:border-[#009AD0]/50 transition-all duration-300 group"
                         >
-                            <UserPlus className="h-5 w-5 text-gray-500 group-hover:text-orange-500 transition-colors" />
+                            <UserPlus className="h-5 w-5 text-gray-500 group-hover:text-[#009AD0] transition-colors" />
                             Yeni Hesap Oluştur
-                            <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all" />
+                            <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-[#009AD0] group-hover:translate-x-1 transition-all" />
                         </Link>
                     </div>
                 </div>
@@ -152,9 +152,9 @@ export default function LoginPage() {
                 {/* Footer Text */}
                 <p className="text-center text-sm text-gray-500 mt-6">
                     Giriş yaparak{" "}
-                    <Link href="/policies/membership" className="text-orange-600 hover:underline">Kullanım Şartları</Link>
+                    <Link href="/policies/membership" className="text-[#009AD0] hover:underline">Kullanım Şartları</Link>
                     {" "}ve{" "}
-                    <Link href="/policies/privacy" className="text-orange-600 hover:underline">Gizlilik Politikası</Link>
+                    <Link href="/policies/privacy" className="text-[#009AD0] hover:underline">Gizlilik Politikası</Link>
                     'nı kabul etmiş olursunuz.
                 </p>
             </div>
