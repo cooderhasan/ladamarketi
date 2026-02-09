@@ -170,25 +170,19 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
 
                     {/* Payment Icons */}
                     <div className="flex items-center gap-2">
-                        {(settings?.showVisa === "true") && (
-                            <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center p-1" title="Visa">
-                                <strong style={{ color: "#1A1F71", fontStyle: "italic", fontFamily: "Helvetica, Arial, sans-serif", fontSize: "1.2rem", lineHeight: 1, letterSpacing: "-0.5px", fontWeight: 900 }}>VISA</strong>
-                            </div>
-                        )}
-                        {(settings?.showMastercard === "true") && (
-                            <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Mastercard">
-                                <svg viewBox="0 0 24 15" className="h-full w-auto max-w-full">
-                                    <rect fill="none" width="24" height="15" />
-                                    <circle cx="7" cy="7.5" r="7" fill="#EB001B" />
-                                    <circle cx="17" cy="7.5" r="7" fill="#F79E1B" fillOpacity="0.8" />
-                                </svg>
-                            </div>
-                        )}
-                        {(settings?.showTroy === "true") && (
-                            <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Troy">
-                                <strong className="text-blue-900 text-sm font-black tracking-tighter">TROY</strong>
-                            </div>
-                        )}
+                        <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center p-1" title="Visa">
+                            <strong style={{ color: "#1A1F71", fontStyle: "italic", fontFamily: "Helvetica, Arial, sans-serif", fontSize: "1.2rem", lineHeight: 1, letterSpacing: "-0.5px", fontWeight: 900 }}>VISA</strong>
+                        </div>
+                        <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Mastercard">
+                            <svg viewBox="0 0 24 15" className="h-full w-auto max-w-full">
+                                <rect fill="none" width="24" height="15" />
+                                <circle cx="7" cy="7.5" r="7" fill="#EB001B" />
+                                <circle cx="17" cy="7.5" r="7" fill="#F79E1B" fillOpacity="0.8" />
+                            </svg>
+                        </div>
+                        <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Troy">
+                            <strong className="text-blue-900 text-sm font-black tracking-tighter">TROY</strong>
+                        </div>
                         {(settings?.showBankTransfer === "true") && (
                             <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Havale / EFT">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-700">
