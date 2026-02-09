@@ -83,7 +83,7 @@ export function HeroSlider({ sliders }: HeroSliderProps) {
 
                     {/* Content */}
                     <div className="relative z-20 h-full flex items-center">
-                        <div className="container mx-auto px-8 md:px-12">
+                        <div className="container mx-auto px-4 pl-16 md:pl-24">
                             <div className="max-w-2xl">
                                 {slider.title && (
                                     <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
