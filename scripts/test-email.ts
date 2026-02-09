@@ -16,7 +16,8 @@ const resend = new Resend(apiKey);
 
 async function main() {
     console.log(`📧 Test maili gönderiliyor...`);
-    console.log(`- API Key: ${apiKey.substring(0, 5)}...`);
+    // Ensure apiKey is treated as string since we checked it above or provide fallback
+    console.log(`- API Key: ${(apiKey || "").substring(0, 5)}...`);
     console.log(`- Alıcı:   ${adminEmail}`);
 
     try {
