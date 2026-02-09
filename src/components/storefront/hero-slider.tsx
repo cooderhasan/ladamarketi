@@ -75,7 +75,7 @@ export function HeroSlider({ sliders }: HeroSliderProps) {
                                 src={slider.imageUrl}
                                 alt={slider.title || ""}
                                 fill
-                                className="object-contain"
+                                className="object-cover object-right"
                                 priority={index === 0}
                             />
                         )}
