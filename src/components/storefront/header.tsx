@@ -313,7 +313,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                 .map((category) => (
                                     <Link
                                         key={category.id}
-                                        href={`/products?category=${category.slug}`}
+                                        href={`/category/${category.slug}`}
                                         className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
                                     >
                                         <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
@@ -389,7 +389,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                             {categories.map((category) => (
                                 <Link
                                     key={category.id}
-                                    href={`/products?category=${category.slug}`}
+                                    href={`/category/${category.slug}`}
                                     className="block px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >

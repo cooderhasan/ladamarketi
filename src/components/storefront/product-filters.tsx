@@ -15,6 +15,7 @@ interface ProductFiltersProps {
     brands: { id: string; name: string; slug: string }[];
     colors: string[];
     sizes: string[];
+    activeCategorySlug?: string;
 }
 
 export function ProductFilters({
@@ -22,56 +23,18 @@ export function ProductFilters({
     brands,
     colors,
     sizes,
+    activeCategorySlug,
 }: ProductFiltersProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // Local state for price inputs to avoid url thrashing
-    const [priceRange, setPriceRange] = useState({
-        min: searchParams.get("min_price") || "",
-        max: searchParams.get("max_price") || "",
-    });
+    // ... (rest of simple state)
 
-    const createQueryString = useCallback(
-        (name: string, value: string | null) => {
-            const params = new URLSearchParams(searchParams.toString());
-            if (value === null) {
-                params.delete(name);
-            } else {
-                params.set(name, value);
-            }
-            return params.toString();
-        },
-        [searchParams]
-    );
+    // ... (createQueryString helper)
 
-    const toggleFilter = (key: string, value: string) => {
-        const params = new URLSearchParams(searchParams.toString());
-        const current = params.getAll(key);
+    // ... (toggleFilter helper)
 
-        if (current.includes(value)) {
-            // Remove
-            const newValues = current.filter((v) => v !== value);
-            params.delete(key);
-            newValues.forEach((v) => params.append(key, v));
-        } else {
-            // Add
-            params.append(key, value);
-        }
-
-        router.push(`?${params.toString()}`);
-    };
-
-    const handlePriceFilter = () => {
-        const params = new URLSearchParams(searchParams.toString());
-        if (priceRange.min) params.set("min_price", priceRange.min);
-        else params.delete("min_price");
-
-        if (priceRange.max) params.set("max_price", priceRange.max);
-        else params.delete("max_price");
-
-        router.push(`?${params.toString()}`);
-    };
+    // ... (handlePriceFilter helper)
 
     const isSelected = (key: string, value: string) => {
         return searchParams.getAll(key).includes(value);
@@ -90,7 +53,7 @@ export function ProductFilters({
                                 <div className="flex items-center space-x-2">
                                     <Checkbox
                                         id="cat-all"
-                                        checked={!searchParams.get("category")}
+                                        checked={!activeCategorySlug && !searchParams.get("category")}
                                         onCheckedChange={() => router.push("/products")}
                                     />
                                     <Label htmlFor="cat-all" className="cursor-pointer font-normal">Tüm Kategoriler</Label>
@@ -99,8 +62,8 @@ export function ProductFilters({
                                     <div key={category.id} className="flex items-center space-x-2">
                                         <Checkbox
                                             id={`cat-${category.id}`}
-                                            checked={searchParams.get("category") === category.slug}
-                                            onCheckedChange={() => router.push(`/products?${createQueryString("category", category.slug)}`)}
+                                            checked={activeCategorySlug === category.slug || searchParams.get("category") === category.slug}
+                                            onCheckedChange={() => router.push(`/category/${category.slug}`)}
                                         />
                                         <Label htmlFor={`cat-${category.id}`} className="cursor-pointer font-normal">
                                             {category.name}

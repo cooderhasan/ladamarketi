@@ -45,7 +45,7 @@ export function CategorySidebar({ categories }: CategorySidebarProps) {
                             {/* Main Category Row */}
                             <div className="flex items-center">
                                 <Link
-                                    href={`/products?category=${category.slug}`}
+                                    href={`/category/${category.slug}`}
                                     className="flex-1 px-5 py-3.5 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-[#009AD0] hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                                 >
                                     {category.name}
@@ -71,7 +71,7 @@ export function CategorySidebar({ categories }: CategorySidebarProps) {
                                     {category.children!.map((child) => (
                                         <Link
                                             key={child.id}
-                                            href={`/products?category=${child.slug}`}
+                                            href={`/category/${child.slug}`}
                                             className="flex items-center gap-2 px-5 py-2.5 pl-8 text-[13px] font-medium text-gray-600 dark:text-gray-300 hover:text-[#009AD0] hover:bg-gray-100/50 dark:hover:bg-gray-700/30 transition-colors"
                                         >
                                             <ChevronRight className="h-3 w-3 text-gray-400" />

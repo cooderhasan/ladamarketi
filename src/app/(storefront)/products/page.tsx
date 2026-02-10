@@ -218,6 +218,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         brands={brands}
                         colors={uniqueColors}
                         sizes={uniqueSizes}
+                        activeCategorySlug={params.category}
                     />
                 </aside>
 

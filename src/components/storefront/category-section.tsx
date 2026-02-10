@@ -22,7 +22,7 @@ export function CategorySection({ categories }: CategorySectionProps) {
                 {categories.map((category) => (
                     <Link
                         key={category.id}
-                        href={`/products?category=${category.slug}`}
+                        href={`/category/${category.slug}`}
                         className="group relative h-40 sm:h-64 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1"
                     >
                         {/* Background Image */}
@@ -40,16 +40,13 @@ export function CategorySection({ categories }: CategorySectionProps) {
                             )}
                         </div>
 
-                        {/* Overlay - Gradient Blue */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#009AD0]/90 via-[#009AD0]/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-
                         {/* Content */}
                         <div className="absolute bottom-0 left-0 p-6 w-full translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                            <h3 className="text-xl font-bold text-white mb-2 drop-shadow-md">
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                                 {category.name}
                             </h3>
-                            <div className="flex items-center text-sm text-white/90 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <span className="border-b border-white/50 pb-0.5">Ürünleri İncele</span>
+                            <div className="flex items-center text-sm text-gray-900/90 dark:text-white/90 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                                <span className="border-b border-gray-900/50 dark:border-white/50 pb-0.5">Ürünleri İncele</span>
                                 <ArrowRight className="h-4 w-4 ml-2" />
                             </div>
                         </div>

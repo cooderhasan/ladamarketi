@@ -129,9 +129,6 @@ export function ProductCard({
                         )}
                         <p className="text-lg font-bold text-[#009AD0] dark:text-[#009AD0]">
                             {formatPrice(price.finalPrice)}
-                            <span className="text-xs font-normal text-gray-500 ml-1">
-                                (KDV Dahil)
-                            </span>
                         </p>
                     </div>
 

@@ -177,7 +177,6 @@ export function ProductCardV2({
                                 <span className="text-lg font-bold text-gray-900 dark:text-white">
                                     {formatPrice(displayPrice)}
                                 </span>
-                                <span className="text-[10px] text-gray-500 font-medium">KDV Dahil</span>
                             </div>
                         </div>
                     </div>

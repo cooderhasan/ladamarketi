@@ -49,7 +49,7 @@ export function CategoryMenu({ categories }: CategoryMenuProps) {
                         <div key={category.id} className="group/item relative px-2">
                             {/* Main Category Item */}
                             <Link
-                                href={`/products?category=${category.slug}`}
+                                href={`/category/${category.slug}`}
                                 className="flex items-center justify-between px-3 py-3 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-700 transition-all group-hover/item:shadow-sm"
                             >
                                 <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export function CategoryMenu({ categories }: CategoryMenuProps) {
                                         {category.children.map((child) => (
                                             <Link
                                                 key={child.id}
-                                                href={`/products?category=${child.slug}`}
+                                                href={`/category/${child.slug}`}
                                                 className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 group/sub transition-all border border-transparent hover:border-blue-100 hover:shadow-sm"
                                             >
                                                 {/* Image Box */}

@@ -459,11 +459,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                         <div className="text-2xl font-bold text-blue-600">
                                             {formatPrice(summary.total)}
                                         </div>
-                                        {summary.total < freeShippingLimit && (
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                +{formatPrice(freeShippingLimit - summary.total)} daha ekle, kargo bedava olsun!
-                                            </p>
-                                        )}
+
                                     </div>
                                 </div>
 
@@ -485,7 +481,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                 </Button>
 
                                 <div className="text-[10px] text-center text-gray-400 leading-tight">
-                                    <p>Siparişi onaylayarak <Link href="/policies/distance-sales" className="underline hover:text-gray-600">Mesafeli Satış Sözleşmesi</Link>'ni</p>
+                                    <p>Siparişi onaylayarak <Link href="/policies/sat-s-zle-mesi" className="underline hover:text-gray-600">Mesafeli Satış Sözleşmesi</Link>'ni</p>
                                     <p>kabul etmiş olursunuz.</p>
                                 </div>
                             </CardContent>
