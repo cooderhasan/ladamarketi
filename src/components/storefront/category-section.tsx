@@ -24,10 +24,10 @@ export function CategorySection({ categories }: CategorySectionProps) {
                     <Link
                         key={category.id}
                         href={`/category/${category.slug}`}
-                        className="group relative h-40 sm:h-64 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1"
+                        className="group relative flex flex-col h-full bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                     >
-                        {/* Background Image */}
-                        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
+                        {/* Image Area */}
+                        <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-700">
                             {category.imageUrl ? (
                                 <Image
                                     src={category.imageUrl}
@@ -37,20 +37,21 @@ export function CategorySection({ categories }: CategorySectionProps) {
                                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-300">
-                                    <span className="text-5xl opacity-20">🚙</span>
+                                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                    <span className="text-4xl opacity-20">🚙</span>
                                 </div>
                             )}
                         </div>
 
-                        {/* Content */}
-                        <div className="absolute bottom-0 left-0 p-6 w-full translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        {/* Content Area */}
+                        <div className="flex flex-col flex-1 p-4 text-center">
+                            <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#009AD0] transition-colors line-clamp-2 mb-2">
                                 {category.name}
                             </h3>
-                            <div className="flex items-center text-sm text-gray-900/90 dark:text-white/90 font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                                <span className="border-b border-gray-900/50 dark:border-white/50 pb-0.5">Ürünleri İncele</span>
-                                <ArrowRight className="h-4 w-4 ml-2" />
+
+                            <div className="mt-auto pt-2 flex items-center justify-center text-sm font-medium text-[#009AD0] opacity-0 -translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <span>İncele</span>
+                                <ArrowRight className="h-3.5 w-3.5 ml-1" />
                             </div>
                         </div>
                     </Link>
