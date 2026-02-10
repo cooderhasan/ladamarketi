@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 interface Category {
@@ -28,10 +29,12 @@ export function CategorySection({ categories }: CategorySectionProps) {
                         {/* Background Image */}
                         <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
                             {category.imageUrl ? (
-                                <img
+                                <Image
                                     src={category.imageUrl}
                                     alt={category.name}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    fill
+                                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-300">

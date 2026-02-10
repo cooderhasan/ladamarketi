@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -105,7 +106,16 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                             {/* Logo */}
                             <Link href="/" className="flex items-center gap-2">
                                 {logoUrl ? (
-                                    <img src={logoUrl} alt={siteName || "Logo"} className="h-10 md:h-14 w-auto object-contain" />
+                                    <div className="relative h-10 md:h-14 w-auto aspect-[3/1]">
+                                        <Image
+                                            src={logoUrl}
+                                            alt={siteName || "Logo"}
+                                            fill
+                                            className="object-contain"
+                                            sizes="(max-width: 768px) 120px, 160px"
+                                            priority
+                                        />
+                                    </div>
                                 ) : (
                                     <div className="flex items-center gap-2">
                                         <div className="w-10 h-10 md:w-14 md:h-14 bg-[#009AD0] rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg">

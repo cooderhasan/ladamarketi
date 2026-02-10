@@ -28,13 +28,52 @@ export function ProductFilters({
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // ... (rest of simple state)
+    // Local state for price inputs to avoid url thrashing
+    const [priceRange, setPriceRange] = useState({
+        min: searchParams.get("min_price") || "",
+        max: searchParams.get("max_price") || "",
+    });
 
-    // ... (createQueryString helper)
+    const createQueryString = useCallback(
+        (name: string, value: string | null) => {
+            const params = new URLSearchParams(searchParams.toString());
+            if (value === null) {
+                params.delete(name);
+            } else {
+                params.set(name, value);
+            }
+            return params.toString();
+        },
+        [searchParams]
+    );
 
-    // ... (toggleFilter helper)
+    const toggleFilter = (key: string, value: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        const current = params.getAll(key);
 
-    // ... (handlePriceFilter helper)
+        if (current.includes(value)) {
+            // Remove
+            const newValues = current.filter((v) => v !== value);
+            params.delete(key);
+            newValues.forEach((v) => params.append(key, v));
+        } else {
+            // Add
+            params.append(key, value);
+        }
+
+        router.push(`?${params.toString()}`);
+    };
+
+    const handlePriceFilter = () => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (priceRange.min) params.set("min_price", priceRange.min);
+        else params.delete("min_price");
+
+        if (priceRange.max) params.set("max_price", priceRange.max);
+        else params.delete("max_price");
+
+        router.push(`?${params.toString()}`);
+    };
 
     const isSelected = (key: string, value: string) => {
         return searchParams.getAll(key).includes(value);
