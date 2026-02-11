@@ -113,10 +113,13 @@ export async function getInstallmentRates() {
     const request_id = Math.random().toString(36).substring(2, 12) + Date.now().toString().substring(10);
     const hash_str = config.merchantId + request_id + config.merchantSalt;
 
+    // Bazı PayTR API'leri HEX, bazıları Base64 ister.
+    // 401 hatası genellikle bu format farkından kaynaklanır.
+    // Taksit sorgulama için HEX deneyelim.
     const paytr_token = crypto
         .createHmac("sha256", config.merchantKey)
         .update(hash_str)
-        .digest("base64");
+        .digest("hex");
 
     const params = {
         merchant_id: config.merchantId,
