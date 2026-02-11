@@ -24,14 +24,12 @@ export function CategorySectionModern({ categories }: CategorySectionProps) {
     return (
         <section className="container mx-auto px-4">
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 h-auto md:h-[500px]">
-                {categories.slice(0, 4).map((category, index) => (
+                {categories.slice(0, 5).map((category, index) => (
                     <Link
                         key={category.id}
                         href={`/category/${category.slug}`}
                         className={cn(
                             "group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-2xl",
-                            // Mobile: Aspect ratio 2/1 for better visibility
-                            // Desktop: First item spans 2x2
                             "aspect-[2/1] md:aspect-auto",
                             index === 0 ? "md:col-span-2 md:row-span-2" : "md:col-span-1"
                         )}
@@ -67,9 +65,9 @@ export function CategorySectionModern({ categories }: CategorySectionProps) {
                                 {category.name}
                             </h3>
 
-                            <div className="h-0 overflow-hidden group-hover:h-8 transition-all duration-300 ease-out opacity-0 group-hover:opacity-100">
-                                <span className="inline-flex items-center text-sm font-medium text-blue-400">
-                                    Ürünleri İncele <ArrowRight className="ml-2 h-4 w-4" />
+                            <div className="h-0 overflow-hidden group-hover:h-10 transition-all duration-300 ease-out opacity-0 group-hover:opacity-100 flex items-center">
+                                <span className="inline-flex items-center text-xs font-bold text-white bg-blue-600/90 px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                                    Ürünleri İncele <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                                 </span>
                             </div>
                         </div>

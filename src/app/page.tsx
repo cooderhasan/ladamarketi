@@ -38,7 +38,7 @@ async function getHomeData() {
       prisma.category.findMany({
         where: { isActive: true, isFeatured: true },
         orderBy: { order: "asc" },
-        take: 4, // Limit to 4 as requested for category section
+        take: 5, // Updated to 5 as requested
       }),
       // Sidebar categories (all active top-level)
       prisma.category.findMany({
