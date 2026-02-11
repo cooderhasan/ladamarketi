@@ -139,10 +139,13 @@ export function CustomersTable({
         }
     };
 
+    const [updatingCustomer, setUpdatingCustomer] = useState<string | null>(null);
+
     const handleDiscountGroupChange = async (
         customerId: string,
         discountGroupId: string
     ) => {
+        setUpdatingCustomer(customerId);
         try {
             const result = await updateCustomerDiscountGroup(customerId, discountGroupId);
             if (result && result.success) {
@@ -150,8 +153,11 @@ export function CustomersTable({
             } else {
                 toast.error(result?.error || "Güncelleme başarısız oldu.");
             }
-        } catch {
+        } catch (e) {
+            console.error("Discount Group Update Error:", e);
             toast.error("Bir hata oluştu.");
+        } finally {
+            setUpdatingCustomer(null);
         }
     };
 
@@ -365,9 +371,10 @@ export function CustomersTable({
                                                 onValueChange={(value) =>
                                                     handleDiscountGroupChange(customer.id, value)
                                                 }
+                                                disabled={updatingCustomer === customer.id}
                                             >
                                                 <SelectTrigger className="w-40">
-                                                    <SelectValue placeholder="Grup Seçin" />
+                                                    <SelectValue placeholder={updatingCustomer === customer.id ? "Güncelleniyor..." : "Grup Seçin"} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     {discountGroups.map((group) => (
