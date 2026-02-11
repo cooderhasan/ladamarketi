@@ -133,13 +133,21 @@ export async function getInstallmentRates() {
             body: new URLSearchParams(params as any).toString(),
         });
 
-        const result = await response.json();
+        const responseText = await response.text();
 
-        if (result.status === "error") {
-            console.error("PayTR API Error Response:", result);
+        try {
+            const result = JSON.parse(responseText);
+            if (result.status === "error") {
+                console.error("PayTR API Error Response:", result);
+            }
+            return result;
+        } catch (e) {
+            console.error("PayTR raw response (not JSON):", responseText);
+            return {
+                status: "error",
+                err_msg: `PayTR geçersiz yanıt döndürdü (IP engeli olabilir). Detay: ${responseText.substring(0, 100)}`
+            };
         }
-
-        return result;
     } catch (error: any) {
         console.error("PayTR getInstallmentRates fetch error details:", {
             message: error.message,
