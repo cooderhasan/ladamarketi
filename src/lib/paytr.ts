@@ -110,7 +110,7 @@ export function verifyPayTRCallback(params: any) {
 }
 
 export async function getInstallmentRates() {
-    const request_id = Date.now().toString();
+    const request_id = Math.random().toString(36).substring(2, 12) + Date.now().toString().substring(10);
     const hash_str = config.merchantId + request_id + config.merchantSalt;
 
     const paytr_token = crypto
@@ -123,6 +123,12 @@ export async function getInstallmentRates() {
         request_id: request_id,
         paytr_token: paytr_token,
     };
+
+    console.log("DEBUG: PayTR Installment Check", {
+        merchantId: config.merchantId,
+        requestId: request_id,
+        hashBaslangic: hash_str.substring(0, 5) + "...",
+    });
 
     try {
         const response = await fetch("https://www.paytr.com/odeme/api/get-installment-rates", {
