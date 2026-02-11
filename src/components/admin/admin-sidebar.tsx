@@ -93,6 +93,8 @@ export function AdminSidebar({ settings }: { settings?: any }) {
     const logoUrl = settings?.logoUrl;
     const siteName = settings?.siteName || "B2B";
 
+    console.log("AdminSidebar Settings:", settings);
+
     return (
         <>
             {/* Mobile overlay */}

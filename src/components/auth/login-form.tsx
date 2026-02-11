@@ -40,7 +40,9 @@ export function LoginForm({ logoUrl, siteName }: LoginFormProps) {
             } else {
                 toast.success("Başarıyla giriş yapıldı, yönlendiriliyorsunuz...");
                 // Redirect to admin - Middleware will handle non-admin users by redirecting them to home
-                window.location.href = "/admin";
+                setTimeout(() => {
+                    window.location.href = "/admin";
+                }, 1500);
             }
         } catch {
             toast.error("Bir hata oluştu.");
