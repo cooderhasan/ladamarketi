@@ -127,7 +127,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                 );
                 toast.success("Sipariş durumu güncellendi");
             } else {
-                toast.error("Güncelleme başarısız oldu");
+                toast.error(result.error || "Güncelleme başarısız oldu");
             }
         } catch (error) {
             toast.error("Bir hata oluştu");

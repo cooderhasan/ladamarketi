@@ -31,7 +31,7 @@ export async function updateOrderStatus(
                 action: "UPDATE_ORDER_STATUS",
                 entityType: "Order",
                 entityId: orderId,
-                oldData: { status: order?.status },
+                oldData: { status: order?.status ?? null },
                 newData: { status },
             },
         });
@@ -40,7 +40,7 @@ export async function updateOrderStatus(
         return { success: true };
     } catch (error) {
         console.error("Order status update error:", error);
-        return { success: false, error: "Failed to update order status" };
+        return { success: false, error: error instanceof Error ? error.message : "Durum güncellenemedi." };
     }
 }
 
