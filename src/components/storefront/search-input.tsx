@@ -28,26 +28,26 @@ export function SearchInput() {
     };
 
     return (
-        <form onSubmit={handleSearch} className="relative w-full">
-            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus-within:border-[#009AD0] focus-within:ring-2 focus-within:ring-[#009AD0]/20 transition-all overflow-hidden">
-                <div className="pl-4 text-gray-400">
+        <form onSubmit={handleSearch} className="relative w-full max-w-2xl mx-auto">
+            <div className="flex items-center bg-white dark:bg-gray-800 rounded-full shadow-sm hover:shadow-md transition-shadow duration-300 border border-gray-200/60 dark:border-gray-700/60 focus-within:border-[#009AD0] focus-within:ring-4 focus-within:ring-[#009AD0]/10 overflow-hidden pl-5 pr-1 py-1">
+                <div className="text-gray-400">
                     {isPending ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin text-[#009AD0]" />
                     ) : (
                         <Search className="h-5 w-5" />
                     )}
                 </div>
                 <Input
                     type="search"
-                    placeholder="Ürün adı, marka veya kategori ara..."
-                    className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm py-3 px-3"
+                    placeholder="Aradığınız ürün, kategori veya marka..."
+                    className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm h-12 px-4 placeholder:text-gray-400"
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                 />
                 <Button
                     type="submit"
                     size="sm"
-                    className="m-1 rounded-lg px-6"
+                    className="rounded-full px-6 bg-[#009AD0] hover:bg-[#007EA8] text-white shadow-md hover:shadow-lg transition-all"
                     disabled={isPending}
                 >
                     Ara

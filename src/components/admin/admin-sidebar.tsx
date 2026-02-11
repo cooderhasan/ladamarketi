@@ -136,10 +136,7 @@ export function AdminSidebar({ settings }: { settings?: any }) {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex flex-col items-center text-center w-full">
-                                <span className="font-bold text-gray-900 dark:text-white leading-tight text-xs w-full break-words line-clamp-2">{siteName}</span>
-                                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mt-0.5">Admin Panel</span>
-                            </div>
+                            {/* Text removed as per user request */}
                         </Link>
                     )}
 
@@ -251,17 +248,18 @@ export function AdminSidebar({ settings }: { settings?: any }) {
                         {!collapsed && <span>Siteye Dön</span>}
                     </Link>
                 </div>
-            </aside>
+            </aside >
 
             {/* Mobile menu button */}
-            <Button
+            < Button
                 variant="outline"
                 size="icon"
                 className="lg:hidden fixed top-4 left-4 z-30 bg-white/80 backdrop-blur shadow-sm border-gray-200"
-                onClick={() => setMobileOpen(true)}
+                onClick={() => setMobileOpen(true)
+                }
             >
                 <Menu className="h-5 w-5" />
-            </Button>
+            </Button >
         </>
     );
 }

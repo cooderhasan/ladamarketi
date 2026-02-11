@@ -95,18 +95,18 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
     }, [categories]);
 
     return (
-        <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-900 shadow-sm">
+        <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
 
             {/* Top Row: Logo, Search, User Actions */}
-            <div className="border-b dark:border-gray-800">
+            <div className="border-b dark:border-gray-800/50">
                 <div className="container mx-auto px-4">
                     <div className="flex h-16 items-center justify-between gap-4">
                         {/* Left: Logo + Phone */}
                         <div className="flex items-center gap-4 shrink-0">
                             {/* Logo */}
-                            <Link href="/" className="flex items-center gap-2">
+                            <Link href="/" className="flex items-center gap-2 group">
                                 {logoUrl ? (
-                                    <div className="relative h-10 md:h-14 w-auto aspect-[3/1]">
+                                    <div className="relative h-10 md:h-14 w-auto aspect-[3/1] transition-transform duration-300 group-hover:scale-105">
                                         <Image
                                             src={logoUrl}
                                             alt={siteName || "Logo"}
@@ -117,8 +117,8 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                         />
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-10 h-10 md:w-14 md:h-14 bg-[#009AD0] rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg">
+                                    <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-105">
+                                        <div className="w-10 h-10 md:w-14 md:h-14 bg-[#009AD0] rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg group-hover:rotate-0 transition-transform">
                                             <span className="text-white font-extrabold text-xl md:text-3xl">L</span>
                                         </div>
                                         <div className="flex flex-col leading-none">
@@ -298,7 +298,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
 
             {/* Bottom Row: Category Navigation (Desktop) - STRIKING DESIGN */}
             <div
-                className="hidden md:block relative overflow-hidden bg-gradient-to-r from-[#0081AF] via-[#009AD0] to-[#0081AF]"
+                className="hidden md:block relative overflow-hidden bg-gradient-to-r from-[#0081AF]/95 via-[#009AD0]/95 to-[#0081AF]/95 backdrop-blur-md shadow-lg"
             >
                 {/* Glowing Line Effect */}
                 <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#4FC3F7] to-transparent opacity-50" />
@@ -359,7 +359,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden border-b dark:border-gray-800 bg-white dark:bg-gray-900">
+                <div className="md:hidden border-b dark:border-gray-800/50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl supports-[backdrop-filter]:bg-white/90 animate-in slide-in-from-top-2 duration-200">
                     <div className="container mx-auto px-4 py-4 space-y-4">
                         {/* Mobile Search */}
                         <SearchInput />

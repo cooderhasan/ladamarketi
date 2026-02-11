@@ -152,12 +152,7 @@ export function AdminSidebarModern({ settings }: { settings?: any }) {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex flex-col items-center text-center w-full">
-                                <span className="font-bold text-gray-900 dark:text-white text-sm tracking-tight">{siteName}</span>
-                                <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mt-1">
-                                    Admin Panel
-                                </span>
-                            </div>
+                            {/* Text removed as per user request */}
                         </Link>
                     )}
 
@@ -309,17 +304,18 @@ export function AdminSidebarModern({ settings }: { settings?: any }) {
                         </Link>
                     </div>
                 </div>
-            </aside>
+            </aside >
 
             {/* Mobile menu button */}
-            <Button
+            < Button
                 variant="outline"
                 size="icon"
                 className="lg:hidden fixed top-4 left-4 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm border-gray-200 dark:border-gray-800 h-10 w-10 rounded-xl"
-                onClick={() => setMobileOpen(true)}
+                onClick={() => setMobileOpen(true)
+                }
             >
                 <Menu className="h-5 w-5" />
-            </Button>
+            </Button >
         </>
     );
 }

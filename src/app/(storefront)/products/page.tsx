@@ -2,11 +2,9 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { ProductCardModern } from "@/components/storefront/product-card-modern";
 import { ProductFilters } from "@/components/storefront/product-filters";
+import { MobileProductFilters } from "@/components/storefront/mobile-product-filters";
 import { Prisma } from "@prisma/client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { redirect } from "next/navigation";
 import { ProductSort } from "@/components/storefront/product-sort";
-
 import { Pagination } from "@/components/storefront/pagination";
 
 interface ProductsPageProps {
@@ -90,27 +88,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     const sizeFilters = typeof params.sizes === 'string' ? [params.sizes] : params.sizes;
 
     if ((colorFilters && colorFilters.length > 0) || (sizeFilters && sizeFilters.length > 0)) {
-        where.variants = {
-            some: {
-                // Must have at least one variant matching ANY of the colors AND ANY of the sizes if both are present
-                // OR logic for within same type, AND logic across types is standard
-                // However, Prisma 'some' works on the list.
-                // If we want "Red OR Blue", we use `in`.
-                // If we want "Red" AND "Large", we check for a variant that is both Red and Large? 
-                // Usually filters are "Product has Red variant" AND "Product has Large variant" (might be different variants).
-                // Let's implement: Product must have a variant that matches Color IN [...] AND Size IN [...] 
-                // Actually, often users want "Show me products that are available in Red".
-
-                OR: [
-                    // If colors are selected
-                    ...(colorFilters && colorFilters.length > 0 ? [{ color: { in: colorFilters } }] : []),
-                    // If sizes are selected (This logic means OR - product has Red OR product has Large. Users usually expect AND between distinct filters)
-                    // A better approach for Filter sections is usually Intersection (AND).
-                    // So: Product has (Color IN colors) matches.
-                ]
-            }
-        };
-
         // Let's refine for AND logic between Filter Groups (Brand AND Color AND Size)
         // Prisma `where.variants` with `some` checks if *at least one* variant matches criteria.
         // If we want "Has Red variant" AND "Has Large variant", we might need multiple `some` clauses if they don't need to be the *same* variant.
@@ -210,54 +187,73 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-col lg:flex-row gap-8">
-                {/* Sidebar Filters */}
-                <aside className="lg:w-64 flex-shrink-0 space-y-8">
-                    <ProductFilters
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        {currentCategory
+                            ? currentCategory.name
+                            : params.search ? `"${params.search}" Arama Sonuçları` : "Tüm Ürünler"}
+                    </h1>
+                    <p className="text-gray-500 dark:text-gray-400">
+                        Toplam <span className="font-semibold text-gray-900 dark:text-white">{totalCount}</span> ürün listeleniyor
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <MobileProductFilters
                         categories={sidebarCategories}
                         brands={brands}
                         colors={uniqueColors}
                         sizes={uniqueSizes}
                         activeCategorySlug={params.category}
                     />
+                    <div className="flex items-center gap-2 ml-auto md:ml-0">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline-block">Sıralama:</span>
+                        <ProductSort initialSort={params.sort || "newest"} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+                {/* Sidebar Filters - Desktop Sticky */}
+                <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+                        <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#009AD0]"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+                            Filtreler
+                        </h2>
+                        <ProductFilters
+                            categories={sidebarCategories}
+                            brands={brands}
+                            colors={uniqueColors}
+                            sizes={uniqueSizes}
+                            activeCategorySlug={params.category}
+                        />
+                    </div>
                 </aside>
 
                 {/* Products Grid */}
-                <div className="flex-1">
-                    {/* Header & Sorting */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                                {currentCategory
-                                    ? currentCategory.name
-                                    : params.search ? `"${params.search}" Arama Sonuçları` : "Tüm Ürünler"}
-                            </h1>
-                            <p className="text-sm text-gray-500 mt-1">{totalCount} ürün listeleniyor</p>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sıralama:</span>
-                            {/* Using a simple form for server-side sort or client component? 
-                               Component props are server components, so we can't use onChange easily without client component.
-                               We can reuse logic or make a small Client Wrapper.
-                               Actually, ProductFilters is client, let's make a Sorting component or just use a helper here if we can.
-                               Simplest: Make the whole page Client? No, SEO.
-                               Best: Small client component for Sort.
-                           */}
-                            <ProductSort initialSort={params.sort || "newest"} />
-                        </div>
-                    </div>
-
+                <div className="flex-1 w-full">
                     {products.length === 0 ? (
-                        <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-dashed">
-                            <p className="text-gray-500">Bu kriterlere uygun ürün bulunamadı.</p>
-                            <a href="/products" className="text-blue-600 hover:underline mt-2 inline-block">
+                        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-900 rounded-3xl border border-dashed border-gray-200 dark:border-gray-800 text-center">
+                            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Ürün Bulunamadı</h3>
+                            <p className="text-gray-500 max-w-sm mx-auto mb-6">
+                                Seçtiğiniz kriterlere uygun ürün bulunmamaktadır. Filtreleri temizleyerek tekrar deneyebilirsiniz.
+                            </p>
+                            <a
+                                href="/products"
+                                className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-[#009AD0] text-white font-medium hover:bg-[#007da8] transition-colors shadow-lg shadow-blue-500/20"
+                            >
                                 Filtreleri Temizle
                             </a>
                         </div>
                     ) : (
                         <>
-                            <div className="grid gap-6 grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                                 {products.map((product) => (
                                     <ProductCardModern
                                         key={product.id}
@@ -272,12 +268,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                                 ))}
                             </div>
 
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                baseUrl="/products"
-                                searchParams={params}
-                            />
+                            <div className="mt-12">
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    baseUrl="/products"
+                                    searchParams={params}
+                                />
+                            </div>
                         </>
                     )}
                 </div>
