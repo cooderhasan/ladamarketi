@@ -11,7 +11,14 @@ import { cn } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart-store";
 import { toast } from "sonner";
 import { useState } from "react";
-import { ShoppingCart, Minus, Plus, Package, Truck, ArrowLeft, ChevronLeft, ChevronRight, FileQuestion } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Package, Truck, ArrowLeft, ChevronLeft, ChevronRight, FileQuestion, CreditCard } from "lucide-react";
+import { InstallmentTable } from "./installment-table";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface ProductVariant {
     id: string;
@@ -48,6 +55,7 @@ interface Product {
     } | null;
     variants?: ProductVariant[];
 }
+
 
 interface ProductDetailProps {
     product: Product;
@@ -503,7 +511,7 @@ export function ProductDetail({
 
             {/* Product Description & Specs */}
             <div className="grid lg:grid-cols-12 gap-8 mb-24">
-                <div className="lg:col-span-8">
+                <div className="lg:col-span-8 space-y-8">
                     {product.description && (
                         <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800">
                             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
@@ -516,6 +524,26 @@ export function ProductDetail({
                             />
                         </div>
                     )}
+
+                    {/* Installment Table Section */}
+                    <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800">
+                        <Accordion type="single" collapsible className="w-full">
+                            <AccordionItem value="installments" className="border-none">
+                                <AccordionTrigger className="hover:no-underline py-0">
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                        <span className="w-1.5 h-8 bg-[#009AD0] rounded-r-full"></span>
+                                        Taksit Seçenekleri
+                                    </h2>
+                                </AccordionTrigger>
+                                <AccordionContent className="pt-6">
+                                    <InstallmentTable price={displayFinalPrice} />
+                                    <p className="mt-4 text-[10px] text-gray-400 italic">
+                                        * Taksit oranları PayTR tarafından anlık olarak güncellenmektedir. Vade farkı ödeme adımında toplam tutara yansıtılacaktır.
+                                    </p>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                    </div>
                 </div>
 
                 <div className="lg:col-span-4 space-y-6">

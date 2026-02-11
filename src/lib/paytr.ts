@@ -108,3 +108,32 @@ export function verifyPayTRCallback(params: any) {
 
     return hash === expected_hash;
 }
+
+export async function getInstallmentRates() {
+    const paytr_token = crypto
+        .createHmac("sha256", config.merchantKey)
+        .update(config.merchantId + config.merchantSalt)
+        .digest("base64");
+
+    const params = {
+        merchant_id: config.merchantId,
+        paytr_token: paytr_token,
+        request_id: Date.now().toString(),
+    };
+
+    try {
+        const response = await fetch("https://www.paytr.com/odeme/api/get-installment-rates", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams(params as any).toString(),
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error("PayTR getInstallmentRates error:", error);
+        return { status: "error", err_msg: "Bağlantı hatası" };
+    }
+}
+
