@@ -129,13 +129,23 @@ export async function getInstallmentRates() {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             },
             body: new URLSearchParams(params as any).toString(),
         });
 
+        console.log("PayTR API Status:", response.status, response.statusText);
+
         const responseText = await response.text();
 
         try {
+            if (!response.ok) {
+                return {
+                    status: "error",
+                    err_msg: `PayTR Hatası (${response.status}): ${responseText.substring(0, 100)}`
+                };
+            }
+
             const result = JSON.parse(responseText);
             if (result.status === "error") {
                 console.error("PayTR API Error Response:", result);
@@ -145,10 +155,11 @@ export async function getInstallmentRates() {
             console.error("PayTR raw response (not JSON):", responseText);
             return {
                 status: "error",
-                err_msg: `PayTR geçersiz yanıt döndürdü (IP engeli olabilir). Detay: ${responseText.substring(0, 100)}`
+                err_msg: `PayTR geçersiz yanıt döndürdü. Durum: ${response.status}. Yanıt: ${responseText.substring(0, 100) || "Boş"}`
             };
         }
     } catch (error: any) {
+
         console.error("PayTR getInstallmentRates fetch error details:", {
             message: error.message,
             stack: error.stack,
