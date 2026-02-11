@@ -140,10 +140,15 @@ export async function getInstallmentRates() {
         }
 
         return result;
-    } catch (error) {
-        console.error("PayTR getInstallmentRates fetch error:", error);
-        return { status: "error", err_msg: "Bağlantı hatası: Sunucu PayTR'a erişemedi." };
+    } catch (error: any) {
+        console.error("PayTR getInstallmentRates fetch error details:", {
+            message: error.message,
+            stack: error.stack,
+            cause: error.cause
+        });
+        return { status: "error", err_msg: `Bağlantı hatası: ${error.message || "Sunucu PayTR'a erişemedi."}` };
     }
 }
+
 
 
