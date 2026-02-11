@@ -5,6 +5,7 @@ import { HeroSlider } from "@/components/storefront/hero-slider";
 import { FeaturedProducts } from "@/components/storefront/featured-products";
 import { CategorySectionModern } from "@/components/storefront/category-section-modern";
 import { CategorySidebar } from "@/components/storefront/category-sidebar";
+import { CategorySidebarModern } from "@/components/storefront/category-sidebar-modern";
 import { StorefrontHeader } from "@/components/storefront/header";
 import { StorefrontFooter } from "@/components/storefront/footer";
 import Link from "next/link";
@@ -171,7 +172,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Left Sidebar - Desktop Only */}
             <aside className="hidden lg:block lg:col-span-1 h-fit sticky top-24 z-30">
-              <CategorySidebar categories={data.sidebarCategories} />
+              <CategorySidebarModern categories={data.sidebarCategories} />
             </aside>
 
             {/* Main Content */}
