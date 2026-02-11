@@ -65,8 +65,10 @@ export function InstallmentTable({ price }: InstallmentTableProps) {
 
     if (error) {
         return (
-            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
-                {error}
+            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex flex-col gap-2">
+                <p className="font-bold">Hata oluştu:</p>
+                <p>{error}</p>
+                <p className="text-[10px] opacity-70">Lütfen API ayarlarınızı ve internet bağlantınızı kontrol edin.</p>
             </div>
         );
     }

@@ -110,15 +110,18 @@ export function verifyPayTRCallback(params: any) {
 }
 
 export async function getInstallmentRates() {
+    const request_id = Date.now().toString();
+    const hash_str = config.merchantId + request_id + config.merchantSalt;
+
     const paytr_token = crypto
         .createHmac("sha256", config.merchantKey)
-        .update(config.merchantId + config.merchantSalt)
+        .update(hash_str)
         .digest("base64");
 
     const params = {
         merchant_id: config.merchantId,
+        request_id: request_id,
         paytr_token: paytr_token,
-        request_id: Date.now().toString(),
     };
 
     try {
@@ -130,10 +133,17 @@ export async function getInstallmentRates() {
             body: new URLSearchParams(params as any).toString(),
         });
 
-        return await response.json();
+        const result = await response.json();
+
+        if (result.status === "error") {
+            console.error("PayTR API Error Response:", result);
+        }
+
+        return result;
     } catch (error) {
-        console.error("PayTR getInstallmentRates error:", error);
-        return { status: "error", err_msg: "Bağlantı hatası" };
+        console.error("PayTR getInstallmentRates fetch error:", error);
+        return { status: "error", err_msg: "Bağlantı hatası: Sunucu PayTR'a erişemedi." };
     }
 }
+
 
