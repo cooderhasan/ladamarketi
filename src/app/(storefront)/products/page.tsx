@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { ProductCardV2 } from "@/components/storefront/product-card-v2";
+import { ProductCardModern } from "@/components/storefront/product-card-modern";
 import { ProductFilters } from "@/components/storefront/product-filters";
 import { Prisma } from "@prisma/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -259,7 +259,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         <>
                             <div className="grid gap-6 grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                                 {products.map((product) => (
-                                    <ProductCardV2
+                                    <ProductCardModern
                                         key={product.id}
                                         product={{
                                             ...product,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ProductCardV2 } from "./product-card-v2";
+import { ProductCardModern } from "./product-card-modern";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
 interface Product {
@@ -58,7 +58,7 @@ export function FeaturedProducts({
             {/* Products Grid */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-3 2xl:grid-cols-4">
                 {products.map((product) => (
-                    <ProductCardV2
+                    <ProductCardModern
                         key={product.id}
                         product={{
                             ...product,

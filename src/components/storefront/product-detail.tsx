@@ -242,7 +242,7 @@ export function ProductDetail({
                                 src={product.images[activeImageIndex] || product.images[0]}
                                 alt={product.name}
                                 fill
-                                className="object-cover"
+                                className="object-contain p-4"
                                 priority
                             />
                         ) : (
@@ -304,7 +304,7 @@ export function ProductDetail({
                                         src={image}
                                         alt={`${product.name} - ${index + 1}`}
                                         fill
-                                        className="object-cover"
+                                        className="object-contain p-1"
                                     />
                                 </button>
                             ))}

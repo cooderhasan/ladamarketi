@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { getSiteSettings } from "@/lib/settings";
 import { HeroSlider } from "@/components/storefront/hero-slider";
 import { FeaturedProducts } from "@/components/storefront/featured-products";
-import { CategorySection } from "@/components/storefront/category-section";
+import { CategorySectionModern } from "@/components/storefront/category-section-modern";
 import { CategorySidebar } from "@/components/storefront/category-sidebar";
 import { StorefrontHeader } from "@/components/storefront/header";
 import { StorefrontFooter } from "@/components/storefront/footer";
@@ -181,45 +181,49 @@ export default async function HomePage() {
                 <HeroSlider sliders={data.sliders} />
               </div>
 
-              {/* Features */}
-              <section className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-3">
-                <div className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                    <Truck className="h-6 w-6 text-blue-600" />
+
+
+              {/* Features - Modern Frameless Design */}
+              <section className="grid gap-2 grid-cols-3 py-4 border-y border-gray-100 dark:border-gray-800">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 group text-center md:text-left">
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
+                    <Truck className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-[10px] md:text-sm leading-tight">
                       Hızlı Teslimat
                     </h3>
-                    <p className="text-sm text-gray-500">Aynı gün kargo</p>
+                    <p className="hidden md:block text-xs text-gray-500">Aynı gün kargo imkanı</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-green-50 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                    <Shield className="h-6 w-6 text-green-600" />
+
+                <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 group text-center md:text-left">
+                  <div className="w-10 h-10 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shrink-0">
+                    <Shield className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-[10px] md:text-sm leading-tight">
                       Güvenli Ödeme
                     </h3>
-                    <p className="text-sm text-gray-500">256-bit SSL</p>
+                    <p className="hidden md:block text-xs text-gray-500">256-bit SSL sertifikası</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                    <HeadphonesIcon className="h-6 w-6 text-purple-600" />
+
+                <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 group text-center md:text-left">
+                  <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
+                    <HeadphonesIcon className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <h3 className="font-bold text-gray-900 dark:text-white text-[10px] md:text-sm leading-tight">
                       7/24 Destek
                     </h3>
-                    <p className="text-sm text-gray-500">Her zaman yanınızda</p>
+                    <p className="hidden md:block text-xs text-gray-500">Müşteri hizmetleri desteği</p>
                   </div>
                 </div>
               </section>
               {/* Categories */}
               {data.categories.length > 0 && (
-                <CategorySection categories={data.categories} />
+                <CategorySectionModern categories={data.categories} />
               )}
 
               {/* Featured Products */}
@@ -258,6 +262,47 @@ export default async function HomePage() {
               )}
             </div>
           </div>
+
+          {/* Features - Modern Frameless Design */}
+          <section className="mt-12 py-8 border-t border-gray-100 dark:border-gray-800">
+            <div className="grid gap-8 grid-cols-1 sm:grid-cols-3">
+              <div className="flex items-center justify-center gap-4 group">
+                <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
+                  <Truck className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-base">
+                    Hızlı Teslimat
+                  </h3>
+                  <p className="text-sm text-gray-500">Aynı gün kargo imkanı</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center gap-4 group">
+                <div className="w-12 h-12 bg-green-50 dark:bg-green-900/20 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shrink-0">
+                  <Shield className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-base">
+                    Güvenli Ödeme
+                  </h3>
+                  <p className="text-sm text-gray-500">256-bit SSL sertifikası</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-center gap-4 group">
+                <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
+                  <HeadphonesIcon className="h-6 w-6 text-purple-600" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-gray-900 dark:text-white text-base">
+                    7/24 Destek
+                  </h3>
+                  <p className="text-sm text-gray-500">Müşteri hizmetleri desteği</p>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
       <StorefrontFooter settings={settings} policies={data.policies} />

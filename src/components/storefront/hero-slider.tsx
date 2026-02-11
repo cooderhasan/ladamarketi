@@ -42,7 +42,7 @@ export function HeroSlider({ sliders }: HeroSliderProps) {
 
     if (sliders.length === 0) {
         return (
-            <div className="relative h-[400px] md:h-[500px] bg-[#009AD0] flex items-center justify-center">
+            <div className="relative h-[400px] md:h-[500px] bg-gray-900 flex items-center justify-center">
                 <div className="text-center text-white px-4">
                     <h1 className="text-3xl md:text-5xl font-bold mb-4">
                         B2B Toptancı E-Ticaret
@@ -73,7 +73,7 @@ export function HeroSlider({ sliders }: HeroSliderProps) {
                 >
                     {/* Background */}
                     <div className="absolute inset-0 bg-gradient-to-r from-gray-900/70 to-gray-900/30 z-10" />
-                    <div className="absolute inset-0 bg-[#009AD0]">
+                    <div className="absolute inset-0 bg-gray-900">
                         {sliders[current].imageUrl && (
                             <Image
                                 src={sliders[current].imageUrl}
