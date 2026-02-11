@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { getSiteSettings } from "@/lib/settings";
 import { redirect } from "next/navigation";
-import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminSidebarModern } from "@/components/admin/admin-sidebar-modern";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -25,11 +25,13 @@ export default async function AdminLayout({
     const settings = await getSiteSettings();
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 print:bg-white">
-            <AdminSidebar settings={settings} />
-            <div className="lg:pl-64 print:pl-0">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 print:bg-white flex">
+            {/* New Modern Sidebar */}
+            <AdminSidebarModern settings={settings} />
+
+            <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 lg:pl-72 print:pl-0">
                 <AdminHeader user={session?.user as any} />
-                <main className="py-6 px-4 sm:px-6 lg:px-8 print:p-0 print:m-0 print:w-full">
+                <main className="py-6 px-4 sm:px-6 lg:px-8 print:p-0 print:m-0 w-full">
                     {children}
                 </main>
             </div>
