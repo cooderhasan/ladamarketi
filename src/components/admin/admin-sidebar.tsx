@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -10,7 +11,6 @@ import {
     ShoppingCart,
     Settings,
     Tag,
-    Image,
     FileText,
     ChevronLeft,
     Menu,
@@ -23,6 +23,7 @@ import {
     Zap,
     Truck,
     LogOut,
+    Image as LucideImage,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,7 @@ const menuGroups: MenuGroup[] = [
             { title: "Ürünler", href: "/admin/products", icon: Package },
             { title: "Kategoriler", href: "/admin/categories", icon: Tag },
             { title: "Markalar", href: "/admin/brands", icon: Award },
-            { title: "Sliderlar", href: "/admin/sliders", icon: Image },
+            { title: "Sliderlar", href: "/admin/sliders", icon: LucideImage },
         ],
     },
     {
@@ -84,10 +85,13 @@ const menuGroups: MenuGroup[] = [
     },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ settings }: { settings?: any }) {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    const logoUrl = settings?.logoUrl;
+    const siteName = settings?.siteName || "B2B";
 
     return (
         <>
@@ -111,21 +115,43 @@ export function AdminSidebar() {
                 {/* Logo Area */}
                 <div className="flex h-16 items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/50 backdrop-blur-xl">
                     {!collapsed && (
-                        <Link href="/admin" className="flex items-center gap-2.5 overflow-hidden" onClick={() => setMobileOpen(false)}>
-                            <div className="w-9 h-9 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                <span className="text-white font-black text-sm tracking-tight">B2B</span>
+                        <Link href="/admin" className="flex items-center gap-3 overflow-hidden" onClick={() => setMobileOpen(false)}>
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100 relative overflow-hidden flex-shrink-0">
+                                {logoUrl ? (
+                                    <Image
+                                        src={logoUrl}
+                                        alt={siteName}
+                                        fill
+                                        className="object-contain p-1"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center">
+                                        <span className="text-white font-black text-xs tracking-tight">{siteName.substring(0, 3).toUpperCase()}</span>
+                                    </div>
+                                )}
                             </div>
-                            <div className="flex flex-col">
-                                <span className="font-bold text-gray-900 dark:text-white leading-none text-base">Admin</span>
-                                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mt-0.5">Panel</span>
+                            <div className="flex flex-col min-w-0">
+                                <span className="font-bold text-gray-900 dark:text-white leading-tight text-sm truncate">{siteName}</span>
+                                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Admin Panel</span>
                             </div>
                         </Link>
                     )}
 
                     {/* Collapsed Logo Alternative */}
                     {collapsed && (
-                        <div className="w-10 h-10 mx-auto bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                            <span className="text-white font-black text-xs">B2B</span>
+                        <div className="w-10 h-10 mx-auto bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100 relative overflow-hidden">
+                            {logoUrl ? (
+                                <Image
+                                    src={logoUrl}
+                                    alt={siteName}
+                                    fill
+                                    className="object-contain p-1"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center">
+                                    <span className="text-white font-black text-xs">{siteName.substring(0, 3).toUpperCase()}</span>
+                                </div>
+                            )}
                         </div>
                     )}
 
