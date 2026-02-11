@@ -110,22 +110,27 @@ export function verifyPayTRCallback(params: any) {
 }
 
 export async function getInstallmentRates() {
-    const request_id = Math.random().toString(36).substring(2, 12) + Date.now().toString().substring(10);
+    const request_id = Date.now().toString(); // Daha basit bir ID deneyelim
     const hash_str = config.merchantId + request_id + config.merchantSalt;
 
-    // Bazı PayTR API'leri HEX, bazıları Base64 ister.
-    // 401 hatası genellikle bu format farkından kaynaklanır.
-    // Taksit sorgulama için HEX deneyelim.
+    // Standart Base64 formatına geri dönüyoruz.
     const paytr_token = crypto
         .createHmac("sha256", config.merchantKey)
         .update(hash_str)
-        .digest("hex");
+        .digest("base64");
 
     const params = {
         merchant_id: config.merchantId,
         request_id: request_id,
         paytr_token: paytr_token,
     };
+
+    console.log("PayTR İstek Parametreleri (Şifresiz):", {
+        merchant_id: config.merchantId,
+        request_id: request_id,
+        // Anahtarları loglamıyoruz (Güvenlik)
+    });
+
 
     console.log("DEBUG: PayTR Installment Check", {
         merchantId: config.merchantId,
