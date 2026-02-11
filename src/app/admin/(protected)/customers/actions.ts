@@ -52,13 +52,29 @@ export async function updateCustomerDiscountGroup(
             select: { discountGroupId: true, role: true },
         });
 
-        await prisma.user.update({
-            where: { id: customerId },
-            data: {
-                discountGroupId,
-                role: "DEALER" // Automatically upgrade to DEALER when assigned a group
-            },
-        });
+        let newData;
+
+        if (discountGroupId === "null" || !discountGroupId) {
+            // Revert to Standard Customer
+            await prisma.user.update({
+                where: { id: customerId },
+                data: {
+                    discountGroupId: null,
+                    role: "CUSTOMER"
+                },
+            });
+            newData = { discountGroupId: null, role: "CUSTOMER" };
+        } else {
+            // Upgrade to Dealer
+            await prisma.user.update({
+                where: { id: customerId },
+                data: {
+                    discountGroupId,
+                    role: "DEALER"
+                },
+            });
+            newData = { discountGroupId, role: "DEALER" };
+        }
 
         // Log the action
         await prisma.adminLog.create({
@@ -68,7 +84,7 @@ export async function updateCustomerDiscountGroup(
                 entityType: "User",
                 entityId: customerId,
                 oldData: { discountGroupId: customer?.discountGroupId, role: customer?.role },
-                newData: { discountGroupId, role: "DEALER" },
+                newData: newData,
             },
         });
 

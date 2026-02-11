@@ -149,7 +149,11 @@ export function CustomersTable({
         try {
             const result = await updateCustomerDiscountGroup(customerId, discountGroupId);
             if (result && result.success) {
-                toast.success("İskonto grubu güncellendi ve kullanıcı bayiliğe yükseltildi.");
+                if (discountGroupId === "null") {
+                    toast.success("Kullanıcı standart müşteriye çevrildi.");
+                } else {
+                    toast.success("İskonto grubu güncellendi ve kullanıcı bayiliğe yükseltildi.");
+                }
             } else {
                 toast.error(result?.error || "Güncelleme başarısız oldu.");
             }
@@ -377,6 +381,9 @@ export function CustomersTable({
                                                     <SelectValue placeholder={updatingCustomer === customer.id ? "Güncelleniyor..." : "Grup Seçin"} />
                                                 </SelectTrigger>
                                                 <SelectContent>
+                                                    <SelectItem value="null">
+                                                        Standart Müşteri (İskonto Yok)
+                                                    </SelectItem>
                                                     {discountGroups.map((group) => (
                                                         <SelectItem key={group.id} value={group.id}>
                                                             {group.name}
