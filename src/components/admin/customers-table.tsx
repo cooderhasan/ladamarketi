@@ -144,8 +144,12 @@ export function CustomersTable({
         discountGroupId: string
     ) => {
         try {
-            await updateCustomerDiscountGroup(customerId, discountGroupId);
-            toast.success("İskonto grubu güncellendi.");
+            const result = await updateCustomerDiscountGroup(customerId, discountGroupId);
+            if (result && result.success) {
+                toast.success("İskonto grubu güncellendi ve kullanıcı bayiliğe yükseltildi.");
+            } else {
+                toast.error(result?.error || "Güncelleme başarısız oldu.");
+            }
         } catch {
             toast.error("Bir hata oluştu.");
         }

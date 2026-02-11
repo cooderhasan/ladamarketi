@@ -41,34 +41,43 @@ export async function updateCustomerDiscountGroup(
     customerId: string,
     discountGroupId: string
 ) {
-    const session = await auth();
-    if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
-        throw new Error("Unauthorized");
+    try {
+        const session = await auth();
+        if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+            throw new Error("Unauthorized");
+        }
+
+        const customer = await prisma.user.findUnique({
+            where: { id: customerId },
+            select: { discountGroupId: true, role: true },
+        });
+
+        await prisma.user.update({
+            where: { id: customerId },
+            data: {
+                discountGroupId,
+                role: "DEALER" // Automatically upgrade to DEALER when assigned a group
+            },
+        });
+
+        // Log the action
+        await prisma.adminLog.create({
+            data: {
+                adminId: session.user.id,
+                action: "UPDATE_DISCOUNT_GROUP",
+                entityType: "User",
+                entityId: customerId,
+                oldData: { discountGroupId: customer?.discountGroupId, role: customer?.role },
+                newData: { discountGroupId, role: "DEALER" },
+            },
+        });
+
+        revalidatePath("/admin/customers");
+        return { success: true };
+    } catch (error) {
+        console.error("Discount group update error:", error);
+        return { success: false, error: error instanceof Error ? error.message : "İskonto grubu güncellenemedi." };
     }
-
-    const customer = await prisma.user.findUnique({
-        where: { id: customerId },
-        select: { discountGroupId: true },
-    });
-
-    await prisma.user.update({
-        where: { id: customerId },
-        data: { discountGroupId },
-    });
-
-    // Log the action
-    await prisma.adminLog.create({
-        data: {
-            adminId: session.user.id,
-            action: "UPDATE_DISCOUNT_GROUP",
-            entityType: "User",
-            entityId: customerId,
-            oldData: { discountGroupId: customer?.discountGroupId },
-            newData: { discountGroupId },
-        },
-    });
-
-    revalidatePath("/admin/customers");
 }
 
 export async function createCustomer(data: {
