@@ -120,8 +120,8 @@ export function AdminSidebar({ settings }: { settings?: any }) {
                     collapsed ? "h-16" : "h-32 py-4"
                 )}>
                     {!collapsed && (
-                        <Link href="/admin" className="flex flex-col items-center gap-2 w-full" onClick={() => setMobileOpen(false)}>
-                            <div className="w-full h-16 relative flex items-center justify-center">
+                        <Link href="/admin" className="flex flex-col items-center gap-2 w-full px-2" onClick={() => setMobileOpen(false)}>
+                            <div className="w-full h-12 relative flex items-center justify-center">
                                 {logoUrl ? (
                                     <Image
                                         src={logoUrl}
@@ -131,14 +131,14 @@ export function AdminSidebar({ settings }: { settings?: any }) {
                                         priority
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                        <span className="text-white font-black text-lg tracking-tight">{siteName.substring(0, 3).toUpperCase()}</span>
+                                    <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                        <span className="text-white font-black text-sm tracking-tight">{siteName.substring(0, 3).toUpperCase()}</span>
                                     </div>
                                 )}
                             </div>
-                            <div className="flex flex-col items-center text-center">
-                                <span className="font-bold text-gray-900 dark:text-white leading-tight text-sm truncate w-full px-2">{siteName}</span>
-                                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Admin Panel</span>
+                            <div className="flex flex-col items-center text-center w-full">
+                                <span className="font-bold text-gray-900 dark:text-white leading-tight text-xs w-full break-words line-clamp-2">{siteName}</span>
+                                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest mt-0.5">Admin Panel</span>
                             </div>
                         </Link>
                     )}
