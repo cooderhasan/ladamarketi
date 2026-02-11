@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { getSiteSettings } from "@/lib/settings";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminHeader } from "@/components/admin/admin-header";
@@ -21,9 +22,11 @@ export default async function AdminLayout({
         redirect("/");
     }
 
+    const settings = await getSiteSettings();
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 print:bg-white">
-            <AdminSidebar />
+            <AdminSidebar settings={settings} />
             <div className="lg:pl-64 print:pl-0">
                 <AdminHeader user={session?.user as any} />
                 <main className="py-6 px-4 sm:px-6 lg:px-8 print:p-0 print:m-0 print:w-full">
