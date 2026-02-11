@@ -115,25 +115,29 @@ export function AdminSidebar({ settings }: { settings?: any }) {
                 )}
             >
                 {/* Logo Area */}
-                <div className="flex h-16 items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/50 backdrop-blur-xl">
+                <div className={cn(
+                    "flex flex-col items-center justify-center px-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900/50 backdrop-blur-xl transition-all duration-300",
+                    collapsed ? "h-16" : "h-32 py-4"
+                )}>
                     {!collapsed && (
-                        <Link href="/admin" className="flex items-center gap-3 overflow-hidden" onClick={() => setMobileOpen(false)}>
-                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100 relative overflow-hidden flex-shrink-0">
+                        <Link href="/admin" className="flex flex-col items-center gap-2 w-full" onClick={() => setMobileOpen(false)}>
+                            <div className="w-full h-16 relative flex items-center justify-center">
                                 {logoUrl ? (
                                     <Image
                                         src={logoUrl}
                                         alt={siteName}
                                         fill
-                                        className="object-contain p-1"
+                                        className="object-contain"
+                                        priority
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center">
-                                        <span className="text-white font-black text-xs tracking-tight">{siteName.substring(0, 3).toUpperCase()}</span>
+                                    <div className="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                        <span className="text-white font-black text-lg tracking-tight">{siteName.substring(0, 3).toUpperCase()}</span>
                                     </div>
                                 )}
                             </div>
-                            <div className="flex flex-col min-w-0">
-                                <span className="font-bold text-gray-900 dark:text-white leading-tight text-sm truncate">{siteName}</span>
+                            <div className="flex flex-col items-center text-center">
+                                <span className="font-bold text-gray-900 dark:text-white leading-tight text-sm truncate w-full px-2">{siteName}</span>
                                 <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Admin Panel</span>
                             </div>
                         </Link>
@@ -161,7 +165,10 @@ export function AdminSidebar({ settings }: { settings?: any }) {
                         variant="ghost"
                         size="icon"
                         onClick={() => setCollapsed(!collapsed)}
-                        className="ml-auto hidden lg:flex h-8 w-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        className={cn(
+                            "absolute top-2 right-2 hidden lg:flex h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 z-10",
+                            collapsed && "relative top-auto right-auto h-8 w-8 mx-auto"
+                        )}
                     >
                         <ChevronLeft
                             className={cn(
