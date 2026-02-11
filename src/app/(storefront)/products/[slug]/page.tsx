@@ -4,9 +4,35 @@ import { getSiteSettings } from "@/lib/settings";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/storefront/product-detail";
 import { JsonLd } from "@/components/seo/json-ld";
+import { Metadata } from "next";
 
 interface ProductPageProps {
     params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+    const { slug } = await params;
+    const product = await prisma.product.findUnique({
+        where: { slug, isActive: true },
+        select: { name: true, description: true, images: true }
+    });
+
+    if (!product) return { title: "Ürün Bulunamadı" };
+
+    const description = product.description?.replace(/<[^>]*>?/gm, "").slice(0, 160) || `${product.name} uygun fiyat ve taksit seçenekleriyle Lada Marketi'nde.`;
+
+    return {
+        title: `${product.name} | Lada Marketi`,
+        description,
+        openGraph: {
+            title: product.name,
+            description,
+            images: product.images || [],
+        },
+        alternates: {
+            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://ladamarketi.com"}/products/${slug}`
+        }
+    };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {

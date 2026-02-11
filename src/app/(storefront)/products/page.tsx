@@ -6,6 +6,7 @@ import { MobileProductFilters } from "@/components/storefront/mobile-product-fil
 import { Prisma } from "@prisma/client";
 import { ProductSort } from "@/components/storefront/product-sort";
 import { Pagination } from "@/components/storefront/pagination";
+import { Metadata } from "next";
 
 interface ProductsPageProps {
     searchParams: Promise<{
@@ -19,6 +20,34 @@ interface ProductsPageProps {
         sizes?: string | string[];
         page?: string;
     }>;
+}
+
+export async function generateMetadata({ searchParams }: ProductsPageProps): Promise<Metadata> {
+    const params = await searchParams;
+    let title = "Tüm Ürünler";
+    let description = "En kaliteli Lada yedek parçaları ve aksesuarları uygun fiyatlarla.";
+
+    if (params.category) {
+        const category = await prisma.category.findUnique({
+            where: { slug: params.category },
+            select: { name: true }
+        });
+        if (category) {
+            title = category.name;
+            description = `${category.name} kategorisindeki ürünleri inceleyin.`;
+        }
+    } else if (params.search) {
+        title = `"${params.search}" Arama Sonuçları`;
+        description = `"${params.search}" için bulunan sonuçlar.`;
+    }
+
+    return {
+        title: `${title} | Lada Marketi`,
+        description,
+        alternates: {
+            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://ladamarketi.com"}/products`
+        }
+    };
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
