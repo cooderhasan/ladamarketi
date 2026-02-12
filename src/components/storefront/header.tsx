@@ -15,7 +15,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ShoppingCart, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap, ChevronDown, Home, Car, Truck, Building2, Mail, Info, Cog } from "lucide-react";
+import { ShoppingCart, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap, ChevronDown, Home, Car, Truck, Building2, Mail, Info, Cog, Plus, Minus, ChevronRight } from "lucide-react";
 
 
 
@@ -359,12 +359,10 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden border-b dark:border-gray-800/50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl supports-[backdrop-filter]:bg-white/90 animate-in slide-in-from-top-2 duration-200">
+                <div className="md:hidden border-b dark:border-gray-800/50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl supports-[backdrop-filter]:bg-white/90 animate-in slide-in-from-top-2 duration-200 max-h-[80vh] overflow-y-auto">
                     <div className="container mx-auto px-4 py-4 space-y-4">
                         {/* Mobile Search */}
                         <SearchInput />
-
-
 
                         {/* Mobile Quick Actions */}
                         <div className="grid grid-cols-2 gap-2">
@@ -386,26 +384,28 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                             </Link>
                         </div>
 
-                        {/* Mobile Categories */}
-                        <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-500 uppercase px-2">Kategoriler</p>
+                        {/* Mobile Categories - Expandable Sidebar Style */}
+                        <div className="space-y-1.5">
+                            <p className="text-xs font-semibold text-gray-500 uppercase px-2 mb-2">Kategoriler</p>
                             <Link
                                 href="/products"
-                                className="block px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                                className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-[#009AD0] hover:bg-blue-50 rounded-lg"
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#009AD0]" />
                                 Tüm Ürünler
                             </Link>
-                            {categories.map((category) => (
-                                <Link
-                                    key={category.id}
-                                    href={`/category/${category.slug}`}
-                                    className="block px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    {category.name}
-                                </Link>
-                            ))}
+                            {categoryTree.map((category) => {
+                                const hasChildren = category.children && category.children.length > 0;
+                                return (
+                                    <MobileCategoryItem
+                                        key={category.id}
+                                        category={category}
+                                        hasChildren={hasChildren}
+                                        onClose={() => setIsMobileMenuOpen(false)}
+                                    />
+                                );
+                            })}
                         </div>
 
                         {/* Mobile Quick Links */}
@@ -429,6 +429,51 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                 </div>
             )}
         </header>
+    );
+}
+
+function MobileCategoryItem({ category, hasChildren, onClose }: { category: Category; hasChildren: boolean; onClose: () => void }) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className={cn(
+            "rounded-lg border border-gray-100 dark:border-gray-800 transition-all duration-200",
+            isOpen && "shadow-sm ring-1 ring-blue-500/20"
+        )}>
+            <div className="flex items-center">
+                <Link
+                    href={`/category/${category.slug}`}
+                    className="flex-1 flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-[#009AD0] transition-colors"
+                    onClick={onClose}
+                >
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                    {category.name}
+                </Link>
+                {hasChildren && (
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="p-2.5 mr-1 rounded-lg text-gray-400 hover:text-[#009AD0] hover:bg-blue-50 transition-all"
+                    >
+                        {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                    </button>
+                )}
+            </div>
+            {isOpen && hasChildren && (
+                <div className="px-4 pb-2 space-y-0.5 border-t border-gray-50 dark:border-gray-800/50">
+                    {category.children!.map((child) => (
+                        <Link
+                            key={child.id}
+                            href={`/category/${child.slug}`}
+                            className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-500 hover:text-[#009AD0] hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            onClick={onClose}
+                        >
+                            <ChevronRight className="w-3 h-3 text-gray-300" />
+                            {child.name}
+                        </Link>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
 
