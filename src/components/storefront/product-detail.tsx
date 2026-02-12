@@ -548,8 +548,8 @@ export function ProductDetail({
 
                 <div className="lg:col-span-4 space-y-6">
                     <div className="bg-gray-50 dark:bg-gray-900/50 rounded-3xl p-6 border border-gray-100 dark:border-gray-800">
-                        <h3 className="font-bold text-gray-900 dark:text-white mb-4">Teknik Özellikler</h3>
-                        <div className="space-y-4 text-sm">
+                        <h3 className="font-semibold text-lg mb-4">Ürün Bilgileri</h3>
+                        <div className="space-y-3 text-sm">
                             <div className="flex justify-between py-2 border-b border-gray-200 dark:border-gray-800">
                                 <span className="text-gray-500">Stok Kodu</span>
                                 <span className="font-mono font-medium">{product.sku || "-"}</span>

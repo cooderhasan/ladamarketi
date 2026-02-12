@@ -66,10 +66,17 @@ export async function POST(req: NextRequest) {
         } else {
             // Payment failed
             console.log(`Order ${orderId} payment failed:`, params.failed_reason_msg);
-            await prisma.order.update({
-                where: { id: orderId },
-                data: { status: "CANCELLED", notes: (params.failed_reason_msg || "Ödeme başarısız.") },
-            });
+            // Hatayı nota ekle ama statüyü değiştirme (Böylece WAITING_FOR_PAYMENT kalır ve panelde gizli kalmaya devam eder)
+            // Ayrıca 'where' sorgusunu orderNumber olarak düzeltiyoruz (id değil)
+            const orderForFail = await prisma.order.findUnique({ where: { orderNumber: orderId } });
+            if (orderForFail) {
+                await prisma.order.update({
+                    where: { id: orderForFail.id },
+                    data: {
+                        notes: (orderForFail.notes ? orderForFail.notes + " | " : "") + `PayTR Hatası: ${params.failed_reason_msg}`
+                    },
+                });
+            }
         }
 
         // 3. Return OK to PayTR

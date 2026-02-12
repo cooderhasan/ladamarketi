@@ -336,6 +336,19 @@ model Slider {
   @@map("sliders")
 }
 
+model Banner {
+  id        String   @id @default(cuid())
+  title     String?
+  imageUrl  String
+  linkUrl   String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("banners")
+}
+
 model CargoCompany {
   id        String   @id @default(cuid())
   name      String   @unique
