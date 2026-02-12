@@ -111,6 +111,31 @@ export default async function StorefrontLayout({
         categories = [];
     }
 
+    // Fetch sidebar categories (all active children of root) for mobile menu
+    let sidebarCategories: any[] = [];
+    try {
+        sidebarCategories = await prisma.category.findMany({
+            where: {
+                isActive: true,
+                parentId: "cml9exnw20009orv864or2ni2"
+            },
+            orderBy: { order: "asc" },
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                children: {
+                    where: { isActive: true },
+                    select: { id: true, name: true, slug: true },
+                    orderBy: { order: "asc" }
+                }
+            }
+        });
+    } catch (error) {
+        console.warn("Could not fetch sidebar categories, using empty array.", error);
+        sidebarCategories = [];
+    }
+
     const policies = await getAllPolicies();
 
     let userDiscountRate = 0;
@@ -138,6 +163,7 @@ export default async function StorefrontLayout({
                 logoUrl={settings.logoUrl}
                 siteName={settings.siteName}
                 categories={categories}
+                sidebarCategories={sidebarCategories}
                 phone={settings.phone}
                 facebookUrl={settings.facebookUrl}
                 instagramUrl={settings.instagramUrl}

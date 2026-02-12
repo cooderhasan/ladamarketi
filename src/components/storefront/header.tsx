@@ -52,9 +52,10 @@ interface StorefrontHeaderProps {
     instagramUrl?: string;
     twitterUrl?: string;
     linkedinUrl?: string;
+    sidebarCategories?: Category[];
 }
 
-export function StorefrontHeader({ user, logoUrl, siteName, categories = [], phone, facebookUrl, instagramUrl, twitterUrl, linkedinUrl }: StorefrontHeaderProps) {
+export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sidebarCategories = [], phone, facebookUrl, instagramUrl, twitterUrl, linkedinUrl }: StorefrontHeaderProps) {
     const pathname = usePathname();
     const items = useCartStore((state) => state.items);
     const clearCart = useCartStore((state) => state.clearCart);
@@ -93,6 +94,17 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                 children: (c.children || []) as Category[]
             }));
     }, [categories]);
+
+    // Use sidebar categories for mobile menu (all 11 categories with subcategories)
+    const mobileCategoryTree = useMemo(() => {
+        const source = sidebarCategories.length > 0 ? sidebarCategories : categories;
+        return source
+            .filter(c => c.name !== "Root" && c.name !== "Home")
+            .map(c => ({
+                ...c,
+                children: (c.children || []) as Category[]
+            }));
+    }, [sidebarCategories, categories]);
 
     return (
         <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
@@ -395,7 +407,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#009AD0]" />
                                 Tüm Ürünler
                             </Link>
-                            {categoryTree.map((category) => {
+                            {mobileCategoryTree.map((category) => {
                                 const hasChildren = category.children && category.children.length > 0;
                                 return (
                                     <MobileCategoryItem

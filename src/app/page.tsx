@@ -147,6 +147,7 @@ export default async function HomePage() {
         logoUrl={settings.logoUrl}
         siteName={settings.siteName}
         categories={data.headerCategories}
+        sidebarCategories={data.sidebarCategories}
         phone={settings.phone}
         facebookUrl={settings.facebookUrl}
         instagramUrl={settings.instagramUrl}
