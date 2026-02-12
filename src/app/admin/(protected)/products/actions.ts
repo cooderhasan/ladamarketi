@@ -36,6 +36,12 @@ export async function createProduct(formData: FormData) {
         isNew: formData.get("isNew") === "true",
         isBestSeller: formData.get("isBestSeller") === "true",
         isActive: formData.get("isActive") !== "false",
+        // Kargo & Desi
+        weight: formData.get("weight") ? Number(formData.get("weight")) : null,
+        width: formData.get("width") ? Number(formData.get("width")) : null,
+        height: formData.get("height") ? Number(formData.get("height")) : null,
+        length: formData.get("length") ? Number(formData.get("length")) : null,
+        desi: formData.get("desi") ? Number(formData.get("desi")) : null,
     };
 
     const categoryIdsJson = formData.get("categoryIds") as string;
@@ -139,6 +145,12 @@ export async function updateProduct(productId: string, formData: FormData) {
         isNew: formData.get("isNew") === "true",
         isBestSeller: formData.get("isBestSeller") === "true",
         isActive: formData.get("isActive") !== "false",
+        // Kargo & Desi
+        weight: formData.get("weight") ? Number(formData.get("weight")) : null,
+        width: formData.get("width") ? Number(formData.get("width")) : null,
+        height: formData.get("height") ? Number(formData.get("height")) : null,
+        length: formData.get("length") ? Number(formData.get("length")) : null,
+        desi: formData.get("desi") ? Number(formData.get("desi")) : null,
     };
 
     const categoryIdsJson = formData.get("categoryIds") as string;

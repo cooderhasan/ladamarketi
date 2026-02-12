@@ -29,6 +29,11 @@ interface Product {
         name: string;
         slug: string;
     } | null;
+    weight?: number | null;
+    width?: number | null;
+    height?: number | null;
+    length?: number | null;
+    desi?: number | null;
     _count?: {
         variants: number;
     };
@@ -82,6 +87,10 @@ export function ProductCardV2({
             return;
         }
 
+        // Calculate effective desi
+        const dimsDesi = (Number(product.width || 0) * Number(product.height || 0) * Number(product.length || 0)) / 3000;
+        const effectiveDesi = Math.max(Number(product.weight || 0), Number(product.desi || 0), dimsDesi);
+
         addItem({
             productId: product.id,
             name: product.name,
@@ -93,6 +102,7 @@ export function ProductCardV2({
             stock: product.stock,
             minQuantity: product.minQuantity,
             discountRate: hasSalePrice ? saleDiscountRate : discountRate,
+            desi: effectiveDesi,
         });
 
         toast.success("Ürün sepete eklendi");

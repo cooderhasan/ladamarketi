@@ -29,6 +29,8 @@ interface CreateOrderData {
     notes?: string;
     discountRate: number;
     paymentMethod?: "BANK_TRANSFER" | "CREDIT_CARD" | "CURRENT_ACCOUNT";
+    shippingCost?: number;
+    shippingDesi?: number;
 }
 
 export async function createOrder(data: CreateOrderData) {
@@ -141,7 +143,7 @@ export async function createOrder(data: CreateOrderData) {
             })
         );
 
-        const total = grandTotal; // Use the accumulated grand total
+        const total = grandTotal + (data.shippingCost || 0); // Include shipping cost in final total
         const discountAmount = totalDiscountAmount; // For record keeping
         const vatAmount = totalVatAmount;
         const paymentMethod = data.paymentMethod || "BANK_TRANSFER";
@@ -193,13 +195,15 @@ export async function createOrder(data: CreateOrderData) {
                     total,
                     status: paymentMethod === "CURRENT_ACCOUNT" ? "CONFIRMED" :
                         paymentMethod === "CREDIT_CARD" ? "WAITING_FOR_PAYMENT" : "PENDING",
-                    shippingAddress: data.shippingAddress,
+                    shippingAddress: data.shippingAddress as any,
                     cargoCompany: data.cargoCompany,
+                    shippingCost: data.shippingCost,
+                    shippingDesi: data.shippingDesi,
                     notes: data.notes,
                     items: {
                         create: orderItems,
                     },
-                },
+                } as any,
             });
 
             // Create payment record

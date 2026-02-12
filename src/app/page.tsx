@@ -99,6 +99,11 @@ async function getHomeData() {
     trendyolPrice: product.trendyolPrice ? Number(product.trendyolPrice) : null,
     n11Price: product.n11Price ? Number(product.n11Price) : null,
     hepsiburadaPrice: product.hepsiburadaPrice ? Number(product.hepsiburadaPrice) : null,
+    weight: product.weight ? Number(product.weight) : null,
+    width: product.width ? Number(product.width) : null,
+    height: product.height ? Number(product.height) : null,
+    length: product.length ? Number(product.length) : null,
+    desi: product.desi ? Number(product.desi) : null,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
   });

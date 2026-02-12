@@ -46,6 +46,12 @@ export const productSchema = z.object({
     isNew: z.boolean().default(false),
     isBestSeller: z.boolean().default(false),
     isActive: z.boolean().default(true),
+    // Kargo & Desi
+    weight: z.number().min(0, "Ağırlık negatif olamaz").nullable().optional(),
+    width: z.number().min(0, "Genişlik negatif olamaz").nullable().optional(),
+    height: z.number().min(0, "Yükseklik negatif olamaz").nullable().optional(),
+    length: z.number().min(0, "Uzunluk negatif olamaz").nullable().optional(),
+    desi: z.number().min(0, "Desi negatif olamaz").nullable().optional(),
 });
 
 // ==================== PRODUCT VARIANT VALIDATIONS ====================

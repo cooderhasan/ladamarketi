@@ -74,6 +74,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         discountAmount: Number(order.discountAmount),
         vatAmount: Number(order.vatAmount),
         total: Number(order.total),
+        shippingCost: order.shippingCost ? Number(order.shippingCost) : 0,
+        shippingDesi: order.shippingDesi ? Number(order.shippingDesi) : 0,
         appliedDiscountRate: Number(order.appliedDiscountRate),
         items: order.items.map((item: any) => ({
             ...item,

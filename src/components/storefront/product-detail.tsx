@@ -44,6 +44,11 @@ interface Product {
     barcode: string | null;
     origin: string | null;
     description: string | null;
+    weight?: number | null;
+    width?: number | null;
+    height?: number | null;
+    length?: number | null;
+    desi?: number | null;
     category: {
         id: string;
         name: string;
@@ -174,6 +179,10 @@ export function ProductDetail({
             [selectedColor && `Renk: ${selectedColor}`, selectedSize && `Beden: ${selectedSize}`]
                 .filter(Boolean).join(", ") : undefined;
 
+        // Calculate effective desi
+        const dimsDesi = (Number(product.width || 0) * Number(product.height || 0) * Number(product.length || 0)) / 3000;
+        const effectiveDesi = Math.max(Number(product.weight || 0), Number(product.desi || 0), dimsDesi);
+
         addItem({
             productId: product.id,
             name: product.name,
@@ -187,6 +196,7 @@ export function ProductDetail({
             stock: effectiveStock,
             variantId: currentVariant?.id,
             variantInfo,
+            desi: effectiveDesi,
         });
         toast.success("Ürün sepete eklendi!");
     };

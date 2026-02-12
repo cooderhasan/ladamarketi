@@ -19,6 +19,11 @@ interface Product {
         name: string;
         slug: string;
     } | null;
+    weight?: number | null;
+    width?: number | null;
+    height?: number | null;
+    length?: number | null;
+    desi?: number | null;
 }
 
 interface FeaturedProductsProps {

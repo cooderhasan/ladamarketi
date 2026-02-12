@@ -202,6 +202,12 @@ model Product {
   stock       Int         @default(0)
   criticalStock Int       @default(10) // Kritik stok seviyesi
   images      String[]
+  weight      Decimal?    @db.Decimal(8, 2)  // Ağırlık (kg)
+  width       Decimal?    @db.Decimal(8, 2)  // Genişlik (cm)
+  height      Decimal?    @db.Decimal(8, 2)  // Yükseklik (cm)
+  length      Decimal?    @db.Decimal(8, 2)  // Uzunluk (cm)
+  desi        Decimal?    @db.Decimal(8, 2)  // Hesaplanmış veya manuel desi
+
   isFeatured  Boolean     @default(false)
   isNew       Boolean     @default(false)
   isBestSeller Boolean    @default(false)
@@ -254,6 +260,8 @@ model Order {
   total                Decimal       @db.Decimal(12, 2)
   status               OrderStatus   @default(PENDING)
   shippingAddress      Json?
+  shippingCost         Decimal       @default(0) @db.Decimal(12, 2) // Kargo ücreti
+  shippingDesi         Decimal?      @db.Decimal(8, 2)  // Toplam sipariş desisi
   cargoCompany         String?       // Kargo Firması
   trackingUrl          String?       // Kargo Takip Linki
   notes                String?
@@ -350,13 +358,29 @@ model Banner {
 }
 
 model CargoCompany {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String           @id @default(cuid())
+  name         String           @unique
+  isActive     Boolean          @default(true)
+  isDesiActive Boolean          @default(false)
+  desiPrices   DesiPriceRange[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
 
   @@map("cargo_companies")
+}
+
+model DesiPriceRange {
+  id              String       @id @default(cuid())
+  cargoCompanyId  String
+  cargoCompany    CargoCompany @relation(fields: [cargoCompanyId], references: [id], onDelete: Cascade)
+  minDesi         Decimal      @db.Decimal(8, 2)  // Başlangıç Desi
+  maxDesi         Decimal      @db.Decimal(8, 2)  // Bitiş Desi
+  price           Decimal      @db.Decimal(12, 2) // Kargo Ücreti (TL)
+  multiplierType  String       @default("FIXED")  // "FIXED" = Sabit Değer, "MULTIPLY" = Katsayı ile Çarp
+  createdAt       DateTime     @default(now())
+
+  @@index([cargoCompanyId])
+  @@map("desi_price_ranges")
 }
 
 // ==================== QUOTE SYSTEM ====================

@@ -48,6 +48,11 @@ export interface ProductWithCategory {
     isNew: boolean;
     isBestSeller: boolean;
     isActive: boolean;
+    weight: Decimal | null;
+    width: Decimal | null;
+    height: Decimal | null;
+    length: Decimal | null;
+    desi: Decimal | null;
     category: {
         id: string;
         name: string;
@@ -79,6 +84,7 @@ export interface CartItem {
     stock: number;
     variantId?: string;
     variantInfo?: string;
+    desi?: number | null;
 }
 
 export interface CartSummary {
@@ -87,6 +93,7 @@ export interface CartSummary {
     discountAmount: number;
     vatAmount: number;
     total: number;
+    totalDesi: number;
     itemCount: number;
 }
 
@@ -100,6 +107,8 @@ export interface OrderWithItems {
     appliedDiscountRate: number;
     vatAmount: number;
     total: number;
+    shippingCost: number | null;
+    shippingDesi: number | null;
     status: string;
     shippingAddress: unknown;
     cargoCompany: string | null;

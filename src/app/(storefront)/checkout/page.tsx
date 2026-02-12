@@ -62,11 +62,26 @@ export default async function CheckoutPage() {
 
     const cargoCompanies = await prisma.cargoCompany.findMany({
         where: { isActive: true },
+        include: { desiPrices: { orderBy: { minDesi: "asc" } } },
         orderBy: { name: "asc" },
-    });
+    }) as any[]; // Casting to any to bypass Prisma Client lock issues on Windows
 
     const settings = await getSiteSettings();
     const freeShippingLimit = Number(settings.freeShippingLimit) || 20000;
 
-    return <CheckoutForm initialData={initialData} cargoCompanies={cargoCompanies} freeShippingLimit={freeShippingLimit} />;
+    // Serialize Decimal fields for Client Component
+    const serializedCargoCompanies = cargoCompanies.map(company => ({
+        id: company.id,
+        name: company.name,
+        isDesiActive: !!company.isDesiActive,
+        desiPrices: (company.desiPrices || []).map((price: any) => ({
+            id: price.id,
+            minDesi: Number(price.minDesi),
+            maxDesi: Number(price.maxDesi),
+            price: Number(price.price),
+            multiplierType: price.multiplierType || "FIXED",
+        }))
+    }));
+
+    return <CheckoutForm initialData={initialData} cargoCompanies={serializedCargoCompanies} freeShippingLimit={freeShippingLimit} />;
 }

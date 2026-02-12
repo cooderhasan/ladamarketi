@@ -255,6 +255,11 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                                             ...product,
                                             listPrice: Number(product.listPrice),
                                             salePrice: product.salePrice ? Number(product.salePrice) : null,
+                                            weight: product.weight ? Number(product.weight) : null,
+                                            width: product.width ? Number(product.width) : null,
+                                            height: product.height ? Number(product.height) : null,
+                                            length: product.length ? Number(product.length) : null,
+                                            desi: product.desi ? Number(product.desi) : null,
                                         }}
                                         discountRate={discountRate}
                                         isDealer={isDealer}

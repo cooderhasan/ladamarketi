@@ -36,7 +36,17 @@ interface CheckoutFormProps {
             availableLimit: number;
         };
     };
-    cargoCompanies: { id: string; name: string }[];
+    cargoCompanies: {
+        id: string;
+        name: string;
+        isDesiActive: boolean;
+        desiPrices: {
+            minDesi: any;
+            maxDesi: any;
+            price: any;
+            multiplierType: string;
+        }[];
+    }[];
     freeShippingLimit: number;
 }
 
@@ -46,6 +56,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
     const { items, getSummary, discountRate, clearCart } = useCartStore();
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [selectedCargoId, setSelectedCargoId] = useState<string | null>(cargoCompanies[0]?.id || null);
     const [paymentMethod, setPaymentMethod] = useState<"BANK_TRANSFER" | "CREDIT_CARD" | "CURRENT_ACCOUNT">("BANK_TRANSFER");
     const orderCompleted = useRef(false);
 
@@ -69,7 +80,31 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
     }
 
     const summary = getSummary();
-    const canUseCurrentAccount = initialData?.currentAccount && initialData.currentAccount.availableLimit >= summary.total;
+
+    // Calculate shipping cost
+    const selectedCargo = cargoCompanies.find(c => c.id === selectedCargoId);
+    let shippingCost = 0;
+    const isFreeShipping = summary.total >= freeShippingLimit;
+
+    if (!isFreeShipping && selectedCargo && selectedCargo.isDesiActive && selectedCargo.desiPrices.length > 0) {
+        // Desi 0 ise en az 1 desi üzerinden hesapla (minimum kargo ücreti için)
+        const totalDesi = Math.max(1, summary.totalDesi || 0);
+        const range = selectedCargo.desiPrices.find(r =>
+            totalDesi >= Number(r.minDesi) && totalDesi <= Number(r.maxDesi)
+        ) || selectedCargo.desiPrices[selectedCargo.desiPrices.length - 1]; // Fallback to last range if exceeds max
+
+        if (range) {
+            const rangePrice = Number(range.price);
+            if (range.multiplierType === "MULTIPLY") {
+                shippingCost = rangePrice * Math.ceil(totalDesi);
+            } else {
+                shippingCost = rangePrice;
+            }
+        }
+    }
+
+    const grandTotal = summary.total + shippingCost;
+    const canUseCurrentAccount = initialData?.currentAccount && initialData.currentAccount.availableLimit >= grandTotal;
 
     if (items.length === 0) {
         return (
@@ -102,11 +137,13 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                     district: formData.get("district") ? String(formData.get("district")) : undefined,
                     phone: String(formData.get("phone")),
                 },
-                cargoCompany: String(formData.get("cargoCompany")),
+                cargoCompany: selectedCargo?.name || String(formData.get("cargoCompany")),
                 notes: formData.get("notes") ? String(formData.get("notes")) : undefined,
                 paymentMethod: paymentMethod,
                 guestEmail: !initialData?.name ? String(formData.get("email")) : undefined,
                 discountRate: Number(discountRate),
+                shippingCost: shippingCost,
+                shippingDesi: summary.totalDesi,
             });
 
             if (result.success) {
@@ -238,13 +275,18 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
 
                                 <div className="space-y-2">
                                     <Label htmlFor="cargoCompany">Kargo Firması Seçimi *</Label>
-                                    <Select name="cargoCompany" required>
+                                    <Select
+                                        name="cargoCompany"
+                                        required
+                                        value={selectedCargoId || ""}
+                                        onValueChange={setSelectedCargoId}
+                                    >
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Kargo firması seçiniz" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {cargoCompanies.map((company) => (
-                                                <SelectItem key={company.id} value={company.name}>
+                                                <SelectItem key={company.id} value={company.id}>
                                                     {company.name}
                                                 </SelectItem>
                                             ))}
@@ -443,11 +485,19 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                         <span>KDV Toplam</span>
                                         <span>{formatPrice(summary.vatAmount)}</span>
                                     </div>
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex justify-between items-center font-medium">
                                         <span className="text-gray-600 dark:text-gray-400">Kargo</span>
-                                        <span className={`font-medium ${summary.total >= freeShippingLimit ? "text-green-600" : "text-gray-900 dark:text-gray-200"}`}>
-                                            {summary.total >= freeShippingLimit ? "Ücretsiz" : "Alıcı Öder"}
-                                        </span>
+                                        {isFreeShipping ? (
+                                            <span className="text-green-600">Ücretsiz</span>
+                                        ) : selectedCargo && !selectedCargo.isDesiActive ? (
+                                            <span className="text-gray-900 dark:text-gray-200 uppercase text-xs font-bold">
+                                                Alıcı Ödemeli
+                                            </span>
+                                        ) : (
+                                            <span className="text-gray-900 dark:text-gray-200">
+                                                {formatPrice(shippingCost)}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 
@@ -457,7 +507,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                     <span className="font-bold text-lg">Toplam Tutar</span>
                                     <div className="text-right">
                                         <div className="text-2xl font-bold text-blue-600">
-                                            {formatPrice(summary.total)}
+                                            {formatPrice(grandTotal)}
                                         </div>
 
                                     </div>

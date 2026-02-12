@@ -43,13 +43,13 @@ export function calculateCartSummary(
     let subtotal = 0; // Total price (VAT inclusive)
     let discountAmount = 0;
     let vatAmount = 0;
+    let totalDesi = 0;
 
     items.forEach((item) => {
         // Item total (VAT inclusive)
         const itemTotal = item.listPrice * item.quantity;
 
         // Discount amount - Use item's specific discount rate
-        // If item.discountRate is defined, use it. Otherwise fallback to global discountRate (backward compatibility)
         const effectiveRate = item.discountRate !== undefined ? item.discountRate : discountRate;
         const itemDiscount = itemTotal * (effectiveRate / 100);
 
@@ -63,14 +63,15 @@ export function calculateCartSummary(
         subtotal += itemTotal;
         discountAmount += itemDiscount;
         vatAmount += itemVat;
+
+        // Add desi calculation
+        totalDesi += (item.desi || 0) * item.quantity;
     });
 
     // Total to pay is simply subtotal minus discount
-    // (VAT is already inside)
     const total = subtotal - discountAmount;
 
     // Subtotal should be the Net Amount (Total - Vat)
-    // So that: Net Subtotal + VAT = Total
     const netSubtotal = total - vatAmount;
 
     return {
@@ -79,6 +80,7 @@ export function calculateCartSummary(
         discountAmount: roundPrice(discountAmount),
         vatAmount: roundPrice(vatAmount),
         total: roundPrice(total),
+        totalDesi: Math.ceil(totalDesi * 100) / 100, // Round up to 2 decimals
         itemCount: items.reduce((acc, item) => acc + item.quantity, 0),
     };
 }

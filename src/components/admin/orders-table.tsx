@@ -411,6 +411,10 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                 <span className="text-xs text-gray-500">Firma</span>
                                                 <span className="font-medium">{selectedOrder.cargoCompany || "Seçilmedi"}</span>
                                             </div>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-xs text-gray-500">Desi</span>
+                                                <span className="font-medium">{(selectedOrder as any).shippingDesi || 0}</span>
+                                            </div>
 
                                             <Label className="text-xs font-medium mb-1.5 block">Takip Linki</Label>
                                             <div className="flex gap-2">
@@ -502,6 +506,10 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                     <div className="flex justify-between text-sm text-gray-600">
                                         <span>KDV Toplam</span>
                                         <span>{formatPrice(Number(selectedOrder.vatAmount))}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-gray-600">
+                                        <span>Kargo Ücreti</span>
+                                        <span>{formatPrice(Number((selectedOrder as any).shippingCost || 0))}</span>
                                     </div>
                                     <div className="border-t border-gray-200 my-1"></div>
                                     <div className="flex justify-between text-lg font-bold text-gray-900">

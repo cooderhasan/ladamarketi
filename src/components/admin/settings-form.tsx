@@ -18,6 +18,7 @@ interface CargoCompany {
     id: string;
     name: string;
     isActive: boolean;
+    isDesiActive: boolean;
 }
 
 interface SettingsFormProps {

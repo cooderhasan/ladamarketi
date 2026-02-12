@@ -60,6 +60,13 @@ export default async function OrderPage({ params }: OrderPageProps) {
     const settings = (generalSettings?.value as Record<string, string>) || {};
     const isBankTransfer = order.payment?.method === "BANK_TRANSFER";
 
+    // Detect if buyer pays (Alıcı Ödemeli)
+    const cargoCompanyDetails = order.cargoCompany
+        ? await prisma.cargoCompany.findFirst({ where: { name: order.cargoCompany } })
+        : null;
+
+    const isBuyerPays = Number((order as any).shippingCost || 0) === 0 && cargoCompanyDetails && !(cargoCompanyDetails as any).isDesiActive;
+
     return (
         <div className="container mx-auto px-4 py-12">
             <div className="max-w-4xl mx-auto space-y-8">
@@ -119,6 +126,18 @@ export default async function OrderPage({ params }: OrderPageProps) {
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">KDV Tutarı</span>
                                         <span className="font-medium">{formatPrice(Number(order.vatAmount))}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500">Kargo Ücreti</span>
+                                        <span className="font-medium">
+                                            {isBuyerPays ? (
+                                                <span className="text-blue-600 font-bold uppercase text-[10px]">Alıcı Ödemeli</span>
+                                            ) : Number((order as any).shippingCost || 0) === 0 ? (
+                                                <span className="text-green-600 font-medium">Ücretsiz</span>
+                                            ) : (
+                                                formatPrice(Number((order as any).shippingCost || 0))
+                                            )}
+                                        </span>
                                     </div>
                                     <Separator className="my-2" />
                                     <div className="flex justify-between text-lg font-bold">

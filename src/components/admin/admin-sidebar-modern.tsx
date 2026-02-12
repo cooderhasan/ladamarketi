@@ -81,7 +81,6 @@ const menuGroups: MenuGroup[] = [
         title: "Yapılandırma",
         items: [
             { title: "Ayarlar", href: "/admin/settings", icon: Settings },
-            { title: "Kargo Firmaları", href: "/admin/cargo-companies", icon: Truck },
             { title: "İskonto Grupları", href: "/admin/discount-groups", icon: FileText },
             { title: "Politikalar", href: "/admin/policies", icon: Scale },
         ],

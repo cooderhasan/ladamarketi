@@ -17,9 +17,10 @@ import { createProduct, updateProduct } from "@/app/admin/(protected)/products/a
 import { generateSlug, generateSKU, generateBarcode } from "@/lib/helpers";
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw } from "lucide-react";
+import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
+import { calculateDesi } from "@/lib/shipping";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -70,6 +71,11 @@ interface Product {
     isNew: boolean;
     isBestSeller: boolean;
     isActive: boolean;
+    weight?: number | null;
+    width?: number | null;
+    height?: number | null;
+    length?: number | null;
+    desi?: number | null;
     variants?: ProductVariant[];
     categories?: { id: string }[];
 }
@@ -110,7 +116,17 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         isFeatured: product?.isFeatured || false,
         isNew: product?.isNew || false,
         isBestSeller: product?.isBestSeller || false,
+        weight: product?.weight ?? "",
+        width: product?.width ?? "",
+        height: product?.height ?? "",
+        length: product?.length ?? "",
+        desi: product?.desi ?? "",
     });
+
+    // Otomatik desi hesaplama
+    const autoDesi = formData.width && formData.height && formData.length
+        ? calculateDesi(Number(formData.width), Number(formData.height), Number(formData.length))
+        : 0;
 
     const handleChange = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -475,6 +491,111 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                     placeholder="Türkiye"
                                 />
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Package className="h-5 w-5 text-blue-500" />
+                                Kargo Bilgileri (Desi)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                                <p className="text-sm text-blue-800 dark:text-blue-200">
+                                    <strong>Bilgi:</strong> Desi = (En × Boy × Yükseklik) / 3000. Kargo firmaları ağırlık ve desi değerlerinden büyük olanı baz alır.
+                                </p>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="weight">Ağırlık (kg)</Label>
+                                    <Input
+                                        id="weight"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.weight}
+                                        onChange={(e) => handleChange("weight", e.target.value)}
+                                        placeholder="Ör: 2.50"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="desi">Desi (Manuel)</Label>
+                                    <Input
+                                        id="desi"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.desi}
+                                        onChange={(e) => handleChange("desi", e.target.value)}
+                                        placeholder={autoDesi > 0 ? `Otomatik: ${autoDesi}` : "Ör: 3.00"}
+                                    />
+                                    <p className="text-xs text-gray-500">Boş bırakılırsa boyutlardan otomatik hesaplanır.</p>
+                                </div>
+                            </div>
+
+                            <hr />
+
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <div className="space-y-2">
+                                    <Label htmlFor="width">Genişlik (cm)</Label>
+                                    <Input
+                                        id="width"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.width}
+                                        onChange={(e) => handleChange("width", e.target.value)}
+                                        placeholder="Ör: 30"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="height">Yükseklik (cm)</Label>
+                                    <Input
+                                        id="height"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.height}
+                                        onChange={(e) => handleChange("height", e.target.value)}
+                                        placeholder="Ör: 20"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="length">Uzunluk (cm)</Label>
+                                    <Input
+                                        id="length"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.length}
+                                        onChange={(e) => handleChange("length", e.target.value)}
+                                        placeholder="Ör: 15"
+                                    />
+                                </div>
+                            </div>
+
+                            {(autoDesi > 0 || Number(formData.weight) > 0) && (
+                                <div className="bg-gray-50 dark:bg-gray-800 border rounded-lg p-4 mt-2">
+                                    <div className="grid grid-cols-3 gap-4 text-sm">
+                                        <div>
+                                            <span className="text-gray-500">Hacimsel Desi:</span>
+                                            <p className="font-semibold">{autoDesi > 0 ? autoDesi : "-"}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-500">Ağırlık:</span>
+                                            <p className="font-semibold">{Number(formData.weight) > 0 ? `${formData.weight} kg` : "-"}</p>
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-500">Efektif Desi:</span>
+                                            <p className="font-bold text-blue-600">
+                                                {Math.max(autoDesi, Number(formData.weight) || 0, Number(formData.desi) || 0).toFixed(2)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>

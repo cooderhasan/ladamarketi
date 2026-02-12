@@ -81,6 +81,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
         ...product,
         listPrice: Number(product.listPrice),
         salePrice: product.salePrice ? Number(product.salePrice) : null,
+        weight: product.weight ? Number(product.weight) : null,
+        width: product.width ? Number(product.width) : null,
+        height: product.height ? Number(product.height) : null,
+        length: product.length ? Number(product.length) : null,
+        desi: product.desi ? Number(product.desi) : null,
         origin: product.origin, // Explicitly pass origin
         variants: product.variants.map(v => ({
             id: v.id,
@@ -129,6 +134,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     ...p,
                     listPrice: Number(p.listPrice),
                     salePrice: p.salePrice ? Number(p.salePrice) : null,
+                    weight: p.weight ? Number(p.weight) : null,
+                    width: p.width ? Number(p.width) : null,
+                    height: p.height ? Number(p.height) : null,
+                    length: p.length ? Number(p.length) : null,
+                    desi: p.desi ? Number(p.desi) : null,
                     origin: p.origin, // Explicitly pass origin
                 }))}
                 discountRate={discountRate}
