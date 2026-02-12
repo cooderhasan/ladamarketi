@@ -62,11 +62,11 @@ export function CategorySectionModern({ categories }: CategorySectionProps) {
                 {/* Bottom Row: 3 Smaller Cards */}
                 {bottomRow.length > 0 && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        {bottomRow.map((category) => (
+                        {bottomRow.map((category, index) => (
                             <Link
                                 key={category.id}
                                 href={`/category/${category.slug}`}
-                                className="relative h-40 sm:h-44 md:h-52 rounded-2xl overflow-hidden group block ring-1 ring-black/5 dark:ring-white/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+                                className={`relative h-40 sm:h-44 md:h-52 rounded-2xl overflow-hidden group block ring-1 ring-black/5 dark:ring-white/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 ${index === bottomRow.length - 1 ? 'hidden sm:block' : ''}`}
                             >
                                 {category.imageUrl ? (
                                     <Image
