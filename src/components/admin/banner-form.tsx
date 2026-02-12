@@ -100,7 +100,7 @@ export function BannerForm({ initialData, onSuccess }: BannerFormProps) {
                             <FormControl>
                                 <ImageUpload
                                     value={field.value ? [field.value] : []}
-                                    onChange={(url) => field.onChange(url)}
+                                    onChange={(urls) => field.onChange(urls[0] || "")}
                                     onRemove={() => field.onChange("")}
                                 />
                             </FormControl>
