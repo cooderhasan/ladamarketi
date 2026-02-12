@@ -72,6 +72,7 @@ export function HeroSlider({ sliders }: HeroSliderProps) {
                     className="absolute inset-0"
                 >
                     {/* Background */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent z-10" />
                     <div className="absolute inset-0 bg-gray-900">
                         {sliders[current].imageUrl && (
                             <Image
