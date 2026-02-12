@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 
 interface Category {
     id: string;
@@ -27,25 +28,32 @@ export function CategorySectionModern({ categories }: CategorySectionProps) {
                         <Link
                             key={category.id}
                             href={`/category/${category.slug}`}
-                            className="relative h-48 sm:h-56 md:h-64 rounded-2xl overflow-hidden group block"
+                            className="relative h-48 sm:h-56 md:h-64 rounded-2xl overflow-hidden group block ring-1 ring-black/5 dark:ring-white/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                         >
                             {category.imageUrl ? (
                                 <Image
                                     src={category.imageUrl}
                                     alt={category.name}
                                     fill
-                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                                     sizes="(max-width: 640px) 100vw, 50vw"
                                     priority
                                 />
                             ) : (
                                 <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" />
                             )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent group-hover:from-black/50 transition-colors" />
-                            <div className="absolute bottom-4 left-4 right-4 z-10">
-                                <h3 className="text-white font-bold text-lg sm:text-xl drop-shadow-md">
+                            {/* Gradient overlay with brand blue tint */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#002838]/80 via-[#002838]/20 to-transparent group-hover:from-[#002838]/70 transition-all duration-300" />
+
+                            {/* Content */}
+                            <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
+                                <h3 className="text-white font-bold text-lg sm:text-xl drop-shadow-lg mb-1">
                                     {category.name}
                                 </h3>
+                                <div className="flex items-center gap-1.5 text-white/0 group-hover:text-white/90 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                                    <span className="text-xs font-semibold uppercase tracking-wider">Ürünleri İncele</span>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                </div>
                             </div>
                         </Link>
                     ))}
@@ -58,24 +66,31 @@ export function CategorySectionModern({ categories }: CategorySectionProps) {
                             <Link
                                 key={category.id}
                                 href={`/category/${category.slug}`}
-                                className="relative h-40 sm:h-44 md:h-52 rounded-2xl overflow-hidden group block"
+                                className="relative h-40 sm:h-44 md:h-52 rounded-2xl overflow-hidden group block ring-1 ring-black/5 dark:ring-white/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
                             >
                                 {category.imageUrl ? (
                                     <Image
                                         src={category.imageUrl}
                                         alt={category.name}
                                         fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                                         sizes="(max-width: 640px) 50vw, 33vw"
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800" />
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent group-hover:from-black/50 transition-colors" />
-                                <div className="absolute bottom-4 left-4 right-4 z-10">
-                                    <h3 className="text-white font-bold text-sm sm:text-base md:text-lg drop-shadow-md">
+                                {/* Gradient overlay with brand blue tint */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#002838]/80 via-[#002838]/20 to-transparent group-hover:from-[#002838]/70 transition-all duration-300" />
+
+                                {/* Content */}
+                                <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+                                    <h3 className="text-white font-bold text-sm sm:text-base md:text-lg drop-shadow-lg mb-0.5">
                                         {category.name}
                                     </h3>
+                                    <div className="flex items-center gap-1 text-white/0 group-hover:text-white/90 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                                        <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Ürünleri İncele</span>
+                                        <ArrowRight className="w-3 h-3" />
+                                    </div>
                                 </div>
                             </Link>
                         ))}
