@@ -37,7 +37,7 @@ export function ContactForm() {
     }
 
     return (
-        <form action={handleSubmit} className="space-y-5">
+        <form action={handleSubmit} className="flex flex-col h-full space-y-5">
             <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2">
                     <Label htmlFor="name">Ad Soyad</Label>
@@ -58,16 +58,15 @@ export function ContactForm() {
                     <Input id="subject" name="subject" placeholder="Mesajınızın konusu" className="h-11" />
                 </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1 flex flex-col">
                 <Label htmlFor="message">Mesaj</Label>
                 <Textarea
                     id="message"
                     name="message"
                     placeholder="Mesajınızı buraya yazınız..."
-                    rows={10}
                     required
                     minLength={10}
-                    className="resize-none"
+                    className="resize-none flex-1 min-h-[250px]"
                 />
             </div>
             <Button className="w-full bg-[#009AD0] hover:bg-[#007EA8] text-white" size="lg" disabled={pending}>

@@ -157,14 +157,14 @@ export default async function ContactPage() {
 
                     {/* Right: Contact Form */}
                     <div className="lg:col-span-3">
-                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg ring-1 ring-black/5 overflow-hidden h-full">
+                        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg ring-1 ring-black/5 overflow-hidden h-full flex flex-col">
                             <div className="bg-gradient-to-r from-[#009AD0] to-[#007EA8] px-6 py-4">
                                 <h2 className="text-white font-bold text-lg">Mesaj Gönderin</h2>
                                 <p className="text-blue-100 text-sm mt-0.5">
                                     Formu doldurarak bize mesaj gönderin, en kısa sürede dönüş yapacağız.
                                 </p>
                             </div>
-                            <div className="p-6">
+                            <div className="p-6 flex-1 flex flex-col">
                                 <ContactForm />
                             </div>
                         </div>
