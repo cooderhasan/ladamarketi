@@ -37,20 +37,26 @@ export function ContactForm() {
     }
 
     return (
-        <form action={handleSubmit} className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
+        <form action={handleSubmit} className="space-y-5">
+            <div className="grid gap-5 md:grid-cols-2">
                 <div className="space-y-2">
                     <Label htmlFor="name">Ad Soyad</Label>
-                    <Input id="name" name="name" placeholder="Adınız Soyadınız" required />
+                    <Input id="name" name="name" placeholder="Adınız Soyadınız" required className="h-11" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="email">E-posta</Label>
-                    <Input id="email" name="email" type="email" placeholder="ornek@sirket.com" required />
+                    <Input id="email" name="email" type="email" placeholder="ornek@sirket.com" required className="h-11" />
                 </div>
             </div>
-            <div className="space-y-2">
-                <Label htmlFor="subject">Konu</Label>
-                <Input id="subject" name="subject" placeholder="Mesajınızın konusu" />
+            <div className="grid gap-5 md:grid-cols-2">
+                <div className="space-y-2">
+                    <Label htmlFor="phone">Telefon</Label>
+                    <Input id="phone" name="phone" type="tel" placeholder="05XX XXX XX XX" className="h-11" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="subject">Konu</Label>
+                    <Input id="subject" name="subject" placeholder="Mesajınızın konusu" className="h-11" />
+                </div>
             </div>
             <div className="space-y-2">
                 <Label htmlFor="message">Mesaj</Label>
@@ -58,12 +64,13 @@ export function ContactForm() {
                     id="message"
                     name="message"
                     placeholder="Mesajınızı buraya yazınız..."
-                    rows={6}
+                    rows={10}
                     required
                     minLength={10}
+                    className="resize-none"
                 />
             </div>
-            <Button className="w-full md:w-auto" size="lg" disabled={pending}>
+            <Button className="w-full bg-[#009AD0] hover:bg-[#007EA8] text-white" size="lg" disabled={pending}>
                 {pending ? "Gönderiliyor..." : "Mesaj Gönder"}
             </Button>
         </form>
