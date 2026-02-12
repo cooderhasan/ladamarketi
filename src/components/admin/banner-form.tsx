@@ -18,37 +18,48 @@ import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { createBanner, updateBanner } from "@/app/admin/(protected)/banners/actions";
 import { toast } from "sonner";
-import { Banner } from "@prisma/client";
 import { Switch } from "@/components/ui/switch";
 
+// Define local interface to avoid build issues with prisma client generation
+interface Banner {
+    id: string;
+    title: string | null;
+    linkUrl: string | null;
+    imageUrl: string;
+    isActive: boolean;
+    order: number;
+}
+
 const formSchema = z.object({
-    title: z.string().optional(),
-    linkUrl: z.string().optional(),
+    title: z.string().optional().or(z.literal("")),
+    linkUrl: z.string().optional().or(z.literal("")),
     imageUrl: z.string().min(1, "Görsel zorunludur."),
     isActive: z.boolean().default(true),
     order: z.coerce.number().default(0),
 });
 
+type BannerFormValues = z.infer<typeof formSchema>;
+
 interface BannerFormProps {
-    initialData?: Banner;
+    initialData?: any; // Use any or a custom type to avoid prisma client export issues during build
     onSuccess: () => void;
 }
 
 export function BannerForm({ initialData, onSuccess }: BannerFormProps) {
     const [loading, setLoading] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: initialData?.title || "",
             linkUrl: initialData?.linkUrl || "",
             imageUrl: initialData?.imageUrl || "",
             isActive: initialData?.isActive ?? true,
-            order: initialData?.order || 0,
+            order: initialData?.order ?? 0,
         },
     });
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const onSubmit = async (values: BannerFormValues) => {
         setLoading(true);
         try {
             if (initialData) {
@@ -123,7 +134,12 @@ export function BannerForm({ initialData, onSuccess }: BannerFormProps) {
                             <FormItem>
                                 <FormLabel>Sıra</FormLabel>
                                 <FormControl>
-                                    <Input type="number" {...field} />
+                                    <Input
+                                        type="number"
+                                        {...field}
+                                        value={field.value as any}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
