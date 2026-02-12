@@ -130,8 +130,8 @@ export function AdminSidebarModern({ settings }: { settings?: any }) {
             >
                 {/* Logo Area */}
                 <div className={cn(
-                    "relative flex flex-col items-center justify-center px-4 transition-all duration-300 shrink-0",
-                    collapsed ? "h-20" : "h-32 py-6"
+                    "relative flex flex-col items-center px-4 transition-all duration-300 shrink-0",
+                    collapsed ? "justify-center h-20" : "h-auto pt-6 pb-2"
                 )}>
                     {/* Background decoration */}
                     <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-blue-50/50 to-transparent dark:from-blue-900/10 pointer-events-none" />

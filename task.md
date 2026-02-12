@@ -13,7 +13,7 @@ sela# Project Tasks
 - [ ] **Phase 3: Admin Geliştirmeleri**
   - [ ] Toplu Fiyat Güncelleme Modülü (Tutar/Yüzde)
   - [ ] Toplu Stok Güncelleme Modülü
-  - [ ] İçerik Yönetimi (Slider, Hizmetlerimiz)
+  - [x] İçerik Yönetimi (Slider, Bannerlar) - *Admin Banner Yönetimi ve Sidebar düzenlemeleri tamamlandı.*
 - [ ] **Phase 4: Ödeme Sistemleri**
   - [ ] PayTR Entegrasyonu
   - [ ] Havale/EFT Bildirim Altyapısı
