@@ -30,6 +30,7 @@ enum UserStatus {
 
 enum OrderStatus {
   PENDING
+  WAITING_FOR_PAYMENT // Ödeme Bekleniyor (PayTR vb. için geçici statü)
   CONFIRMED
   PROCESSING
   SHIPPED

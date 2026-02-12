@@ -40,17 +40,11 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         if (Object.values(OrderStatus).includes(normalizedStatus as OrderStatus)) {
             where.status = normalizedStatus as OrderStatus;
         }
-    }
-
-    if (startDate || endDate) {
-        where.createdAt = {};
-        if (startDate) where.createdAt.gte = startDate;
-        if (endDate) {
-            // Set end date to end of day
-            const endOfDay = new Date(endDate);
-            endOfDay.setHours(23, 59, 59, 999);
-            where.createdAt.lte = endOfDay;
-        }
+    } else {
+        // Varsayılan görünüm: "Ödeme Bekleniyor" olanları gizle (Başarısız/Yarım kalan PayTR işlemleri)
+        where.NOT = {
+            status: "WAITING_FOR_PAYMENT"
+        };
     }
 
     // Parallel Fetch: Orders + Total Count

@@ -191,7 +191,8 @@ export async function createOrder(data: CreateOrderData) {
                     appliedDiscountRate: data.discountRate,
                     vatAmount,
                     total,
-                    status: paymentMethod === "CURRENT_ACCOUNT" ? "CONFIRMED" : "PENDING",
+                    status: paymentMethod === "CURRENT_ACCOUNT" ? "CONFIRMED" :
+                        paymentMethod === "CREDIT_CARD" ? "WAITING_FOR_PAYMENT" : "PENDING",
                     shippingAddress: data.shippingAddress,
                     cargoCompany: data.cargoCompany,
                     notes: data.notes,
