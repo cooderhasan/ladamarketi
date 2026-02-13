@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2 } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useCartStore } from "@/stores/cart-store";
 import type { UserRole, UserStatus } from "@prisma/client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -167,7 +168,11 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             className="text-red-600 focus:text-red-600"
-                            onClick={() => signOut({ callbackUrl: "/login" })}
+                            onClick={() => {
+                                const { logout } = useCartStore.getState();
+                                logout();
+                                signOut({ callbackUrl: "/login" });
+                            }}
                         >
                             <LogOut className="mr-2 h-4 w-4" />
                             Çıkış Yap

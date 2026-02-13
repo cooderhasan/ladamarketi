@@ -260,7 +260,8 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                                                 <DropdownMenuItem
                                                     className="text-red-600"
                                                     onClick={() => {
-                                                        clearCart();
+                                                        const { logout } = useCartStore.getState();
+                                                        logout();
                                                         signOut({ callbackUrl: "/" });
                                                     }}
                                                 >

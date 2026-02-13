@@ -17,6 +17,7 @@ interface CartState {
     clearCart: () => void;
     getSummary: () => CartSummary;
     setItems: (items: CartItem[]) => void;
+    logout: () => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -108,6 +109,10 @@ export const useCartStore = create<CartState>()(
             getSummary: () => {
                 const { items, discountRate } = get();
                 return calculateCartSummary(items, discountRate);
+            },
+
+            logout: () => {
+                set({ items: [], isAuthenticated: false, discountRate: 0 });
             },
         }),
         {
