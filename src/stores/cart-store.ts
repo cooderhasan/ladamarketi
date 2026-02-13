@@ -9,6 +9,7 @@ interface CartState {
     discountRate: number;
     isSyncing: boolean;
     isAuthenticated: boolean;
+    _hasHydrated: boolean; // Add hydration tracking
     setDiscountRate: (rate: number) => void;
     setIsAuthenticated: (val: boolean) => void;
     addItem: (item: CartItem) => void;
@@ -18,6 +19,7 @@ interface CartState {
     getSummary: () => CartSummary;
     setItems: (items: CartItem[]) => void;
     logout: () => void;
+    setHasHydrated: (val: boolean) => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -27,6 +29,9 @@ export const useCartStore = create<CartState>()(
             discountRate: 0,
             isSyncing: false,
             isAuthenticated: false,
+            _hasHydrated: false,
+
+            setHasHydrated: (val) => set({ _hasHydrated: val }),
 
             setDiscountRate: (rate) => set({ discountRate: rate }),
 
@@ -35,6 +40,7 @@ export const useCartStore = create<CartState>()(
             setItems: (items) => set({ items }),
 
             addItem: async (item) => {
+                // ... same as before
                 if (item.listPrice <= 0) {
                     console.warn("Cannot add item with price 0 to cart:", item.name);
                     return;
@@ -109,6 +115,9 @@ export const useCartStore = create<CartState>()(
         }),
         {
             name: "b2b-cart",
+            onRehydrateStorage: () => (state) => {
+                state?.setHasHydrated(true);
+            },
         }
     )
 );

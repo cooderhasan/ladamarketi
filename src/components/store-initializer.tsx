@@ -16,20 +16,28 @@ export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: Stor
     const setItems = useCartStore((state) => state.setItems);
     const setIsAuthenticated = useCartStore((state) => state.setIsAuthenticated);
 
+    const hasHydrated = useCartStore((state) => state._hasHydrated);
+
     useEffect(() => {
         // Update store with server-side flags
         useCartStore.setState({ discountRate, isAuthenticated });
 
-        // Handle Cart Merging for Authenticated Users
+        // IMPORTANT: Only process cart merging AFTER hydration is complete
+        if (!hasHydrated) {
+            console.log("STORE_INIT: Waiting for hydration...");
+            return;
+        }
+
         if (isAuthenticated && !initialized.current) {
             const localItems = useCartStore.getState().items;
+            console.log("STORE_INIT: Initializing authenticated session. Local items:", localItems.length, "DB items:", dbCart?.length);
 
             if (dbCart) {
                 if (localItems.length === 0) {
-                    // 1. Local empty, use DB cart
+                    console.log("STORE_INIT: Local empty, setting items from DB:", dbCart.length);
                     setItems(dbCart);
                 } else {
-                    // 2. Local not empty, merge with DB
+                    console.log("STORE_INIT: Merging local and DB items...");
                     const mergedItems = [...dbCart];
 
                     localItems.forEach(localItem => {
@@ -46,18 +54,18 @@ export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: Stor
                         }
                     });
 
+                    console.log("STORE_INIT: Merge result:", mergedItems.length, "Syncing to DB...");
                     setItems(mergedItems);
-                    // Force sync back to DB to ensure both sides are identical
                     syncCart(mergedItems);
                 }
             } else if (localItems.length > 0) {
-                // 3. Authenticated but no DB cart yet, sync local to DB
+                console.log("STORE_INIT: No DB cart, syncing local items to DB:", localItems.length);
                 syncCart(localItems);
             }
 
             initialized.current = true;
         }
-    }, [discountRate, dbCart, isAuthenticated, setItems]);
+    }, [discountRate, dbCart, isAuthenticated, setItems, hasHydrated]);
 
     return null;
 }
