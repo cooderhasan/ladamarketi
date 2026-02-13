@@ -156,10 +156,7 @@ export default async function StorefrontLayout({
         }
     }
 
-    console.log("V7_FORCE: LAYOUT: Rendering. Session:", !!session?.user, "User:", session?.user?.id);
-    const cartRes = session?.user?.id ? await getDBCart(session.user.id) : { items: [], error: null };
-    console.log("V7_FORCE: LAYOUT: dbCart fetched, items:", cartRes.items.length, "Error:", cartRes.error);
-    const dbCart = cartRes.items;
+    const dbCart = session?.user?.id ? await getDBCart(session.user.id) : null;
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">

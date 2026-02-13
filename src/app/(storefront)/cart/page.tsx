@@ -12,7 +12,7 @@ import { formatPrice, calculatePrice } from "@/lib/helpers";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, FileQuestion } from "lucide-react";
 
 export default function CartPage() {
-    const { items, removeItem, updateQuantity, getSummary, discountRate } =
+    const { items, removeItem, updateQuantity, getSummary, discountRate, isAuthenticated } =
         useCartStore();
     const [mounted, setMounted] = useState(false);
 
@@ -212,15 +212,14 @@ export default function CartPage() {
                                 </span>
                             </div>
 
-                            <Link href="/checkout" className="block">
-                                <Button className="w-full" size="lg">
+                            <Link href={isAuthenticated ? "/checkout" : "/checkout/auth"} className="block">
+                                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 text-lg font-bold shadow-lg shadow-blue-600/20">
                                     Siparişi Tamamla
-                                    <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                             </Link>
 
-                            <Link href="/products" className="block">
-                                <Button variant="outline" className="w-full">
+                            <Link href="/products" className="block text-center mt-4">
+                                <Button variant="outline" className="w-full rounded-xl py-6">
                                     Alışverişe Devam Et
                                 </Button>
                             </Link>

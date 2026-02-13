@@ -12,7 +12,6 @@ interface StoreInitializerProps {
 }
 
 export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: StoreInitializerProps) {
-    console.log(`V7_FORCE: Component executed (Auth: ${isAuthenticated}, DB Items: ${dbCart?.length || 0})`);
     const initialized = useRef(false);
     const setItems = useCartStore((state) => state.setItems);
     const setIsAuthenticated = useCartStore((state) => state.setIsAuthenticated);
@@ -20,19 +19,15 @@ export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: Stor
     const hasHydrated = useCartStore((state) => state._hasHydrated);
 
     useEffect(() => {
-        console.log(`V7_FORCE: Effect logic starting (Hydrated: ${hasHydrated}, Auth: ${isAuthenticated}, Init: ${initialized.current})`);
-
         // Update store with server-side flags
         useCartStore.setState({ discountRate, isAuthenticated });
 
         if (!hasHydrated) {
-            console.log("V7_FORCE: Still waiting for store hydration from localStorage...");
             return;
         }
 
         if (isAuthenticated && !initialized.current) {
             const localItems = useCartStore.getState().items;
-            console.log(`V7_FORCE: Ready to merge. Local: ${localItems.length}, DB: ${dbCart?.length || 0}`);
 
             if (dbCart) {
                 if (localItems.length === 0) {

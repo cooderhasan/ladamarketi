@@ -51,7 +51,6 @@ export async function syncCart(items: StoreCartItem[]) {
 }
 
 export async function getDBCart(providedUserId?: string) {
-    console.log("V7_FORCE: GET_DB_CART: Starting...");
     try {
         let userId = providedUserId;
 
@@ -60,9 +59,7 @@ export async function getDBCart(providedUserId?: string) {
             userId = session?.user?.id;
         }
 
-        if (!userId) {
-            return { items: [], error: "No userId" };
-        }
+        if (!userId) return null;
 
         const cart = await prisma.cart.findUnique({
             where: { userId: userId },
@@ -97,9 +94,9 @@ export async function getDBCart(providedUserId?: string) {
             }
         });
 
-        if (!cart) return { items: [], error: null };
+        if (!cart) return [];
 
-        const mappedItems: StoreCartItem[] = cart.items.map((item) => {
+        return cart.items.map((item) => {
             const listPrice = Number(item.product.listPrice) + Number(item.variant?.priceAdjustment || 0);
 
             return {
@@ -119,11 +116,9 @@ export async function getDBCart(providedUserId?: string) {
                 desi: item.product.desi ? Number(item.product.desi) : null,
             };
         });
-
-        return { items: mappedItems, error: null };
-    } catch (error: any) {
-        console.error("V7_FORCE: GET_DB_CART: Error:", error);
-        return { items: [], error: error.message || "Unknown DB error" };
+    } catch (error) {
+        console.error("GET_DB_CART: Error:", error);
+        return null;
     }
 }
 
