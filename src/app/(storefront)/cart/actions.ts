@@ -51,7 +51,7 @@ export async function syncCart(items: StoreCartItem[]) {
 }
 
 export async function getDBCart(providedUserId?: string) {
-    console.log("GET_DB_CART: Fetching cart from DB...");
+    console.log("V7_FORCE: GET_DB_CART: Starting...");
     try {
         let userId = providedUserId;
 
@@ -61,11 +61,9 @@ export async function getDBCart(providedUserId?: string) {
         }
 
         if (!userId) {
-            console.log("GET_DB_CART: No active session or userId provided.");
-            return null;
+            return { items: [], error: "No userId" };
         }
 
-        console.log("GET_DB_CART: Searching for user:", userId);
         const cart = await prisma.cart.findUnique({
             where: { userId: userId },
             include: {
@@ -99,9 +97,8 @@ export async function getDBCart(providedUserId?: string) {
             }
         });
 
-        if (!cart) return [];
+        if (!cart) return { items: [], error: null };
 
-        // Map DB items to StoreCartItem types
         const mappedItems: StoreCartItem[] = cart.items.map((item) => {
             const listPrice = Number(item.product.listPrice) + Number(item.variant?.priceAdjustment || 0);
 
@@ -113,7 +110,7 @@ export async function getDBCart(providedUserId?: string) {
                 quantity: item.quantity,
                 listPrice: listPrice,
                 salePrice: item.product.salePrice ? Number(item.product.salePrice) : undefined,
-                discountRate: 0, // This will be handled by the client-side store based on user group
+                discountRate: 0,
                 vatRate: item.product.vatRate,
                 minQuantity: item.product.minQuantity,
                 stock: item.variant ? item.variant.stock : item.product.stock,
@@ -123,11 +120,10 @@ export async function getDBCart(providedUserId?: string) {
             };
         });
 
-        console.log(`GET_DB_CART: Found ${mappedItems.length} items in DB.`);
-        return mappedItems;
-    } catch (error) {
-        console.error("GET_DB_CART: Error:", error);
-        return null;
+        return { items: mappedItems, error: null };
+    } catch (error: any) {
+        console.error("V7_FORCE: GET_DB_CART: Error:", error);
+        return { items: [], error: error.message || "Unknown DB error" };
     }
 }
 
