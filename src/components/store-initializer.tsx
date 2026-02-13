@@ -40,17 +40,14 @@ export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: Stor
                         });
 
                         if (existingIndex >= 0) {
-                            // Already in DB, maybe update quantity? 
-                            // For now, let's keep the larger quantity
                             mergedItems[existingIndex].quantity = Math.max(mergedItems[existingIndex].quantity, localItem.quantity);
                         } else {
-                            // New item from local, add to merge
                             mergedItems.push(localItem);
                         }
                     });
 
                     setItems(mergedItems);
-                    // Sync back to DB
+                    // Force sync back to DB to ensure both sides are identical
                     syncCart(mergedItems);
                 }
             } else if (localItems.length > 0) {

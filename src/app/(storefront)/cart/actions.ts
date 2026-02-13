@@ -5,11 +5,16 @@ import { auth } from "@/lib/auth";
 import { CartItem as StoreCartItem } from "@/types";
 
 export async function syncCart(items: StoreCartItem[]) {
+    console.log("SYNC_CART: Received request, item count:", items.length);
     try {
         const session = await auth();
-        if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+        if (!session?.user?.id) {
+            console.log("SYNC_CART: No active session, skipping sync.");
+            return { success: false, error: "Unauthorized" };
+        }
 
         const userId = session.user.id;
+        console.log("SYNC_CART: Syncing for user:", userId);
 
         // Ensure cart exists
         let cart = await prisma.cart.findUnique({
@@ -37,18 +42,24 @@ export async function syncCart(items: StoreCartItem[]) {
             }),
         ]);
 
+        console.log("SYNC_CART: Sync successful.");
         return { success: true };
     } catch (error) {
-        console.error("Cart sync error:", error);
+        console.error("SYNC_CART: Cart sync error:", error);
         return { success: false, error: "Sepet senkronize edilemedi." };
     }
 }
 
 export async function getDBCart() {
+    console.log("GET_DB_CART: Fetching cart from DB...");
     try {
         const session = await auth();
-        if (!session?.user?.id) return null;
+        if (!session?.user?.id) {
+            console.log("GET_DB_CART: No active session.");
+            return null;
+        }
 
+        console.log("GET_DB_CART: Found session for user:", session.user.id);
         const cart = await prisma.cart.findUnique({
             where: { userId: session.user.id },
             include: {
@@ -106,9 +117,10 @@ export async function getDBCart() {
             };
         });
 
+        console.log(`GET_DB_CART: Found ${mappedItems.length} items in DB.`);
         return mappedItems;
     } catch (error) {
-        console.error("Get DB cart error:", error);
+        console.error("GET_DB_CART: Error:", error);
         return null;
     }
 }

@@ -63,18 +63,14 @@ export const useCartStore = create<CartState>()(
 
                 set({ items: newItems });
 
-                if (get().isAuthenticated) {
-                    await syncCart(newItems);
-                }
+                await syncCart(newItems);
             },
 
             removeItem: async (productId) => {
                 const newItems = get().items.filter((i) => i.productId !== productId);
                 set({ items: newItems });
 
-                if (get().isAuthenticated) {
-                    await syncCart(newItems);
-                }
+                await syncCart(newItems);
             },
 
             updateQuantity: async (productId, quantity) => {
@@ -93,17 +89,13 @@ export const useCartStore = create<CartState>()(
                         set({ items: newItems });
                     }
 
-                    if (get().isAuthenticated) {
-                        await syncCart(newItems);
-                    }
+                    await syncCart(newItems);
                 }
             },
 
             clearCart: async () => {
                 set({ items: [] });
-                if (get().isAuthenticated) {
-                    await syncCart([]);
-                }
+                await syncCart([]);
             },
 
             getSummary: () => {
