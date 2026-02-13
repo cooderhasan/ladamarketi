@@ -84,7 +84,7 @@ export function ProductCard({
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,
-            discountRate: product.salePrice ? exactSaleDiscountRate : discountRate,
+            discountRate: discountRate, // Always pass the user's/dealer's discount rate
             desi: effectiveDesi,
         });
 

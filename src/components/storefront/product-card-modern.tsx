@@ -105,7 +105,7 @@ export function ProductCardModern({
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,
-            discountRate: hasSalePrice ? exactSaleDiscountRate : discountRate,
+            discountRate: discountRate, // Always pass the user's/dealer's discount rate
             desi: effectiveDesi,
         });
 
