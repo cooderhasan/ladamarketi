@@ -6,8 +6,11 @@ import Image from "next/image";
 import { PrintButton } from "@/components/admin/print-button";
 import { AutoPrint } from "@/components/admin/auto-print";
 
-// Helper to serialise decimals
-const toNumber = (value: any) => Number(value);
+// Helper to serialise decimals safely
+const toNumber = (value: any) => {
+    if (value === null || value === undefined) return 0;
+    return typeof value === "object" && "toNumber" in value ? value.toNumber() : Number(value);
+};
 
 export default async function OrderPrintPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

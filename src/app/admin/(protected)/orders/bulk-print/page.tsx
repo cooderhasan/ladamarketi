@@ -4,9 +4,13 @@ import { getSiteSettings } from "@/lib/settings";
 import { notFound } from "next/navigation";
 import { PrintButton } from "@/components/admin/print-button";
 import { AutoPrint } from "@/components/admin/auto-print";
+import { CloseButton } from "@/components/admin/close-button";
 
-// Helper to serialise decimals
-const toNumber = (value: any) => Number(value);
+// Helper to serialise decimals safely
+const toNumber = (value: any) => {
+    if (value === null || value === undefined) return 0;
+    return typeof value === "object" && "toNumber" in value ? value.toNumber() : Number(value);
+};
 
 interface BulkPrintPageProps {
     searchParams: Promise<{ ids?: string }>;
@@ -66,12 +70,7 @@ export default async function BulkOrderPrintPage({ searchParams }: BulkPrintPage
                     <span className="text-xs text-gray-500">Her sipariş ayrı bir sayfada yazdırılacaktır.</span>
                 </div>
                 <div className="flex gap-4 items-center">
-                    <button
-                        onClick={() => window.close()}
-                        className="text-sm text-gray-500 hover:text-gray-700 font-medium"
-                    >
-                        Kapat
-                    </button>
+                    <CloseButton />
                     <PrintButton />
                 </div>
             </div>
