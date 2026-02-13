@@ -57,6 +57,7 @@ export function ProductCardV2({
 
     const price = calculatePrice(
         product.listPrice,
+        product.salePrice, // Pass salePrice
         discountRate,
         product.vatRate
     );
@@ -98,6 +99,7 @@ export function ProductCardV2({
             image: product.images[0],
             quantity: quantity,
             listPrice: product.listPrice,
+            salePrice: product.salePrice || undefined, // Pass salePrice
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,

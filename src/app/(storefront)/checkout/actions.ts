@@ -108,16 +108,37 @@ export async function createOrder(data: CreateOrderData) {
                 }
 
                 // Calculation Logic (Tax Included Input)
-                // 1. Gross Line Total (Price * Qty)
-                const grossLineTotal = unitPrice * item.quantity;
 
-                // 2. Calculate Discount
-                const itemDiscount = grossLineTotal * (effectiveDiscountRate / 100);
+                // 1. Fetch Sale Price if exists
+                const salePrice = product.salePrice ? Number(product.salePrice) : null;
 
-                // 3. Discounted Line Total (This is what the user pays)
-                const discountedLineTotal = grossLineTotal - itemDiscount;
+                // 2. Calculate Dealer Price (if applicable)
+                const dealerPrice = unitPrice * (1 - effectiveDiscountRate / 100);
 
-                // 4. Back-calculate VAT from the Discounted Total
+                // 3. Determine Best Price
+                let finalUnitPrice = dealerPrice;
+                let appliedItemDiscountRate = effectiveDiscountRate;
+
+                // Check Best Price Logic
+                if (salePrice !== null && salePrice > 0) {
+                    // If Sale Price is better (lower) than Dealer Price
+                    if (salePrice < dealerPrice) {
+                        finalUnitPrice = salePrice;
+                        // Calculate effective discount rate for record keeping
+                        appliedItemDiscountRate = ((unitPrice - salePrice) / unitPrice) * 100;
+                    }
+                }
+
+                // 4. Gross Line Total (List Price * Qty) - For reference, but we use Final Unit Price
+                // Actually, lineTotal is what matters.
+
+                // Discounted Total for the line
+                const discountedLineTotal = finalUnitPrice * item.quantity;
+
+                // Discount Amount
+                const itemDiscount = (unitPrice * item.quantity) - discountedLineTotal;
+
+                // 5. Back-calculate VAT from the Discounted Total
                 // Formula: Price = Net * (1 + VAT%) => Net = Price / (1 + VAT%)
                 const vatRate = product.vatRate;
                 const netLineTotal = discountedLineTotal / (1 + vatRate / 100);
@@ -133,8 +154,8 @@ export async function createOrder(data: CreateOrderData) {
                     productId: product.id,
                     productName: productName,
                     quantity: item.quantity,
-                    unitPrice,
-                    discountRate: effectiveDiscountRate,
+                    unitPrice: unitPrice, // Storing List Price as Unit Price
+                    discountRate: appliedItemDiscountRate, // Storing Effective Discount Rate
                     vatRate: product.vatRate,
                     lineTotal: discountedLineTotal,
                     variantId: item.variantId,

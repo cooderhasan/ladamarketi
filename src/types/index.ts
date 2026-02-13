@@ -78,6 +78,7 @@ export interface CartItem {
     image: string;
     quantity: number;
     listPrice: number;
+    salePrice?: number;
     discountRate: number;
     vatRate: number;
     minQuantity: number;

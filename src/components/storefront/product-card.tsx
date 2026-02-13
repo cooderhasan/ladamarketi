@@ -15,6 +15,7 @@ interface Product {
     slug: string;
     images: string[];
     listPrice: number;
+    salePrice?: number | null; // Add salePrice
     vatRate: number;
     minQuantity: number;
     stock: number;
@@ -48,6 +49,7 @@ export function ProductCard({
     const { addItem } = useCartStore();
     const price = calculatePrice(
         product.listPrice,
+        product.salePrice, // Pass salePrice
         discountRate,
         product.vatRate
     );
@@ -73,6 +75,7 @@ export function ProductCard({
             image: product.images[0],
             quantity: product.minQuantity || 1,
             listPrice: product.listPrice,
+            salePrice: product.salePrice || undefined, // Pass salePrice
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,

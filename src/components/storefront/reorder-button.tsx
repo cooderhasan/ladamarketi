@@ -35,6 +35,7 @@ export function ReorderButton({ orderId }: ReorderButtonProps) {
                         name: item.name,
                         slug: item.slug,
                         listPrice: item.price, // Map price from action to listPrice in store
+                        salePrice: item.salePrice, // Pass salePrice
                         image: item.image,
                         quantity: item.quantity,
                         vatRate: item.vatRate,

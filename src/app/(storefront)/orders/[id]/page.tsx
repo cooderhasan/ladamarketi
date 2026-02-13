@@ -102,7 +102,13 @@ export default async function OrderPage({ params }: OrderPageProps) {
                                                     {item.productName}
                                                 </p>
                                                 <p className="text-sm text-gray-500">
-                                                    {item.quantity} adet x {formatPrice(Number(item.unitPrice))}
+                                                    {item.quantity} adet x{" "}
+                                                    {Number(item.lineTotal) / item.quantity < Number(item.unitPrice) && (
+                                                        <span className="line-through text-gray-400 mr-1">
+                                                            {formatPrice(Number(item.unitPrice))}
+                                                        </span>
+                                                    )}
+                                                    {formatPrice(Number(item.lineTotal) / item.quantity)}
                                                 </p>
                                             </div>
                                             <p className="font-medium text-gray-900 dark:text-white">

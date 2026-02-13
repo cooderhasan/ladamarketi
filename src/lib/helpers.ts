@@ -9,26 +9,45 @@ export const SHIPPING_FREE_LIMIT = 20000; // DEPRECATED: Use settings.freeShippi
  * Calculate discounted price for a product based on dealer discount rate
  * NOTE: listPrice is treated as VAT-INCLUSIVE
  */
+/**
+ * Calculate discounted price for a product based on dealer discount rate AND sale price
+ * NOTE: listPrice is treated as VAT-INCLUSIVE
+ */
 export function calculatePrice(
     listPrice: number,
+    salePrice: number | undefined | null,
     discountRate: number,
     vatRate: number
 ): PriceCalculation {
-    // 1. Calculate price after discount (still VAT-inclusive)
-    const discountedPrice = listPrice * (1 - discountRate / 100);
+    // 1. Calculate Dealer Discounted Price (VAT-inclusive)
+    const dealerPrice = listPrice * (1 - discountRate / 100);
 
-    // 2. Calculate VAT amount from the inclusive price
+    // 2. Determine Best Price (Minimum of Dealer Price vs Sale Price)
+    // If salePrice exists and is lower than dealerPrice, use salePrice.
+    // Otherwise, use dealerPrice.
+    let finalDiscountedPrice = dealerPrice;
+    let appliedDiscountRate = discountRate;
+
+    if (salePrice !== undefined && salePrice !== null && salePrice > 0) {
+        if (salePrice < dealerPrice) {
+            finalDiscountedPrice = salePrice;
+            // Calculate effective discount rate for the sale price
+            appliedDiscountRate = ((listPrice - salePrice) / listPrice) * 100;
+        }
+    }
+
+    // 3. Calculate VAT amount from the inclusive price
     // Formula: Price = Base * (1 + Rate) => Base = Price / (1 + Rate)
-    const basePrice = discountedPrice / (1 + vatRate / 100);
-    const vatAmount = discountedPrice - basePrice;
+    const basePrice = finalDiscountedPrice / (1 + vatRate / 100);
+    const vatAmount = finalDiscountedPrice - basePrice;
 
     return {
         listPrice,
-        discountRate,
-        discountedPrice: roundPrice(discountedPrice),
+        discountRate: appliedDiscountRate,
+        discountedPrice: roundPrice(finalDiscountedPrice),
         vatRate,
         vatAmount: roundPrice(vatAmount),
-        finalPrice: roundPrice(discountedPrice),
+        finalPrice: roundPrice(finalDiscountedPrice),
     };
 }
 
@@ -46,21 +65,27 @@ export function calculateCartSummary(
     let totalDesi = 0;
 
     items.forEach((item) => {
-        // Item total (VAT inclusive)
-        const itemTotal = item.listPrice * item.quantity;
+        // Item total (List Price * Qty)
+        const itemListTotal = item.listPrice * item.quantity;
 
-        // Discount amount - Use item's specific discount rate
-        const effectiveRate = item.discountRate !== undefined ? item.discountRate : discountRate;
-        const itemDiscount = itemTotal * (effectiveRate / 100);
+        // Calculate single item price using Best Price Logic
+        const priceCalc = calculatePrice(
+            item.listPrice,
+            item.salePrice,
+            item.discountRate !== undefined ? item.discountRate : discountRate,
+            item.vatRate
+        );
 
-        // Price after discount (VAT inclusive)
-        const itemDiscounted = itemTotal - itemDiscount;
+        // Total calculated price for the quantity
+        const itemFinalTotal = priceCalc.finalPrice * item.quantity;
 
-        // Calculate VAT from discounted price
-        const itemBase = itemDiscounted / (1 + item.vatRate / 100);
-        const itemVat = itemDiscounted - itemBase;
+        // Discount is the difference between List Total and Final Total
+        const itemDiscount = itemListTotal - itemFinalTotal;
 
-        subtotal += itemTotal;
+        // VAT for the total line
+        const itemVat = priceCalc.vatAmount * item.quantity;
+
+        subtotal += itemListTotal;
         discountAmount += itemDiscount;
         vatAmount += itemVat;
 
@@ -71,12 +96,14 @@ export function calculateCartSummary(
     // Total to pay is simply subtotal minus discount
     const total = subtotal - discountAmount;
 
-    // Subtotal should be the Net Amount (Total - Vat)
-    const netSubtotal = total - vatAmount;
+    // Subtotal in summary usually refers to the "Gross Total" before discounts
+    // But sometimes it refers to "Net Subtotal" (without VAT).
+    // Let's keep it as List Price Total for clarity in this context
+    // Or closer to previous logic: Net Subtotal = Total - VAT
 
     return {
         items,
-        subtotal: roundPrice(netSubtotal),
+        subtotal: roundPrice(subtotal), // Gross Total (List Price)
         discountAmount: roundPrice(discountAmount),
         vatAmount: roundPrice(vatAmount),
         total: roundPrice(total),

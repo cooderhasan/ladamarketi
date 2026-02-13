@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatPrice, SHIPPING_FREE_LIMIT } from "@/lib/helpers";
+import { formatPrice, calculatePrice, SHIPPING_FREE_LIMIT } from "@/lib/helpers";
 import { createOrder } from "@/app/(storefront)/checkout/actions";
 import { toast } from "sonner";
 import { CreditCard, Building2, ArrowLeft, Truck } from "lucide-react";
@@ -458,9 +458,12 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                                 )}
                                                 <div className="mt-1 font-semibold text-gray-900 dark:text-white text-sm">
                                                     {formatPrice(
-                                                        item.listPrice *
-                                                        item.quantity *
-                                                        (1 - (item.discountRate || discountRate) / 100)
+                                                        calculatePrice(
+                                                            item.listPrice,
+                                                            item.salePrice || undefined,
+                                                            item.discountRate !== undefined ? item.discountRate : discountRate,
+                                                            item.vatRate
+                                                        ).finalPrice * item.quantity
                                                     )}
                                                 </div>
                                             </div>
@@ -524,7 +527,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                         <>
                                             Siparişi Onayla
                                             <span className="ml-2 font-normal text-blue-100/80">
-                                                • {formatPrice(summary.total)}
+                                                • {formatPrice(grandTotal)}
                                             </span>
                                         </>
                                     )}

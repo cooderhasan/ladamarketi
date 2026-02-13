@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatPrice } from "@/lib/helpers";
+import { formatPrice, calculatePrice } from "@/lib/helpers";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, FileQuestion } from "lucide-react";
 
 export default function CartPage() {
@@ -89,15 +89,31 @@ export default function CartPage() {
                                         >
                                             {item.name}
                                         </Link>
-                                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                                            Birim fiyat:{" "}
-                                            {formatPrice(
-                                                item.listPrice *
-                                                (1 - (item.discountRate || discountRate) / 100)
-                                            )}
-                                        </p>
+                                        {(() => {
+                                            const price = calculatePrice(
+                                                item.listPrice,
+                                                item.salePrice || undefined, // Use item's salePrice if available
+                                                item.discountRate !== undefined ? item.discountRate : discountRate,
+                                                item.vatRate
+                                            );
+                                            return (
+                                                <div className="mt-1">
+                                                    {price.finalPrice < item.listPrice && (
+                                                        <span className="text-xs text-gray-400 line-through mr-1">
+                                                            {formatPrice(item.listPrice)}
+                                                        </span>
+                                                    )}
+                                                    <p className="text-xs sm:text-sm text-gray-500 inline-block">
+                                                        Birim fiyat:{" "}
+                                                        <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                                            {formatPrice(price.finalPrice)}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                            );
+                                        })()}
                                         <p className="text-xs text-gray-400">
-                                            Min. {item.minQuantity} adet | KDV: %{item.vatRate}
+                                            KDV: %{item.vatRate}
                                         </p>
 
                                         {/* Quantity & Price Row */}
@@ -151,9 +167,12 @@ export default function CartPage() {
                                             {/* Line Total */}
                                             <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">
                                                 {formatPrice(
-                                                    item.listPrice *
-                                                    item.quantity *
-                                                    (1 - (item.discountRate || discountRate) / 100)
+                                                    calculatePrice(
+                                                        item.listPrice,
+                                                        item.salePrice || undefined,
+                                                        item.discountRate !== undefined ? item.discountRate : discountRate,
+                                                        item.vatRate
+                                                    ).finalPrice * item.quantity
                                                 )}
                                             </p>
                                         </div>

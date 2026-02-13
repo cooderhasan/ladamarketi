@@ -61,6 +61,7 @@ export async function getReorderItems(orderId: string) {
             name: true,
             slug: true,
             listPrice: true,
+            salePrice: true, // Add salePrice
             stock: true,
             images: true,
             vatRate: true,
@@ -83,6 +84,7 @@ export async function getReorderItems(orderId: string) {
             name: product.name,
             slug: product.slug,
             price: Number(product.listPrice),
+            salePrice: product.salePrice ? Number(product.salePrice) : undefined, // Include salePrice
             image: product.images[0] || "",
             quantity: quantityToAdd,
             vatRate: product.vatRate,

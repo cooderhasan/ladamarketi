@@ -112,6 +112,7 @@ export function ProductDetail({
 
     const price = calculatePrice(
         product.listPrice + priceAdjustment,
+        product.salePrice, // Pass salePrice
         discountRate,
         product.vatRate
     );
@@ -187,9 +188,10 @@ export function ProductDetail({
             productId: product.id,
             name: product.name,
             slug: product.slug,
-            image: product.images[0] || "",
+            image: product.images[activeImageIndex] || "",
             quantity,
             listPrice: product.listPrice + priceAdjustment,
+            salePrice: product.salePrice || undefined, // Added salePrice
             discountRate: hasSalePrice ? saleDiscountRate : discountRate,
             vatRate: product.vatRate,
             minQuantity: product.minQuantity,
