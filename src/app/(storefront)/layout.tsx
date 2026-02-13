@@ -156,7 +156,7 @@ export default async function StorefrontLayout({
         }
     }
 
-    const dbCart = session?.user ? await getDBCart() : null;
+    const dbCart = session?.user?.id ? await getDBCart(session.user.id) : null;
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">

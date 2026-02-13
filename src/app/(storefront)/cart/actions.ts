@@ -50,18 +50,24 @@ export async function syncCart(items: StoreCartItem[]) {
     }
 }
 
-export async function getDBCart() {
+export async function getDBCart(providedUserId?: string) {
     console.log("GET_DB_CART: Fetching cart from DB...");
     try {
-        const session = await auth();
-        if (!session?.user?.id) {
-            console.log("GET_DB_CART: No active session.");
+        let userId = providedUserId;
+
+        if (!userId) {
+            const session = await auth();
+            userId = session?.user?.id;
+        }
+
+        if (!userId) {
+            console.log("GET_DB_CART: No active session or userId provided.");
             return null;
         }
 
-        console.log("GET_DB_CART: Found session for user:", session.user.id);
+        console.log("GET_DB_CART: Searching for user:", userId);
         const cart = await prisma.cart.findUnique({
-            where: { userId: session.user.id },
+            where: { userId: userId },
             include: {
                 items: {
                     include: {
