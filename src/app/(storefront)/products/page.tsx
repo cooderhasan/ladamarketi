@@ -19,6 +19,7 @@ interface ProductsPageProps {
         colors?: string | string[];
         sizes?: string | string[];
         page?: string;
+        is_on_sale?: string;
     }>;
 }
 
@@ -39,6 +40,9 @@ export async function generateMetadata({ searchParams }: ProductsPageProps): Pro
     } else if (params.search) {
         title = `"${params.search}" Arama Sonuçları`;
         description = `"${params.search}" için bulunan sonuçlar.`;
+    } else if (params.is_on_sale === "true") {
+        title = "İndirimli Ürünler";
+        description = "En uygun fiyatlı Lada yedek parçaları ve fırsat ürünleri.";
     }
 
     return {
@@ -133,6 +137,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         where.variants = { some: variantConditions };
     }
 
+    // Is on Sale
+    if (params.is_on_sale === "true") {
+        where.salePrice = {
+            not: null,
+            lt: prisma.product.fields.listPrice
+        };
+    }
+
     // --- Build Sorting ---
     let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: "desc" };
     if (params.sort === "price_asc") {
@@ -222,7 +234,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                         {currentCategory
                             ? currentCategory.name
-                            : params.search ? `"${params.search}" Arama Sonuçları` : "Tüm Ürünler"}
+                            : params.search
+                                ? `"${params.search}" Arama Sonuçları`
+                                : params.is_on_sale === "true"
+                                    ? "İndirimli Ürünler"
+                                    : "Tüm Ürünler"}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400">
                         Toplam <span className="font-semibold text-gray-900 dark:text-white">{totalCount}</span> ürün listeleniyor
