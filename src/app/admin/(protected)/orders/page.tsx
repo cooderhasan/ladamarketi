@@ -47,6 +47,20 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         };
     }
 
+    // Date Filtering
+    if (startDate || endDate) {
+        where.createdAt = {};
+        if (startDate) {
+            where.createdAt.gte = startDate;
+        }
+        if (endDate) {
+            // End date'i günün sonuna ayarla (23:59:59)
+            const endOfDay = new Date(endDate);
+            endOfDay.setHours(23, 59, 59, 999);
+            where.createdAt.lte = endOfDay;
+        }
+    }
+
     // Parallel Fetch: Orders + Total Count
     const [orders, totalCount] = await Promise.all([
         prisma.order.findMany({
