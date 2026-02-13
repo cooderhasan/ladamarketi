@@ -12,6 +12,7 @@ interface StoreInitializerProps {
 }
 
 export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: StoreInitializerProps) {
+    console.log("STORE_INIT: Component executed", { discountRate, dbCartItems: dbCart?.length, isAuthenticated });
     const initialized = useRef(false);
     const setItems = useCartStore((state) => state.setItems);
     const setIsAuthenticated = useCartStore((state) => state.setIsAuthenticated);
@@ -19,6 +20,7 @@ export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: Stor
     const hasHydrated = useCartStore((state) => state._hasHydrated);
 
     useEffect(() => {
+        console.log("STORE_INIT: Effect triggered", { hasHydrated, isAuthenticated, initialized: initialized.current });
         // Update store with server-side flags
         useCartStore.setState({ discountRate, isAuthenticated });
 
