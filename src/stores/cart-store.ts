@@ -115,8 +115,21 @@ export const useCartStore = create<CartState>()(
         }),
         {
             name: "b2b-cart",
-            onRehydrateStorage: () => (state) => {
-                state?.setHasHydrated(true);
+            // IMPORTANT: Do not persist the hydration flag itself
+            partialize: (state) => {
+                const { _hasHydrated, ...rest } = state;
+                return rest;
+            },
+            onRehydrateStorage: () => {
+                console.log("STORE_LOG: Rehydration process starting...");
+                return (state, error) => {
+                    if (error) {
+                        console.error("STORE_LOG: Rehydration error:", error);
+                    } else {
+                        console.log("STORE_LOG: Rehydration finished successfully.");
+                        state?.setHasHydrated(true);
+                    }
+                };
             },
         }
     )

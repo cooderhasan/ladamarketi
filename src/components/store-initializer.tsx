@@ -12,7 +12,7 @@ interface StoreInitializerProps {
 }
 
 export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: StoreInitializerProps) {
-    console.log("STORE_INIT: Component executed", { discountRate, dbCartItems: dbCart?.length, isAuthenticated });
+    console.log(`STORE_INIT: Component executed (Auth: ${isAuthenticated}, DB Items: ${dbCart?.length || 0})`);
     const initialized = useRef(false);
     const setItems = useCartStore((state) => state.setItems);
     const setIsAuthenticated = useCartStore((state) => state.setIsAuthenticated);
@@ -20,19 +20,19 @@ export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: Stor
     const hasHydrated = useCartStore((state) => state._hasHydrated);
 
     useEffect(() => {
-        console.log("STORE_INIT: Effect triggered", { hasHydrated, isAuthenticated, initialized: initialized.current });
+        console.log(`STORE_INIT: Effect logic starting (Hydrated: ${hasHydrated}, Auth: ${isAuthenticated}, Init: ${initialized.current})`);
+
         // Update store with server-side flags
         useCartStore.setState({ discountRate, isAuthenticated });
 
-        // IMPORTANT: Only process cart merging AFTER hydration is complete
         if (!hasHydrated) {
-            console.log("STORE_INIT: Waiting for hydration...");
+            console.log("STORE_INIT: Still waiting for store hydration from localStorage...");
             return;
         }
 
         if (isAuthenticated && !initialized.current) {
             const localItems = useCartStore.getState().items;
-            console.log("STORE_INIT: Initializing authenticated session. Local items:", localItems.length, "DB items:", dbCart?.length);
+            console.log(`STORE_INIT: Ready to merge. Local: ${localItems.length}, DB: ${dbCart?.length || 0}`);
 
             if (dbCart) {
                 if (localItems.length === 0) {
