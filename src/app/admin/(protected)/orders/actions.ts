@@ -74,3 +74,42 @@ export async function updateOrderTracking(orderId: string, trackingUrl: string) 
         return { success: false, error: "Takip linki güncellenemedi." };
     }
 }
+
+export async function bulkUpdateOrderStatus(
+    orderIds: string[],
+    status: "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED"
+) {
+    try {
+        const session = await auth();
+
+        if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+            throw new Error("Unauthorized");
+        }
+
+        // Update all selected orders
+        await prisma.order.updateMany({
+            where: {
+                id: { in: orderIds },
+            },
+            data: { status },
+        });
+
+        // Log the bulk action (simplified log)
+        await prisma.adminLog.create({
+            data: {
+                adminId: session.user.id,
+                action: "BULK_UPDATE_ORDER_STATUS",
+                entityType: "Order",
+                entityId: "BULK",
+                newData: { orderIds, status },
+            },
+        });
+
+        revalidatePath("/admin/orders");
+        return { success: true };
+    } catch (error) {
+        console.error("Bulk order status update error:", error);
+        return { success: false, error: "Toplu güncelleme başarısız oldu." };
+    }
+}
+

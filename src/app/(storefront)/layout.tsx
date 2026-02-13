@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { getSiteSettings } from "@/lib/settings";
 import { getAllPolicies } from "@/app/actions/policy";
 import { StoreInitializer } from "@/components/store-initializer";
+import { getDBCart } from "@/app/(storefront)/cart/actions";
 
 export default async function StorefrontLayout({
     children,
@@ -155,9 +156,15 @@ export default async function StorefrontLayout({
         }
     }
 
+    const dbCart = session?.user ? await getDBCart() : null;
+
     return (
         <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-            <StoreInitializer discountRate={userDiscountRate} />
+            <StoreInitializer
+                discountRate={userDiscountRate}
+                dbCart={dbCart}
+                isAuthenticated={!!session?.user}
+            />
             <StorefrontHeader
                 user={session?.user}
                 logoUrl={settings.logoUrl}
