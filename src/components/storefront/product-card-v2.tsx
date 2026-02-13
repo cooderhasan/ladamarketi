@@ -65,10 +65,13 @@ export function ProductCardV2({
     // Sale Price Logic
     const hasSalePrice = product.salePrice != null && product.salePrice < product.listPrice;
 
-    // Calculate discount percentage for badge
-    const saleDiscountRate = hasSalePrice && product.salePrice != null
-        ? Math.round(((product.listPrice - product.salePrice) / product.listPrice) * 100)
+    // Calculate exact discount percentage for cart
+    const exactSaleDiscountRate = hasSalePrice && product.salePrice != null
+        ? ((product.listPrice - product.salePrice) / product.listPrice) * 100
         : 0;
+
+    // Calculate rounded discount percentage for badge
+    const saleDiscountRate = Math.round(exactSaleDiscountRate);
 
     // Determine which price to display
     const displayPrice = hasSalePrice && product.salePrice != null ? product.salePrice : (isDealer ? price.finalPrice : product.listPrice);
@@ -103,7 +106,7 @@ export function ProductCardV2({
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,
-            discountRate: hasSalePrice ? saleDiscountRate : discountRate,
+            discountRate: hasSalePrice ? exactSaleDiscountRate : discountRate,
             desi: effectiveDesi,
         });
 

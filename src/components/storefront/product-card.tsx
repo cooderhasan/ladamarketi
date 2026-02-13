@@ -56,6 +56,11 @@ export function ProductCard({
 
     const hasVariants = product._count?.variants && product._count.variants > 0;
 
+    // Calculate exact discount percentage for cart if not passed
+    const exactSaleDiscountRate = product.salePrice
+        ? ((product.listPrice - product.salePrice) / product.listPrice) * 100
+        : 0;
+
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -79,7 +84,7 @@ export function ProductCard({
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,
-            discountRate: discountRate,
+            discountRate: product.salePrice ? exactSaleDiscountRate : discountRate,
             desi: effectiveDesi,
         });
 

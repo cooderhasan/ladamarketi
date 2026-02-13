@@ -184,21 +184,26 @@ export function ProductDetail({
         const dimsDesi = (Number(product.width || 0) * Number(product.height || 0) * Number(product.length || 0)) / 3000;
         const effectiveDesi = Math.max(Number(product.weight || 0), Number(product.desi || 0), dimsDesi);
 
+        // Calculate exact discount percentage for cart
+        const exactSaleDiscountRate = product.salePrice
+            ? ((product.listPrice - product.salePrice) / product.listPrice) * 100
+            : 0;
+
         addItem({
             productId: product.id,
             name: product.name,
             slug: product.slug,
-            image: product.images[activeImageIndex] || "",
-            quantity,
+            image: product.images[0],
+            quantity: quantity,
             listPrice: product.listPrice + priceAdjustment,
-            salePrice: product.salePrice || undefined, // Added salePrice
-            discountRate: hasSalePrice ? saleDiscountRate : discountRate,
+            salePrice: product.salePrice || undefined, // Pass salePrice
             vatRate: product.vatRate,
+            stock: product.stock,
             minQuantity: product.minQuantity,
-            stock: effectiveStock,
-            variantId: currentVariant?.id,
-            variantInfo,
+            discountRate: hasSalePrice ? exactSaleDiscountRate : discountRate,
             desi: effectiveDesi,
+            variantId: selectedVariant?.id,
+            variantInfo: variantInfo,
         });
         toast.success("Ürün sepete eklendi!");
     };

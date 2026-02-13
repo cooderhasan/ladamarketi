@@ -64,10 +64,13 @@ export function ProductCardModern({
     // Sale Price Logic
     const hasSalePrice = product.salePrice != null && product.salePrice < product.listPrice;
 
-    // Calculate discount percentage for badge
-    const saleDiscountRate = hasSalePrice && product.salePrice != null
-        ? Math.round(((product.listPrice - product.salePrice) / product.listPrice) * 100)
+    // Calculate exact discount percentage for cart
+    const exactSaleDiscountRate = hasSalePrice && product.salePrice != null
+        ? ((product.listPrice - product.salePrice) / product.listPrice) * 100
         : 0;
+
+    // Use rounded for badge
+    const saleDiscountRate = Math.round(exactSaleDiscountRate);
 
     // Determine which price to display
     const displayPrice = hasSalePrice && product.salePrice != null ? product.salePrice : (isDealer ? price.finalPrice : product.listPrice);
@@ -75,7 +78,7 @@ export function ProductCardModern({
     const strikethroughPrice = product.listPrice;
 
     // Badge rate: sale discount takes precedence, otherwise dealer discount (if dealer)
-    const discountBadgeRate = hasSalePrice ? saleDiscountRate : 0;
+    // const discountBadgeRate = hasSalePrice ? saleDiscountRate : 0; // Unused variable?
 
     const hasVariants = product._count?.variants && product._count.variants > 0;
 
@@ -102,7 +105,7 @@ export function ProductCardModern({
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,
-            discountRate: hasSalePrice ? saleDiscountRate : discountRate,
+            discountRate: hasSalePrice ? exactSaleDiscountRate : discountRate,
             desi: effectiveDesi,
         });
 
