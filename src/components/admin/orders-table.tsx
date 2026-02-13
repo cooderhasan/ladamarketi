@@ -16,7 +16,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, FileDown, Search, X } from "lucide-react";
+import { Eye, FileDown, Search, X, Printer, CheckCircle2 } from "lucide-react";
 import {
     formatDate,
     getOrderStatusLabel,
@@ -33,10 +33,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updateOrderStatus, updateOrderTracking } from "@/app/admin/(protected)/orders/actions";
+import { updateOrderStatus, updateOrderTracking, bulkUpdateOrderStatus } from "@/app/admin/(protected)/orders/actions";
 import { toast } from "sonner";
 import { OrderWithItems } from "@/types";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface OrdersTableProps {
     orders: OrderWithItems[];
@@ -72,9 +73,14 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
     const [isOpen, setIsOpen] = useState(false);
     const [loadingId, setLoadingId] = useState<string | null>(null);
 
+    // Selection State
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [isBulkLoading, setIsBulkLoading] = useState(false);
+
     // Sync local order state when props change (due to server refetch)
     useEffect(() => {
         setOrders(initialOrders);
+        setSelectedIds([]); // Reset selection on page change or filter change
     }, [initialOrders]);
 
     // Handle Search/Filter Application
@@ -136,9 +142,93 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
         }
     };
 
+    // Bulk Handlers
+    const toggleSelectAll = () => {
+        if (selectedIds.length === orders.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(orders.map(o => o.id));
+        }
+    };
+
+    const toggleSelect = (orderId: string) => {
+        setSelectedIds(prev =>
+            prev.includes(orderId)
+                ? prev.filter(id => id !== orderId)
+                : [...prev, orderId]
+        );
+    };
+
+    const handleBulkStatusUpdate = async (newStatus: string) => {
+        if (selectedIds.length === 0) return;
+
+        setIsBulkLoading(true);
+        try {
+            const result = await bulkUpdateOrderStatus(selectedIds, newStatus as any);
+            if (result.success) {
+                toast.success(`${selectedIds.length} sipariş durumu güncellendi`);
+                setSelectedIds([]);
+                router.refresh();
+            } else {
+                toast.error(result.error);
+            }
+        } catch (error) {
+            toast.error("Toplu güncelleme sırasında bir hata oluştu");
+        } finally {
+            setIsBulkLoading(false);
+        }
+    };
+
+    const handleBulkPrint = () => {
+        if (selectedIds.length === 0) return;
+        window.open(`/admin/orders/bulk-print?ids=${selectedIds.join(',')}`, '_blank');
+    };
+
     return (
         <div className="space-y-4">
-            {/* Filter Bar */}
+            {/* Bulk Actions Bar */}
+            {selectedIds.length > 0 && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-3 rounded-lg flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                            {selectedIds.length} sipariş seçildi
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Select onValueChange={handleBulkStatusUpdate} disabled={isBulkLoading}>
+                            <SelectTrigger className="w-[200px] h-9 bg-white dark:bg-gray-800">
+                                <SelectValue placeholder="Durumu Güncelle" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {orderStatuses.filter(s => s.value !== 'ALL').map((status) => (
+                                    <SelectItem key={status.value} value={status.value}>
+                                        {status.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white dark:bg-gray-800 gap-2"
+                            onClick={handleBulkPrint}
+                        >
+                            <Printer className="h-4 w-4" />
+                            Toplu Yazdır
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedIds([])}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-100"
+                        >
+                            İptal
+                        </Button>
+                    </div>
+                </div>
+            )}
+
             {/* Filter Bar */}
             <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow border border-gray-100 dark:border-gray-800">
                 <div className="flex flex-col md:flex-row md:items-end gap-4">
@@ -213,6 +303,13 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                     <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead className="w-[50px]">
+                                    <Checkbox
+                                        checked={selectedIds.length === orders.length && orders.length > 0}
+                                        onCheckedChange={toggleSelectAll}
+                                        aria-label="Tümünü Seç"
+                                    />
+                                </TableHead>
                                 <TableHead>Sipariş No</TableHead>
                                 <TableHead>Müşteri</TableHead>
                                 <TableHead>Tarih</TableHead>
@@ -224,7 +321,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                         <TableBody>
                             {orders.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                                         Sipariş bulunamadı.
                                     </TableCell>
                                 </TableRow>
@@ -232,12 +329,19 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                 orders.map((order) => (
                                     <TableRow
                                         key={order.id}
-                                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                                        className={`cursor-pointer transition-colors ${selectedIds.includes(order.id) ? 'bg-blue-50/50 dark:bg-blue-900/10' : 'hover:bg-muted/50'}`}
                                         onClick={() => {
                                             setSelectedOrder(order);
                                             setIsOpen(true);
                                         }}
                                     >
+                                        <TableCell onClick={(e) => e.stopPropagation()}>
+                                            <Checkbox
+                                                checked={selectedIds.includes(order.id)}
+                                                onCheckedChange={() => toggleSelect(order.id)}
+                                                aria-label={`${order.orderNumber} nolu siparişi seç`}
+                                            />
+                                        </TableCell>
                                         <TableCell className="font-medium">
                                             #{order.orderNumber}
                                         </TableCell>
