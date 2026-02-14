@@ -293,48 +293,53 @@ export async function createOrder(data: CreateOrderData) {
         const settings = settingsRecord?.value as any || {};
 
         // Send confirmation email (to user email or guest email)
-        const emailTo = userForEmail?.email || data.guestEmail;
-        if (emailTo) {
-            sendOrderConfirmationEmail({
-                to: emailTo,
+        // Send confirmation email (to user email or guest email)
+        // ONLY if payment method is NOT Credit Card. 
+        // For Credit Card, we will send email in the PayTR Callback (success)
+        if (paymentMethod !== "CREDIT_CARD") {
+            const emailTo = userForEmail?.email || data.guestEmail;
+            if (emailTo) {
+                sendOrderConfirmationEmail({
+                    to: emailTo,
+                    orderNumber: order.orderNumber,
+                    customerName: data.shippingAddress.name,
+                    items: orderItems.map((item) => ({
+                        productName: item.productName,
+                        quantity: item.quantity,
+                        unitPrice: Number(item.unitPrice),
+                        lineTotal: item.lineTotal,
+                        variantInfo: item.variantInfo || undefined,
+                    })),
+                    totalAmount: total,
+                    paymentMethod: paymentMethod,
+                    bankInfo: paymentMethod === "BANK_TRANSFER" ? {
+                        bankName: settings.bankName || "",
+                        iban: settings.bankIban1 || "",
+                        accountHolder: settings.bankAccountName || "",
+                    } : undefined,
+                    shippingAddress: {
+                        address: data.shippingAddress.address,
+                        city: data.shippingAddress.city,
+                        district: data.shippingAddress.district,
+                    },
+                    cargoCompany: data.cargoCompany,
+                }).catch((err) => {
+                    console.error("Failed to send order confirmation email:", err);
+                });
+            }
+
+            // Send admin notification (fire and forget)
+            sendAdminNewOrderEmail({
                 orderNumber: order.orderNumber,
                 customerName: data.shippingAddress.name,
-                items: orderItems.map((item) => ({
-                    productName: item.productName,
-                    quantity: item.quantity,
-                    unitPrice: Number(item.unitPrice),
-                    lineTotal: item.lineTotal,
-                    variantInfo: item.variantInfo || undefined,
-                })),
+                companyName: userForEmail?.companyName || data.shippingAddress.name, // Fallback to person name
                 totalAmount: total,
-                paymentMethod: paymentMethod,
-                bankInfo: paymentMethod === "BANK_TRANSFER" ? {
-                    bankName: settings.bankName || "",
-                    iban: settings.bankIban1 || "",
-                    accountHolder: settings.bankAccountName || "",
-                } : undefined,
-                shippingAddress: {
-                    address: data.shippingAddress.address,
-                    city: data.shippingAddress.city,
-                    district: data.shippingAddress.district,
-                },
+                orderId: order.id,
                 cargoCompany: data.cargoCompany,
             }).catch((err) => {
-                console.error("Failed to send order confirmation email:", err);
+                console.error("Failed to send admin notification email:", err);
             });
         }
-
-        // Send admin notification (fire and forget)
-        sendAdminNewOrderEmail({
-            orderNumber: order.orderNumber,
-            customerName: data.shippingAddress.name,
-            companyName: userForEmail?.companyName || data.shippingAddress.name, // Fallback to person name
-            totalAmount: total,
-            orderId: order.id,
-            cargoCompany: data.cargoCompany,
-        }).catch((err) => {
-            console.error("Failed to send admin notification email:", err);
-        });
 
         return { success: true, orderId: order.id };
     } catch (error) {

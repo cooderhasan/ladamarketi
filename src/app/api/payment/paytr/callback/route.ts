@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyPayTRCallback } from "@/lib/paytr";
+import { sendOrderConfirmationEmail, sendAdminNewOrderEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
     try {
@@ -27,15 +28,17 @@ export async function POST(req: NextRequest) {
             const order = await prisma.order.findFirst({
                 where: {
                     orderNumber: orderId, // Use orderId (which is merchant_oid) for orderNumber
-                    // Status check is removed to allow re-payment or different flows
-                    // status: "PENDING",
                 },
-                include: { payment: true },
+                include: {
+                    payment: true,
+                    items: true,
+                    user: true,
+                },
             });
 
             if (!order) {
                 console.error(`Sipariş bulunamadı: ${orderId}`);
-                return new NextResponse("OK"); // PayTR'a OK dön ki tekrar denemesin (veya hata dönüp loglatabiliriz ama genelde OK dönülür)
+                return new NextResponse("OK");
             }
 
             // Ödeme Başarılı
@@ -49,20 +52,64 @@ export async function POST(req: NextRequest) {
                     update: {
                         status: "COMPLETED",
                         amount: Number(total_amount) / 100,
-                        providerRef: orderId, // Using orderId (merchant_oid) as providerRef
-                        providerData: params as any, // Store all params as providerData
+                        providerRef: orderId,
+                        providerData: params as any,
                     },
                     create: {
                         orderId: order.id,
-                        method: "CREDIT_CARD", // Assuming credit card, adjust if other methods are possible
+                        method: "CREDIT_CARD",
                         status: "COMPLETED",
                         amount: Number(total_amount) / 100,
-                        providerRef: orderId, // Using orderId (merchant_oid) as providerRef
-                        providerData: params as any, // Store all params as providerData
+                        providerRef: orderId,
+                        providerData: params as any,
                     },
                 }),
             ]);
             console.log(`Order ${orderId} confirmed via PayTR`);
+
+            // --- SEND EMAILS (Now that payment is confirmed) ---
+            try {
+                const shippingAddress = order.shippingAddress as any; // Cast JSON to any
+                const emailTo = order.user?.email || order.guestEmail;
+
+                if (emailTo) {
+                    await sendOrderConfirmationEmail({
+                        to: emailTo,
+                        orderNumber: order.orderNumber,
+                        customerName: shippingAddress?.name || "Değerli Müşterimiz",
+                        items: order.items.map((item) => ({
+                            productName: item.productName,
+                            quantity: item.quantity,
+                            unitPrice: Number(item.unitPrice),
+                            lineTotal: Number(item.lineTotal),
+                            variantInfo: item.variantInfo || undefined,
+                        })),
+                        totalAmount: Number(order.total),
+                        paymentMethod: "CREDIT_CARD",
+                        shippingAddress: {
+                            address: shippingAddress?.address || "",
+                            city: shippingAddress?.city || "",
+                            district: shippingAddress?.district || "",
+                        },
+                        cargoCompany: order.cargoCompany || undefined,
+                    });
+                }
+
+                // Send admin notification
+                await sendAdminNewOrderEmail({
+                    orderNumber: order.orderNumber,
+                    customerName: shippingAddress?.name || "Misafir",
+                    companyName: order.user?.companyName || shippingAddress?.name || "Misafir",
+                    totalAmount: Number(order.total),
+                    orderId: order.id,
+                    cargoCompany: order.cargoCompany || undefined,
+                });
+
+                console.log(`Emails sent for Order ${orderId}`);
+            } catch (emailErr) {
+                console.error(`Failed to send emails for Order ${orderId}:`, emailErr);
+                // Don't fail the request, just log it
+            }
         } else {
             // Payment failed
             console.log(`Order ${orderId} payment failed:`, params.failed_reason_msg);
