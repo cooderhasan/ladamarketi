@@ -7,6 +7,7 @@ import { getSiteSettings } from "@/lib/settings";
 import { getAllPolicies } from "@/app/actions/policy";
 import { StoreInitializer } from "@/components/store-initializer";
 import { getDBCart } from "@/app/(storefront)/cart/actions";
+import { AddedToCartModal } from "@/components/storefront/added-to-cart-modal";
 
 export default async function StorefrontLayout({
     children,
@@ -165,6 +166,7 @@ export default async function StorefrontLayout({
                 dbCart={dbCart}
                 isAuthenticated={!!session?.user}
             />
+            <AddedToCartModal />
             <StorefrontHeader
                 user={session?.user}
                 logoUrl={settings.logoUrl}

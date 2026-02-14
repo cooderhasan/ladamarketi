@@ -51,7 +51,7 @@ export function ProductCardModern({
     isDealer,
     badge,
 }: ProductCardProps) {
-    const { addItem } = useCartStore();
+    const { addItem, openAddedToCartModal } = useCartStore();
     const [quantity, setQuantity] = useState(product.minQuantity || 1);
 
     const price = calculatePrice(
@@ -94,22 +94,23 @@ export function ProductCardModern({
         const dimsDesi = (Number(product.width || 0) * Number(product.height || 0) * Number(product.length || 0)) / 3000;
         const effectiveDesi = Math.max(Number(product.weight || 0), Number(product.desi || 0), dimsDesi);
 
-        addItem({
+        const itemToAdd = {
             productId: product.id,
             name: product.name,
             slug: product.slug,
             image: product.images[0],
             quantity: quantity,
             listPrice: product.listPrice,
-            salePrice: product.salePrice || undefined, // Pass salePrice
+            salePrice: product.salePrice || undefined,
             vatRate: product.vatRate,
             stock: product.stock,
             minQuantity: product.minQuantity,
-            discountRate: discountRate, // Always pass the user's/dealer's discount rate
+            discountRate: discountRate,
             desi: effectiveDesi,
-        });
+        };
 
-        toast.success("Ürün sepete eklendi");
+        addItem(itemToAdd);
+        openAddedToCartModal(itemToAdd);
     };
 
     return (

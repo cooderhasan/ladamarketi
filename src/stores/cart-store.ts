@@ -20,6 +20,12 @@ interface CartState {
     setItems: (items: CartItem[]) => void;
     logout: () => void;
     setHasHydrated: (val: boolean) => void;
+
+    // Added to Cart Modal State
+    lastAddedItem: CartItem | null;
+    isAddedToCartModalOpen: boolean;
+    openAddedToCartModal: (item: CartItem) => void;
+    closeAddedToCartModal: () => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -112,6 +118,12 @@ export const useCartStore = create<CartState>()(
             logout: () => {
                 set({ items: [], isAuthenticated: false, discountRate: 0 });
             },
+
+            // Modal Actions
+            lastAddedItem: null,
+            isAddedToCartModalOpen: false,
+            openAddedToCartModal: (item) => set({ lastAddedItem: item, isAddedToCartModalOpen: true }),
+            closeAddedToCartModal: () => set({ isAddedToCartModalOpen: false }),
         }),
         {
             name: "b2b-cart",
