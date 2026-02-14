@@ -145,6 +145,9 @@ export function ProductCardModern({
                             src={product.images[0]}
                             alt={product.name}
                             fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            priority={false}
+                            loading="lazy"
                             className={cn(
                                 "object-contain p-2 transition-all duration-700 ease-in-out group-hover/card:scale-110",
                                 product.stock === 0 && "opacity-50 grayscale"
