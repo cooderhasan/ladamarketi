@@ -1,5 +1,6 @@
 import { getSiteSettings } from "@/lib/settings";
 import { LoginForm } from "@/components/auth/login-form";
+import { Suspense } from "react";
 
 export const metadata = {
     title: "Giriş Yap",
@@ -19,7 +20,9 @@ export default async function LoginPage() {
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200/30 dark:bg-blue-500/10 rounded-full blur-3xl" />
             </div>
 
-            <LoginForm logoUrl={logoUrl} siteName={siteName} />
+            <Suspense fallback={<div className="flex justify-center p-8">Yükleniyor...</div>}>
+                <LoginForm logoUrl={logoUrl} siteName={siteName} />
+            </Suspense>
         </div>
     );
 }
