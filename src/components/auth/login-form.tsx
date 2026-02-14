@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,8 @@ interface LoginFormProps {
 
 export function LoginForm({ logoUrl, siteName }: LoginFormProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl");
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -39,9 +41,13 @@ export function LoginForm({ logoUrl, siteName }: LoginFormProps) {
                 toast.error("E-posta veya şifre hatalı.");
             } else {
                 toast.success("Başarıyla giriş yapıldı, yönlendiriliyorsunuz...");
-                // Redirect to admin - Middleware will handle non-admin users by redirecting them to home
+                // Redirect to callbackUrl if present, otherwise to admin/home
                 setTimeout(() => {
-                    window.location.href = "/admin";
+                    if (callbackUrl) {
+                        window.location.href = callbackUrl;
+                    } else {
+                        window.location.href = "/admin";
+                    }
                 }, 1500);
             }
         } catch {

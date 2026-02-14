@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,8 @@ interface RegisterFormProps {
 
 export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl");
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [isCorporate, setIsCorporate] = useState(false);
@@ -75,7 +77,7 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
                     </div>
 
                     <div className="pt-4">
-                        <Link href="/login">
+                        <Link href={callbackUrl ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/login"}>
                             <Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
                                 Giriş Yap
                             </Button>
@@ -183,7 +185,10 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
 
                 <div className="mt-6 text-center text-sm">
                     <span className="text-gray-500">Zaten hesabınız var mı? </span>
-                    <Link href="/login" className="text-blue-600 hover:underline">
+                    <Link
+                        href={callbackUrl ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/login"}
+                        className="text-blue-600 hover:underline"
+                    >
                         Giriş Yap
                     </Link>
                 </div>
