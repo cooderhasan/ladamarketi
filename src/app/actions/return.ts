@@ -108,7 +108,7 @@ export async function getAdminReturnRequests(status?: "PENDING" | "APPROVED" | "
         include: {
             user: {
                 select: {
-                    name: true,
+                    companyName: true,
                     email: true,
                     phone: true,
                 }

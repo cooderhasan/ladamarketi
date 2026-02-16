@@ -36,7 +36,7 @@ interface ReturnRequest {
     details: string | null;
     adminNote: string | null;
     user: {
-        name: string | null;
+        companyName: string | null;
         email: string | null;
         phone: string | null;
     };
@@ -132,7 +132,7 @@ export function ReturnTable({ initialRequests }: ReturnTableProps) {
                                 </div>
                             </td>
                             <td className="px-6 py-4">
-                                <div className="font-medium">{req.user.name || "İsimsiz"}</div>
+                                <div className="font-medium">{req.user.companyName || "İsimsiz"}</div>
                                 <div className="text-xs text-gray-500">{req.user.email}</div>
                                 <div className="text-xs text-gray-500">{req.user.phone}</div>
                             </td>
