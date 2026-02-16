@@ -31,6 +31,12 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
             items: {
                 include: {
                     returnRequest: true,
+                    product: {
+                        select: {
+                            images: true,
+                            slug: true,
+                        }
+                    }
                 }
             },
             payment: true,
@@ -94,15 +100,18 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                                 return (
                                     <div key={item.id} className="p-6 flex flex-col sm:flex-row gap-4 sm:items-center">
                                         <div className="relative w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden shrink-0 border border-gray-100 dark:border-gray-800">
-                                            {/* We don't have imageURL in OrderItem directly usually, assuming fetched via product relation or similar. 
-                                                Wait, OrderItem model doesn't store image. It links to Product.
-                                                However, standard checkout usually stores a snapshot or we fetch product image.
-                                                Let's assume we can fetch product.images from product relation if we included it.
-                                                Wait, I didn't include `product` in the query above! I need to fix that.
-                                            */}
-                                            <div className="flex items-center justify-center h-full text-xs text-gray-400">
-                                                Resim Yok
-                                            </div>
+                                            {item.product && item.product.images && item.product.images[0] ? (
+                                                <Image
+                                                    src={item.product.images[0]}
+                                                    alt={item.productName}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-full text-xs text-gray-400">
+                                                    Resim Yok
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-semibold text-gray-900 dark:text-white truncate">
