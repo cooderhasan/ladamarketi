@@ -38,6 +38,11 @@ export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: Stor
                     const mergedItems = [...dbCart];
 
                     localItems.forEach(localItem => {
+                        // Apply current user discount rate to local items being merged
+                        if (isAuthenticated) {
+                            localItem.discountRate = discountRate;
+                        }
+
                         const localKey = localItem.variantId ? `${localItem.productId}-${localItem.variantId}` : localItem.productId;
                         const existingIndex = mergedItems.findIndex(dbItem => {
                             const dbKey = dbItem.variantId ? `${dbItem.productId}-${dbItem.variantId}` : dbItem.productId;
@@ -45,8 +50,14 @@ export function StoreInitializer({ discountRate, dbCart, isAuthenticated }: Stor
                         });
 
                         if (existingIndex >= 0) {
+                            // If item exists in DB, keep DB item (which has correct price/discount) but update quantity
+                            // Use the maximum quantity to avoid losing items, or sum them? 
+                            // Current logic uses Math.max, let's keep it or maybe sum is better? 
+                            // Usually for merge, sum is better, but let's stick to existing logic for now unless requested.
+                            // However, we must ensure the local quantity isn't lost if it's higher.
                             mergedItems[existingIndex].quantity = Math.max(mergedItems[existingIndex].quantity, localItem.quantity);
                         } else {
+                            // If item doesn't exist in DB, add it (with updated discount rate)
                             mergedItems.push(localItem);
                         }
                     });
