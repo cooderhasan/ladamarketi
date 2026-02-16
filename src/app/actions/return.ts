@@ -85,8 +85,8 @@ export async function getReturnRequests() {
             },
             orderItem: {
                 select: {
-                    name: true,
-                    price: true,
+                    productName: true,
+                    unitPrice: true,
                     quantity: true,
                 }
             }

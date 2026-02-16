@@ -90,7 +90,7 @@ export default async function ReturnsPage() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-gray-900 dark:text-white">
-                                            {request.orderItem.name}
+                                            {request.orderItem.productName}
                                         </div>
                                         <div className="text-xs text-gray-500">
                                             {request.orderItem.quantity} Adet
@@ -107,7 +107,7 @@ export default async function ReturnsPage() {
                                         </Badge>
                                     </td>
                                     <td className="px-6 py-4 text-right font-medium">
-                                        {formatPrice(Number(request.orderItem.price) * request.orderItem.quantity)}
+                                        {formatPrice(Number(request.orderItem.unitPrice) * request.orderItem.quantity)}
                                     </td>
                                 </tr>
                             ))}
