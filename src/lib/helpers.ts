@@ -242,6 +242,8 @@ export function getOrderStatusLabel(status: string, paymentMethod?: string) {
         case "PENDING":
             if (paymentMethod === "BANK_TRANSFER") return "Havale Bekleniyor";
             if (paymentMethod === "CREDIT_CARD") return "Ödeme Bekleniyor (Kart)";
+            return "Sipariş Alındı";
+        case "WAITING_FOR_PAYMENT":
             return "Ödeme Bekleniyor";
         case "CONFIRMED":
             return "Onaylandı";
@@ -263,7 +265,8 @@ export function getOrderStatusLabel(status: string, paymentMethod?: string) {
  */
 export function getOrderStatusColor(status: string): string {
     const statusColors: Record<string, string> = {
-        PENDING: "bg-yellow-100 text-yellow-800",
+        PENDING: "bg-gray-100 text-gray-800",
+        WAITING_FOR_PAYMENT: "bg-yellow-100 text-yellow-800",
         CONFIRMED: "bg-blue-100 text-blue-800",
         PROCESSING: "bg-purple-100 text-purple-800",
         SHIPPED: "bg-indigo-100 text-indigo-800",
