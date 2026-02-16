@@ -68,14 +68,16 @@ export default async function WishlistPage() {
                             <ProductCard
                                 product={{
                                     ...item.product,
+                                    listPrice: Number(item.product.listPrice),
+                                    salePrice: item.product.salePrice ? Number(item.product.salePrice) : null,
                                     images: item.product.images || [],
                                     category: item.product.category || null,
                                     _count: item.product._count || { variants: 0 },
-                                    weight: null,
-                                    width: null,
-                                    height: null,
-                                    length: null,
-                                    desi: null,
+                                    weight: item.product.weight ? Number(item.product.weight) : null,
+                                    width: item.product.width ? Number(item.product.width) : null,
+                                    height: item.product.height ? Number(item.product.height) : null,
+                                    length: item.product.length ? Number(item.product.length) : null,
+                                    desi: item.product.desi ? Number(item.product.desi) : null,
                                 }}
                                 discountRate={userDiscountRate}
                                 isDealer={isDealer}
