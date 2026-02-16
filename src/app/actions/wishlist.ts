@@ -86,6 +86,11 @@ export async function getWishlistItems() {
                     stock: true,
                     vatRate: true,
                     minQuantity: true,
+                    weight: true,
+                    width: true,
+                    height: true,
+                    length: true,
+                    desi: true,
                     category: {
                         select: {
                             name: true,
