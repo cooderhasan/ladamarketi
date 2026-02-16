@@ -50,7 +50,7 @@ export async function syncCart(items: StoreCartItem[]) {
     }
 }
 
-export async function getDBCart(providedUserId?: string) {
+export async function getDBCart(providedUserId?: string, userDiscountRate?: number) {
     try {
         let userId = providedUserId;
 
@@ -60,6 +60,24 @@ export async function getDBCart(providedUserId?: string) {
         }
 
         if (!userId) return null;
+
+        // If userDiscountRate is not provided, try to fetch it
+        if (userDiscountRate === undefined) {
+            try {
+                const user = await prisma.user.findUnique({
+                    where: { id: userId },
+                    select: {
+                        discountGroup: {
+                            select: { discountRate: true }
+                        }
+                    }
+                });
+                userDiscountRate = Number(user?.discountGroup?.discountRate || 0);
+            } catch (error) {
+                console.warn("Could not fetch user discount rate in getDBCart, defaulting to 0.", error);
+                userDiscountRate = 0;
+            }
+        }
 
         const cart = await prisma.cart.findUnique({
             where: { userId: userId },
@@ -107,7 +125,7 @@ export async function getDBCart(providedUserId?: string) {
                 quantity: item.quantity,
                 listPrice: listPrice,
                 salePrice: item.product.salePrice ? Number(item.product.salePrice) : undefined,
-                discountRate: 0,
+                discountRate: userDiscountRate ?? 0,
                 vatRate: item.product.vatRate,
                 minQuantity: item.product.minQuantity,
                 stock: item.variant ? item.variant.stock : item.product.stock,
