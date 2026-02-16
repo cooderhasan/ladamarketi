@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface Policy {
     slug: string;
@@ -29,7 +30,14 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                     <div className="space-y-6 col-span-2 md:col-span-1">
                         <div className="flex items-center justify-center md:justify-start gap-2 group">
                             {settings?.logoUrl ? (
-                                <img src={settings.logoUrl} alt={settings?.siteName || "Logo"} className="h-10 w-auto object-contain brightness-0 invert" />
+                                <Image
+                                    src={settings.logoUrl}
+                                    alt={settings?.siteName || "Logo"}
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="h-10 w-auto object-contain brightness-0 invert"
+                                />
                             ) : (
                                 <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-105">
                                     <div className="w-10 h-10 bg-[#009AD0] rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg shadow-[#009AD0]/20 group-hover:rotate-0 transition-transform">
