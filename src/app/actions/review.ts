@@ -54,8 +54,8 @@ export async function getProductReviews(productId: string) {
         include: {
             user: {
                 select: {
-                    name: true,
-                    image: true,
+                    companyName: true,
+                    email: true,
                 },
             },
         },
@@ -98,7 +98,7 @@ export async function getAdminReviews(status?: "PENDING" | "APPROVED" | "REJECTE
         include: {
             user: {
                 select: {
-                    name: true,
+                    companyName: true,
                     email: true,
                 }
             },
