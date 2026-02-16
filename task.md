@@ -35,8 +35,8 @@ sela# Project Tasks
   - [ ] Sıkça Sorulan Sorular (SSS/FAQ)
   - [ ] Ürün Karşılaştırma
 
-- [ ] **Phase 8: Kullanıcı Etkileşimi ve Satış Sonrası (Active)**
-  - [ ] Ürün Yorumları ve Değerlendirme
-  - [ ] Favoriler / İstek Listesi
-  - [ ] Çerez (Cookie) Politikası Bildirimi
-  - [ ] İade ve İptal Talep Sistemi
+- [ ] **Phase 8: Kullanıcı Etkileşimi ve Satış Sonrası (Completed)**
+  - [x] Ürün Yorumları ve Değerlendirme
+  - [x] Favoriler / İstek Listesi
+  - [x] Çerez (Cookie) Politikası Bildirimi
+  - [x] İade ve İptal Talep Sistemi
