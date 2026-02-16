@@ -8,6 +8,7 @@ import { ShoppingCart, Eye } from "lucide-react";
 import { useCartStore } from "@/stores/cart-store";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { WishlistButton } from "@/components/products/wishlist-button";
 
 interface Product {
     id: string;
@@ -111,22 +112,27 @@ export function ProductCard({
                     )}
 
                     {/* Badges */}
-                    <div className="absolute top-2 left-2 flex flex-col gap-1">
+                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
                         {badge && (
                             <Badge className="bg-[#009AD0]">{badge}</Badge>
                         )}
                         {product.stock === 0 && (
                             <Badge variant="destructive">Stokta Yok</Badge>
                         )}
+                        {/* Discount Badge moved here */}
+                        {discountRate > 0 && (
+                            <Badge className="bg-green-600">
+                                %{discountRate} İndirim
+                            </Badge>
+                        )}
                     </div>
 
-                    {/* Discount Badge */}
-                    {discountRate > 0 && (
-                        <Badge className="absolute top-2 right-2 bg-green-600">
-                            %{discountRate} İndirim
-                        </Badge>
-                    )}
+                    {/* Wishlist Button */}
+                    <div className="absolute top-2 right-2 z-10">
+                        <WishlistButton productId={product.id} variant="icon" className="bg-white/80 backdrop-blur-sm hover:bg-white shadow-sm" />
+                    </div>
                 </div>
+
 
                 {/* Content */}
                 <div className="p-4 flex-1 flex flex-col">

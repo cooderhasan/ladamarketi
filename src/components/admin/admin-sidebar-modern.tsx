@@ -24,7 +24,9 @@ import {
     Truck,
     LogOut,
     Image as LucideImage,
-    Search
+    Search,
+    RefreshCcw,
+    Star
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -63,6 +65,8 @@ const menuGroups: MenuGroup[] = [
         items: [
             { title: "Siparişler", href: "/admin/orders", icon: ShoppingCart },
             { title: "Müşteriler", href: "/admin/customers", icon: Users },
+            { title: "İade Talepleri", href: "/admin/returns", icon: RefreshCcw },
+            { title: "Değerlendirmeler", href: "/admin/reviews", icon: Star },
             { title: "Teklifler", href: "/admin/quotes", icon: FileQuestion },
             { title: "Mesajlar", href: "/admin/messages", icon: Mail },
             { title: "Stok Uyarı", href: "/admin/stock-alerts", icon: AlertTriangle },

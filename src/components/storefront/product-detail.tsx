@@ -11,8 +11,11 @@ import { cn } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart-store";
 import { toast } from "sonner";
 import { useState } from "react";
-import { ShoppingCart, Minus, Plus, Package, Truck, ChevronLeft, ChevronRight, Shield, CreditCard, ChevronRight as ChevronRightIcon, FileText } from "lucide-react";
+import { ShoppingCart, Minus, Plus, Package, Truck, ChevronLeft, ChevronRight, Shield, CreditCard, ChevronRight as ChevronRightIcon, FileText, Star } from "lucide-react";
 import { InstallmentTable } from "./installment-table";
+import { WishlistButton } from "@/components/products/wishlist-button";
+import { ReviewForm } from "@/components/products/review-form";
+import { ReviewList } from "@/components/products/review-list";
 import {
     Tabs,
     TabsContent,
@@ -61,6 +64,16 @@ interface Product {
     variants?: ProductVariant[];
 }
 
+interface Review {
+    id: string;
+    rating: number;
+    comment: string | null;
+    createdAt: Date;
+    user: {
+        name: string | null;
+        image: string | null;
+    };
+}
 
 interface ProductDetailProps {
     product: Product;
@@ -69,6 +82,11 @@ interface ProductDetailProps {
     isDealer: boolean;
     isAuthenticated: boolean;
     whatsappNumber?: string;
+    reviews: Review[];
+    reviewStats: {
+        averageRating: number;
+        totalReviews: number;
+    };
 }
 
 export function ProductDetail({
@@ -78,6 +96,8 @@ export function ProductDetail({
     isDealer,
     isAuthenticated,
     whatsappNumber,
+    reviews,
+    reviewStats,
 }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(product.minQuantity);
     const [inputValue, setInputValue] = useState(product.minQuantity.toString());
@@ -351,9 +371,29 @@ export function ProductDetail({
                             </div>
 
                             {/* Title */}
-                            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white leading-snug mb-4">
+                            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white leading-snug mb-2">
                                 {product.name}
                             </h1>
+
+                            {/* Rating Summary */}
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="flex gap-0.5">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <Star
+                                            key={star}
+                                            className={cn(
+                                                "w-4 h-4",
+                                                reviewStats.averageRating >= star
+                                                    ? "fill-yellow-400 text-yellow-400"
+                                                    : "text-gray-200 dark:text-gray-700"
+                                            )}
+                                        />
+                                    ))}
+                                </div>
+                                <span className="text-sm text-gray-500">
+                                    ({reviewStats.totalReviews} Değerlendirme)
+                                </span>
+                            </div>
 
                             {/* Price */}
                             <div className="mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
@@ -503,6 +543,12 @@ export function ProductDetail({
                                                 <ShoppingCart className="h-5 w-5 mr-2" />
                                                 Sepete Ekle
                                             </Button>
+
+                                            <WishlistButton
+                                                productId={product.id}
+                                                variant="icon"
+                                                className="h-12 w-12 border border-gray-200 dark:border-gray-700 rounded-lg shrink-0"
+                                            />
                                         </div>
 
                                         {/* WhatsApp */}
@@ -562,20 +608,27 @@ export function ProductDetail({
                 {/* Tabs Section */}
                 <div className="mb-12">
                     <Tabs defaultValue="description" className="w-full">
-                        <TabsList className="w-full bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-1.5 flex gap-1 shadow-sm mb-4 h-auto">
+                        <TabsList className="w-full bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 p-1.5 flex flex-wrap gap-1 shadow-sm mb-4 h-auto">
                             <TabsTrigger
                                 value="description"
-                                className="flex-1 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-lg data-[state=active]:bg-[#009AD0] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+                                className="flex-1 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-lg data-[state=active]:bg-[#009AD0] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all whitespace-nowrap"
                             >
                                 <FileText className="w-4 h-4 mr-1.5 hidden sm:inline-block" />
                                 Ürün Açıklaması
                             </TabsTrigger>
                             <TabsTrigger
                                 value="payment"
-                                className="flex-1 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-lg data-[state=active]:bg-[#009AD0] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
+                                className="flex-1 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-lg data-[state=active]:bg-[#009AD0] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all whitespace-nowrap"
                             >
                                 <CreditCard className="w-4 h-4 mr-1.5 hidden sm:inline-block" />
                                 Ödeme Seçenekleri
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="reviews"
+                                className="flex-1 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2.5 rounded-lg data-[state=active]:bg-[#009AD0] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all whitespace-nowrap"
+                            >
+                                <Star className="w-4 h-4 mr-1.5 hidden sm:inline-block" />
+                                Değerlendirmeler ({reviewStats.totalReviews})
                             </TabsTrigger>
                         </TabsList>
 
@@ -594,8 +647,6 @@ export function ProductDetail({
                             </div>
                         </TabsContent>
 
-
-
                         <TabsContent value="payment" className="focus-visible:ring-0 mt-0">
                             <div className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-800 shadow-sm">
                                 <div className="mb-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/20 flex items-start gap-3">
@@ -613,6 +664,57 @@ export function ProductDetail({
                                 <p className="mt-6 text-[11px] text-gray-400 italic text-center">
                                     * Taksit oranları ve banka kampanyaları anlık olarak güncellenmektedir.
                                 </p>
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="reviews" className="focus-visible:ring-0 mt-0">
+                            <div className="grid md:grid-cols-12 gap-8">
+                                <div className="md:col-span-4 lg:col-span-3">
+                                    <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-100 dark:border-gray-800 sticky top-4">
+                                        <div className="text-center mb-6">
+                                            <div className="text-5xl font-bold text-gray-900 dark:text-white mb-2">
+                                                {reviewStats.averageRating.toFixed(1)}
+                                            </div>
+                                            <div className="flex justify-center gap-1 mb-2">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <Star
+                                                        key={star}
+                                                        className={cn(
+                                                            "w-5 h-5",
+                                                            Math.round(reviewStats.averageRating) >= star
+                                                                ? "fill-yellow-400 text-yellow-400"
+                                                                : "text-gray-200 dark:text-gray-700"
+                                                        )}
+                                                    />
+                                                ))}
+                                            </div>
+                                            <p className="text-sm text-gray-500">
+                                                {reviewStats.totalReviews} Değerlendirme
+                                            </p>
+                                        </div>
+
+                                        {isAuthenticated ? (
+                                            <ReviewForm productId={product.id} />
+                                        ) : (
+                                            <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                                                    Değerlendirme yapabilmek için giriş yapmalısınız.
+                                                </p>
+                                                <Link href="/login">
+                                                    <Button variant="outline" size="sm" className="w-full">
+                                                        Giriş Yap
+                                                    </Button>
+                                                </Link>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="md:col-span-8 lg:col-span-9">
+                                    <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-100 dark:border-gray-800">
+                                        <h3 className="text-lg font-bold mb-6">Müşteri Değerlendirmeleri</h3>
+                                        <ReviewList reviews={reviews} />
+                                    </div>
+                                </div>
                             </div>
                         </TabsContent>
                     </Tabs>

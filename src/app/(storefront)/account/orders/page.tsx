@@ -76,7 +76,7 @@ export default async function OrdersPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <Button variant="ghost" size="sm" asChild>
-                                            <Link href={`/orders/${order.id}`}>Detay</Link>
+                                            <Link href={`/account/orders/${order.id}`}>Detay</Link>
                                         </Button>
                                     </td>
                                 </tr>

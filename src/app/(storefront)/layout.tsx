@@ -9,6 +9,8 @@ import { StoreInitializer } from "@/components/store-initializer";
 import { getDBCart } from "@/app/(storefront)/cart/actions";
 import { AddedToCartModal } from "@/components/storefront/added-to-cart-modal";
 
+import { CookieConsent } from "@/components/storefront/cookie-consent";
+
 export default async function StorefrontLayout({
     children,
 }: {
@@ -161,6 +163,7 @@ export default async function StorefrontLayout({
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+            <CookieConsent />
             <StoreInitializer
                 discountRate={userDiscountRate}
                 dbCart={dbCart}

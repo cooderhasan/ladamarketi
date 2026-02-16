@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/storefront/product-detail";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Metadata } from "next";
+import { getProductReviews, getReviewStats } from "@/app/actions/review";
 
 interface ProductPageProps {
     params: Promise<{ slug: string }>;
@@ -76,6 +77,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         take: 4,
     });
 
+    const reviews = await getProductReviews(product.id);
+    const reviewStats = await getReviewStats(product.id);
+
     // Serialize product with variants
     const serializedProduct = {
         ...product,
@@ -145,6 +149,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 isDealer={isDealer}
                 isAuthenticated={isAuthenticated}
                 whatsappNumber={settings.whatsappNumber}
+                reviews={reviews}
+                reviewStats={reviewStats}
             />
         </>
     );

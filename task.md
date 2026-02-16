@@ -27,3 +27,16 @@ sela# Project Tasks
   - [ ] Input Validation (Zod)
   - [ ] Rate Limiting & Security Headers
   - [ ] Next.js Metadata & SEO
+- [ ] **Phase 7: Pazarlama ve Otomasyon**
+  - [ ] Sepet Hatırlatma Modülü (Abandoned Cart Recovery)
+  - [ ] Gelişmiş Adres Defteri
+  - [ ] Kupon / Promosyon Kodu Sistemi
+  - [ ] Blog / İçerik Yönetimi
+  - [ ] Sıkça Sorulan Sorular (SSS/FAQ)
+  - [ ] Ürün Karşılaştırma
+
+- [ ] **Phase 8: Kullanıcı Etkileşimi ve Satış Sonrası (Active)**
+  - [ ] Ürün Yorumları ve Değerlendirme
+  - [ ] Favoriler / İstek Listesi
+  - [ ] Çerez (Cookie) Politikası Bildirimi
+  - [ ] İade ve İptal Talep Sistemi

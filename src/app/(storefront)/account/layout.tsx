@@ -9,7 +9,9 @@ import {
     MapPin,
     LogOut,
     FileQuestion,
-    CreditCard
+    CreditCard,
+    Heart,
+    RefreshCcw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
@@ -35,6 +37,16 @@ const sidebarItems = [
         title: "Tekliflerim",
         href: "/account/quotes",
         icon: FileQuestion,
+    },
+    {
+        title: "Favorilerim",
+        href: "/account/wishlist",
+        icon: Heart,
+    },
+    {
+        title: "İade Taleplerim",
+        href: "/account/returns",
+        icon: RefreshCcw,
     },
     {
         title: "Adreslerim",

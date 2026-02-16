@@ -13,3 +13,9 @@
 # Güvenlik önemli güvenlik önlemleri alınacak.
 # Toplu stok güncelleme eklnecek  tutar cinsinden ve % olarak stok artırma ve azaltma yapılacak. 
 # local postresql veri tabanı adı: lada şifre:123456
+# Sepet hatırlatma modülü (Abandoned Cart Recovery) eklenecek, sepette ürün bırakanlara e-posta gönderilecek.
+# Gelişmiş Adres Defteri (Çoklu adres yönetimi)
+# Kupon / Promosyon Kodu Sistemi
+# Blog / İçerik Yönetimi
+# Sıkça Sorulan Sorular (SSS/FAQ) Modülü
+# Ürün Karşılaştırma (Compare) Modülü
