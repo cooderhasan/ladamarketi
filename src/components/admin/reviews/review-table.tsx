@@ -17,7 +17,7 @@ interface Review {
     status: "PENDING" | "APPROVED" | "REJECTED";
     createdAt: Date;
     user: {
-        name: string | null;
+        companyName: string | null;
         email: string | null;
     };
     product: {
@@ -88,7 +88,7 @@ export function ReviewTable({ initialReviews }: ReviewTableProps) {
                                 </div>
                             </td>
                             <td className="px-6 py-4">
-                                <div className="font-medium">{review.user.name || "İsimsiz"}</div>
+                                <div className="font-medium">{review.user.companyName || "İsimsiz"}</div>
                                 <div className="text-xs text-gray-500">{review.user.email}</div>
                             </td>
                             <td className="px-6 py-4 max-w-[300px]">
