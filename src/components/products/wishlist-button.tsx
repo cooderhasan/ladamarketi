@@ -63,7 +63,7 @@ export function WishlistButton({ productId, variant = "default", className }: Wi
                 onClick={handleToggle}
                 disabled={isLoading}
                 className={cn(
-                    "p-2 rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
+                    "w-9 h-9 flex items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
                     isWishlisted ? "text-red-500 hover:text-red-600" : "text-gray-400 hover:text-gray-600",
                     className
                 )}
