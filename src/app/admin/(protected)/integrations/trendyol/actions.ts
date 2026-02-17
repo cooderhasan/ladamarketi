@@ -96,11 +96,13 @@ export async function syncProductsToTrendyol() {
         const products = await (prisma as any).product.findMany({
             where: {
                 isActive: true,
+                isTrendyolActive: true,
                 barcode: { not: null },
             },
             include: {
                 brand: true,
                 categories: true,
+                variants: true
             }
         });
 
@@ -109,40 +111,76 @@ export async function syncProductsToTrendyol() {
         }
 
         // 3. Transform to Trendyol Format
-        const items = products.map((p: any) => {
-            // Priority:
-            // 1. Mapped Category ID (on our Category)
-            // 2. Fallback (e.g. 1234 placeholder)
+        // 3. Transform to Trendyol Format
+        const items: any[] = [];
 
-            // Note: A product can have multiple categories. We pick the first one which has a mapping.
-            const mappedCategory = p.categories.find((c: any) => c.trendyolCategoryId !== null);
-            const trendyolCatId = mappedCategory ? mappedCategory.trendyolCategoryId : 1234; // Fallback should ideally be an error or config default
+        for (const p of products) {
+            // Priority for Category: our mapped Category ID > Fallback
+            const mappedCategory = (p as any).categories.find((c: any) => c.trendyolCategoryId !== null);
+            const trendyolCatId = mappedCategory ? mappedCategory.trendyolCategoryId : 1234;
 
             // Brand Mapping
-            const trendyolBrandId = p.brand?.trendyolBrandId ? p.brand.trendyolBrandId : (p.brandId_WORKAROUND || 1795);
+            const brandId = (p as any).brand?.trendyolBrandId || 1795; // Default "Diğer" if not found? Need real check
 
-            // If has trendyolPrice, use it, else listPrice.
-            const salePrice = p.trendyolPrice ? Number(p.trendyolPrice) : Number(p.listPrice);
-            const listPrice = Number(p.listPrice);
-
-            return {
-                barcode: p.barcode,
+            // Base Info
+            const baseItem = {
                 title: p.name,
-                productMainId: p.sku || p.id,
-                brandId: Number(trendyolBrandId),
+                productMainId: p.sku || p.id, // Model Kodu (Grup Kodu)
+                brandId: Number(brandId),
                 categoryId: Number(trendyolCatId),
-                quantity: p.stock,
-                stockCode: p.sku || p.barcode,
-                dimensionalWeight: 1, // Desi
                 description: p.description || p.name,
                 currencyType: "TRY",
-                listPrice: listPrice,
-                salePrice: salePrice,
                 vatRate: p.vatRate,
                 images: p.images.map((url: string) => ({ url })),
-                attributes: [] // Needs attribute mapping
+                attributes: [] // Needs attribute mapping logic (Renk/Beden etc)
             };
-        });
+
+            const baseListPrice = Number(p.listPrice);
+            const baseSalePrice = p.trendyolPrice ? Number(p.trendyolPrice) : Number(p.listPrice);
+
+            // Check Variants
+            if ((p as any).variants && (p as any).variants.length > 0) {
+                for (const v of (p as any).variants) {
+                    // Skip if variant has no barcode (Trendyol requires barcode)
+                    if (!v.barcode) continue;
+
+                    // Variant specific
+                    const variantListPrice = baseListPrice + Number(v.priceAdjustment || 0);
+                    // Sale price logic: if base has specialized trendyol price, add adjustment.
+                    // If base uses listPrice, uses variantListPrice.
+                    // Simplified: Variant Sale Price = Base Sale Price + Adjustment
+                    const variantSalePrice = baseSalePrice + Number(v.priceAdjustment || 0);
+
+                    items.push({
+                        ...baseItem,
+                        barcode: v.barcode,
+                        stockCode: v.sku || v.barcode, // Stok Kodu (Merchant SKU)
+                        quantity: v.stock,
+                        listPrice: variantListPrice,
+                        salePrice: variantSalePrice,
+                        dimensionalWeight: 1, // Desi logic needed per variant if possible, else 1
+                        // Attributes: Need to add Color/Size attributes here based on Category requirements
+                        attributes: [
+                            ...(v.color ? [{ attributeId: 338, attributeValueId: 0, customAttributeValue: v.color }] : []), // 338 is often Color, but depends on Category!
+                            ...(v.size ? [{ attributeId: 343, attributeValueId: 0, customAttributeValue: v.size }] : [])   // 343 is often Size
+                        ]
+                    });
+                }
+            } else {
+                // Single Product (No variants)
+                if (p.barcode) {
+                    items.push({
+                        ...baseItem,
+                        barcode: p.barcode,
+                        stockCode: p.sku || p.barcode,
+                        quantity: p.stock,
+                        listPrice: baseListPrice,
+                        salePrice: baseSalePrice,
+                        dimensionalWeight: p.desi ? Number(p.desi) : 1
+                    });
+                }
+            }
+        }
 
         // 4. Send to Trendyol
         // Since we don't have real category/brand mapping yet, this will likely fail validation on Trendyol side
@@ -272,14 +310,38 @@ export async function syncOrdersFromTrendyol() {
             let total = 0;
 
             for (const line of tOrder.lines) {
-                // Find our product by barcode
-                const product = await (prisma as any).product.findFirst({
-                    where: { barcode: line.barcode }
+                let productId = "";
+                let variantId = null;
+
+                // 1. Try to find VARIANT by barcode
+                const variant = await prisma.productVariant.findFirst({
+                    where: { barcode: line.barcode },
+                    include: { product: true }
                 });
 
-                if (product) {
+                if (variant) {
+                    productId = variant.productId;
+                    variantId = variant.id;
+                } else {
+                    // 2. Try to find PRODUCT by barcode
+                    const product = await prisma.product.findFirst({
+                        where: { barcode: line.barcode }
+                    });
+
+                    if (product) {
+                        productId = product.id;
+                    }
+                }
+
+                if (productId) {
+                    // Fetch product name if we only have ID (from variant)
+                    // If we found variant, we have product in include.
+                    // If we found product, we have product.
+                    // Actually let's keep it simple.
+
                     orderItems.push({
-                        productId: product.id,
+                        productId: productId,
+                        variantId: variantId,
                         productName: line.productName,
                         quantity: line.quantity,
                         unitPrice: line.price,

@@ -216,6 +216,11 @@ model Product {
   isNew       Boolean     @default(false)
   isBestSeller Boolean    @default(false)
   isActive    Boolean     @default(true)
+  
+  // Marketplace Visibility
+  isTrendyolActive    Boolean @default(false)
+  isN11Active         Boolean @default(false)
+  isHepsiburadaActive Boolean @default(false)
 
   categoryId  String? // Deprecated: Use categories relation instead
   category    Category?   @relation("LegacyCategory", fields: [categoryId], references: [id])

@@ -71,6 +71,9 @@ interface Product {
     isNew: boolean;
     isBestSeller: boolean;
     isActive: boolean;
+    isTrendyolActive?: boolean;
+    isN11Active?: boolean;
+    isHepsiburadaActive?: boolean;
     weight?: number | null;
     width?: number | null;
     height?: number | null;
@@ -113,6 +116,9 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         images: product?.images || [] as string[],
         variants: product?.variants || [] as ProductVariant[],
         isActive: product?.isActive ?? true,
+        isTrendyolActive: product?.isTrendyolActive ?? false,
+        isN11Active: product?.isN11Active ?? false,
+        isHepsiburadaActive: product?.isHepsiburadaActive ?? false,
         isFeatured: product?.isFeatured || false,
         isNew: product?.isNew || false,
         isBestSeller: product?.isBestSeller || false,
@@ -786,6 +792,42 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                 <Checkbox
                                     checked={formData.isActive}
                                     onCheckedChange={(c) => handleChange("isActive", c)}
+                                />
+                            </div>
+
+                            <hr />
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Pazar Yeri Görünürlüğü</h3>
+
+                            <div className="flex items-center justify-between p-4 border rounded-lg bg-orange-50 dark:bg-orange-900/10">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base text-orange-700 dark:text-orange-300">Trendyol Satış</Label>
+                                    <p className="text-sm text-muted-foreground">Bu ürünü Trendyol'a gönder?</p>
+                                </div>
+                                <Checkbox
+                                    checked={formData.isTrendyolActive}
+                                    onCheckedChange={(c) => handleChange("isTrendyolActive", c)}
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 border rounded-lg bg-purple-50 dark:bg-purple-900/10">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base text-purple-700 dark:text-purple-300">N11 Satış</Label>
+                                    <p className="text-sm text-muted-foreground">Bu ürünü N11'e gönder?</p>
+                                </div>
+                                <Checkbox
+                                    checked={formData.isN11Active}
+                                    onCheckedChange={(c) => handleChange("isN11Active", c)}
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 border rounded-lg bg-orange-50 dark:bg-orange-900/10">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base text-orange-700 dark:text-orange-300">Hepsiburada Satış</Label>
+                                    <p className="text-sm text-muted-foreground">Bu ürünü Hepsiburada'ya gönder?</p>
+                                </div>
+                                <Checkbox
+                                    checked={formData.isHepsiburadaActive}
+                                    onCheckedChange={(c) => handleChange("isHepsiburadaActive", c)}
                                 />
                             </div>
 

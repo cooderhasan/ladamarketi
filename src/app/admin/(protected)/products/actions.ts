@@ -36,6 +36,10 @@ export async function createProduct(formData: FormData) {
         isNew: formData.get("isNew") === "true",
         isBestSeller: formData.get("isBestSeller") === "true",
         isActive: formData.get("isActive") !== "false",
+        // Marketplace Visibility
+        isTrendyolActive: formData.get("isTrendyolActive") === "true",
+        isN11Active: formData.get("isN11Active") === "true",
+        isHepsiburadaActive: formData.get("isHepsiburadaActive") === "true",
         // Kargo & Desi
         weight: formData.get("weight") ? Number(formData.get("weight")) : null,
         width: formData.get("width") ? Number(formData.get("width")) : null,
@@ -145,6 +149,10 @@ export async function updateProduct(productId: string, formData: FormData) {
         isNew: formData.get("isNew") === "true",
         isBestSeller: formData.get("isBestSeller") === "true",
         isActive: formData.get("isActive") !== "false",
+        // Marketplace Visibility
+        isTrendyolActive: formData.get("isTrendyolActive") === "true",
+        isN11Active: formData.get("isN11Active") === "true",
+        isHepsiburadaActive: formData.get("isHepsiburadaActive") === "true",
         // Kargo & Desi
         weight: formData.get("weight") ? Number(formData.get("weight")) : null,
         width: formData.get("width") ? Number(formData.get("width")) : null,
