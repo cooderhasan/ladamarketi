@@ -88,7 +88,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
                         </div>
                         <div className="text-right">
                             <h2 className="text-xs font-bold text-gray-500 uppercase mb-1">TARİH</h2>
-                            <p className="font-bold text-lg">{formatDate(order.createdAt).split(' ')[0]}</p>
+                            <p className="font-bold text-lg">{new Date(order.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                         </div>
                     </div>
                 </div>
