@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { OrderConfirmationEmail } from '@/emails/order-confirmation';
 import { AdminNewOrderEmail } from '@/emails/admin-new-order';
+import { ShippingNotificationEmail } from '@/emails/shipping-notification';
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789");
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
@@ -104,6 +105,47 @@ export async function sendAdminNewOrderEmail(props: SendAdminNewOrderProps) {
         return { success: true, data };
     } catch (error) {
         console.error('Admin email sending failed:', error);
+        return { success: false, error };
+    }
+}
+
+interface SendShippingNotificationProps {
+    to: string;
+    customerName: string;
+    orderNumber: string;
+    cargoCompany: string;
+    trackingUrl: string;
+}
+
+export async function sendShippingNotificationEmail(props: SendShippingNotificationProps) {
+    if (!process.env.RESEND_API_KEY) {
+        console.warn('RESEND_API_KEY is not set. Email sending skipped.');
+        return { success: false, error: 'API key missing' };
+    }
+
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'Sipariş <siparis@ladamarketi.com>',
+            to: [props.to],
+            // Bcc to admin to track sent emails
+            bcc: ADMIN_EMAIL ? [ADMIN_EMAIL] : undefined,
+            subject: `Siparişiniz Kargoya Verildi - #${props.orderNumber}`,
+            react: ShippingNotificationEmail({
+                orderNumber: props.orderNumber,
+                customerName: props.customerName,
+                cargoCompany: props.cargoCompany,
+                trackingUrl: props.trackingUrl,
+            }),
+        });
+
+        if (error) {
+            console.error('Shipping notification email sending error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('Shipping notification email sending failed:', error);
         return { success: false, error };
     }
 }

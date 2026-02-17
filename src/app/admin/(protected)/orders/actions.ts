@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { sendShippingNotificationEmail } from "@/lib/email";
 
 export async function updateOrderStatus(
     orderId: string,
@@ -52,10 +53,35 @@ export async function updateOrderTracking(orderId: string, trackingUrl: string) 
             throw new Error("Unauthorized");
         }
 
-        await prisma.order.update({
+        const order = await prisma.order.update({
             where: { id: orderId },
             data: { trackingUrl },
+            include: {
+                user: {
+                    select: { email: true, companyName: true }
+                }
+            }
         });
+
+        // Send Notification Email
+        // If we have a tracking URL (not empty) and we haven't just cleared it
+        if (trackingUrl && trackingUrl.trim() !== "") {
+            const email = order.user?.email || order.guestEmail;
+            const customerName = order.user?.companyName || order.guestEmail || "Müşteri";
+
+            if (email) {
+                // Fire and forget - don't block the UI for email sending
+                sendShippingNotificationEmail({
+                    to: email,
+                    customerName: customerName,
+                    orderNumber: order.orderNumber,
+                    cargoCompany: order.cargoCompany || "Kargo",
+                    trackingUrl: trackingUrl
+                }).catch(err => {
+                    console.error("Failed to send shipping notification:", err);
+                });
+            }
+        }
 
         await prisma.adminLog.create({
             data: {
