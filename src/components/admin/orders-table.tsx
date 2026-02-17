@@ -16,7 +16,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, FileDown, Search, X, Printer, CheckCircle2 } from "lucide-react";
+import { Eye, FileDown, Search, X, Printer, CheckCircle2, Truck } from "lucide-react";
 import {
     formatDate,
     getOrderStatusLabel,
@@ -393,6 +393,14 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                     onClick={() => window.open(`/admin/orders/${order.id}/print`, '_blank')}
                                                 >
                                                     <span className="text-lg">🖨️</span>
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="Kargo Etiketi Yazdır"
+                                                    onClick={() => window.open(`/admin/orders/${order.id}/shipping-label`, '_blank')}
+                                                >
+                                                    <Truck className="h-5 w-5" />
                                                 </Button>
                                                 <a
                                                     href={`/admin/orders/${order.id}/pdf`}
