@@ -9,7 +9,12 @@ export async function middleware(request: NextRequest) {
     // 1. RATE LIMITING PROTECTION (DoS Prevention)
     // Basic protection: 100 requests per minute per IP
     const ip = request.headers.get("x-forwarded-for") || (request as any).ip || "unknown";
-    const limit = 200; // Requests (Safe limit for SEO & Users)
+
+    // Rate limit configuration
+    // Default: 1000 requests per minute (Generous limit for customers)
+    // Admin: 5000 requests per minute (Effectively unlimited for admins)
+    const isDashboard = request.nextUrl.pathname.startsWith("/admin");
+    const limit = isDashboard ? 5000 : 1000;
     const windowMs = 60 * 1000; // 1 minute
 
     if (ip !== "unknown" && process.env.NODE_ENV === "production") {
