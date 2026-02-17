@@ -16,7 +16,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, FileDown, Search, X, Printer, CheckCircle2, Truck } from "lucide-react";
+import { Eye, FileDown, Search, X, Printer, CheckCircle2, Truck, MessageCircle } from "lucide-react";
 import {
     formatDate,
     getOrderStatusLabel,
@@ -350,8 +350,20 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                 <span className="font-medium">
                                                     {order.user?.companyName || order.user?.email || order.guestEmail || "Misafir"}
                                                 </span>
-                                                <span className="text-xs text-gray-500">
+                                                <span className="text-xs text-gray-500 flex items-center gap-1">
                                                     {order.user?.phone || "-"}
+                                                    {order.user?.phone && (
+                                                        <a
+                                                            href={`https://wa.me/${order.user.phone.replace(/\D/g, "").replace(/^0/, "90").replace(/^5/, "905")}?text=${encodeURIComponent(`Merhaba Lada Marketinden #${order.orderNumber} numaralı siparişiniz için yazıyorum`)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-green-500 hover:text-green-600 p-1 hover:bg-green-50 rounded-full transition-colors"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            title="WhatsApp ile İletişime Geç"
+                                                        >
+                                                            <MessageCircle className="h-3.5 w-3.5" />
+                                                        </a>
+                                                    )}
                                                 </span>
                                             </div>
                                         </TableCell>
