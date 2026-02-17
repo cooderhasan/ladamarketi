@@ -73,7 +73,7 @@ export async function testTrendyolConnection() {
     }
 }
 
-export async function syncProductsToTrendyol() {
+export async function syncProductsToTrendyol(productId?: string) {
     try {
         // 1. Check Config
         const config = await (prisma as any).trendyolConfig.findFirst({
@@ -93,12 +93,18 @@ export async function syncProductsToTrendyol() {
         // 2. Fetch Eligible Products
         // Must have barcode, brand, and be active
         // Use 'any' to bypass potential type issues with new schema fields if not regenerated
+        const whereClause: any = {
+            isActive: true,
+            isTrendyolActive: true,
+            barcode: { not: null },
+        };
+
+        if (productId) {
+            whereClause.id = productId;
+        }
+
         const products = await (prisma as any).product.findMany({
-            where: {
-                isActive: true,
-                isTrendyolActive: true,
-                barcode: { not: null },
-            },
+            where: whereClause,
             include: {
                 brand: true,
                 categories: true,

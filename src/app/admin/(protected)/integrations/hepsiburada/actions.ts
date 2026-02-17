@@ -49,17 +49,23 @@ import { HepsiburadaClient } from "@/services/hepsiburada/api";
 
 // ... (get and save config remain same)
 
-export async function syncProductsToHepsiburada() {
+export async function syncProductsToHepsiburada(productId?: string) {
     try {
         const config = await (prisma as any).hepsiburadaConfig.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon bulunamadı." };
 
+        const whereClause: any = {
+            isActive: true,
+            isHepsiburadaActive: true
+        };
+
+        if (productId) {
+            whereClause.id = productId;
+        }
+
         // 1. Fetch products (Include variants)
         const products = await prisma.product.findMany({
-            where: {
-                isActive: true,
-                isHepsiburadaActive: true
-            },
+            where: whereClause,
             include: { variants: true }
         });
 

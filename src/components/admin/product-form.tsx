@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/select";
 import { CategoryTreeSelect } from "@/components/ui/category-tree-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createProduct, updateProduct } from "@/app/admin/(protected)/products/actions";
+import { createProduct, updateProduct, syncProductToMarketplaces } from "@/app/admin/(protected)/products/actions";
 import { generateSlug, generateSKU, generateBarcode } from "@/lib/helpers";
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package } from "lucide-react";
+import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package, RefreshCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { calculateDesi } from "@/lib/shipping";
@@ -166,6 +166,29 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         const updated = [...formData.variants];
         updated[index] = { ...updated[index], [field]: value };
         handleChange("variants", updated);
+    };
+
+    const handleMarketplaceSync = async () => {
+        if (!product?.id) {
+            toast.error("Önce ürünü kaydetmelisiniz.");
+            return;
+        }
+
+        if (!window.confirm("Bu ürünün fiyat ve stok bilgileri aktif pazar yerlerine gönderilecek. Onaylıyor musunuz?")) return;
+
+        setLoading(true);
+        try {
+            const result = await syncProductToMarketplaces(product.id);
+            if (result.success) {
+                toast.success(result.message);
+            } else {
+                toast.error(result.message);
+            }
+        } catch (error) {
+            toast.error("Bir hata oluştu.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -829,6 +852,23 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                     checked={formData.isHepsiburadaActive}
                                     onCheckedChange={(c) => handleChange("isHepsiburadaActive", c)}
                                 />
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/10 mt-4">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base text-blue-700 dark:text-blue-300">Pazar Yeri Senkronizasyonu</Label>
+                                    <p className="text-sm text-muted-foreground">Fiyat ve stok bilgisini şimdi pazar yerlerine gönder.</p>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleMarketplaceSync}
+                                    disabled={loading || !product?.id}
+                                    className="border-blue-200 hover:bg-blue-100 hover:text-blue-700 dark:border-blue-800 dark:hover:bg-blue-900"
+                                >
+                                    <RefreshCw className="mr-2 h-4 w-4" />
+                                    Şimdi Güncelle
+                                </Button>
                             </div>
 
                             <div className="flex items-center justify-between p-4 border rounded-lg bg-white dark:bg-gray-800">

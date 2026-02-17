@@ -45,17 +45,23 @@ export async function saveN11Config(prevState: any, formData: FormData) {
 
 import { N11Client } from "@/services/n11/api";
 
-export async function syncProductsToN11() {
+export async function syncProductsToN11(productId?: string) {
     try {
         const config = await (prisma as any).n11Config.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon bulunamadı." };
 
+        const whereClause: any = {
+            isActive: true,
+            isN11Active: true
+        };
+
+        if (productId) {
+            whereClause.id = productId;
+        }
+
         // Fetch products with variants
         const products = await prisma.product.findMany({
-            where: {
-                isActive: true,
-                isN11Active: true
-            },
+            where: whereClause,
             include: { variants: true, categories: true }
         });
 

@@ -6,6 +6,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { productSchema } from "@/lib/validations";
 import { generateSlug } from "@/lib/helpers";
+import { syncProductsToTrendyol } from "../integrations/trendyol/actions";
+import { syncProductsToN11 } from "../integrations/n11/actions";
+import { syncProductsToHepsiburada } from "../integrations/hepsiburada/actions";
 
 export async function createProduct(formData: FormData) {
     const session = await auth();
@@ -268,4 +271,55 @@ export async function toggleProductStatus(productId: string, isActive: boolean) 
     });
 
     revalidatePath("/admin/products");
+}
+
+export async function syncProductToMarketplaces(productId: string) {
+    const session = await auth();
+    if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+        throw new Error("Unauthorized");
+    }
+
+    const product = await prisma.product.findUnique({
+        where: { id: productId }
+    });
+
+    if (!product) return { success: false, message: "Ürün bulunamadı." };
+
+    const results: string[] = [];
+
+    // Trendyol Sync
+    if ((product as any).isTrendyolActive) {
+        try {
+            const res = await syncProductsToTrendyol(productId);
+            results.push(`Trendyol: ${res.success ? "Başarılı" : res.message}`);
+        } catch (e: any) {
+            results.push(`Trendyol: Hata (${e.message})`);
+        }
+    }
+
+    // N11 Sync
+    if ((product as any).isN11Active) {
+        try {
+            const res = await syncProductsToN11(productId);
+            results.push(`N11: ${res.success ? "Başarılı" : res.message}`);
+        } catch (e: any) {
+            results.push(`N11: Hata (${e.message})`);
+        }
+    }
+
+    // Hepsiburada Sync
+    if ((product as any).isHepsiburadaActive) {
+        try {
+            const res = await syncProductsToHepsiburada(productId);
+            results.push(`Hepsiburada: ${res.success ? "Başarılı" : res.message}`);
+        } catch (e: any) {
+            results.push(`Hepsiburada: Hata (${e.message})`);
+        }
+    }
+
+    if (results.length === 0) {
+        return { success: false, message: "Ürün hiçbir pazar yerinde aktif değil veya seçim yapılmamış." };
+    }
+
+    return { success: true, message: results.join(" | ") };
 }
