@@ -2,7 +2,42 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+// Simple in-memory rate limiter
+const rateLimitMap = new Map();
+
 export async function middleware(request: NextRequest) {
+    // 1. RATE LIMITING PROTECTION (DoS Prevention)
+    // Basic protection: 100 requests per minute per IP
+    const ip = request.headers.get("x-forwarded-for") || (request as any).ip || "unknown";
+    const limit = 200; // Requests (Safe limit for SEO & Users)
+    const windowMs = 60 * 1000; // 1 minute
+
+    if (ip !== "unknown" && process.env.NODE_ENV === "production") {
+        const now = Date.now();
+        const clientData = rateLimitMap.get(ip);
+
+        if (clientData) {
+            if (now - clientData.startTime > windowMs) {
+                // Reset window
+                rateLimitMap.set(ip, { count: 1, startTime: now });
+            } else {
+                clientData.count++;
+                if (clientData.count > limit) {
+                    console.warn(`RATE_LIMIT_EXCEEDED: IP ${ip} blocked.`);
+                    return new NextResponse("Too Many Requests (Rate Limit Exceeded)", { status: 429 });
+                }
+            }
+        } else {
+            rateLimitMap.set(ip, { count: 1, startTime: now });
+        }
+
+        // Cleanup old entries periodically (every 1000 requests roughly) to prevent memory leak
+        if (rateLimitMap.size > 5000) {
+            rateLimitMap.clear(); // Brute force cleanup for safety
+        }
+    }
+
+    // 2. AUTHENTICATION & SECURITY HEADERS
     const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET,
@@ -12,7 +47,6 @@ export async function middleware(request: NextRequest) {
 
     const { pathname } = request.nextUrl;
 
-    // Admin routes - require ADMIN or OPERATOR role
     // Admin routes - require ADMIN or OPERATOR role
     if (pathname.startsWith("/admin")) {
         console.log("MW_DEBUG: Path:", pathname, "Token:", !!token, "Role:", token?.role);
@@ -33,19 +67,6 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // Protected routes - require authentication
-    // Protected routes - require authentication
-    // Orders should probably require auth or a special token, but for now let's keep orders protected
-    // Cart and Checkout should be public for B2C guests
-    // Orders should be accessible to guests (verification happens in page)
-    /* 
-    if (pathname.startsWith("/orders")) {
-        if (!token) {
-            return NextResponse.redirect(new URL("/login", request.url));
-        }
-    }
-    */
-
     const response = NextResponse.next();
 
     // Security Headers
@@ -64,7 +85,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        "/admin/:path*",
-        "/orders/:path*",
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - public folder
+         */
+        '/((?!_next/static|_next/image|favicon.ico|public).*)',
     ],
 };
