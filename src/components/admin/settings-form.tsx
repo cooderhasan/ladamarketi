@@ -68,6 +68,7 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                     <TabsTrigger value="payment" className="px-4 py-2">Ödeme Bilgileri</TabsTrigger>
                     <TabsTrigger value="social" className="px-4 py-2">Sosyal Medya</TabsTrigger>
                     <TabsTrigger value="cargo" className="px-4 py-2">Kargo & Teslimat</TabsTrigger>
+                    <TabsTrigger value="xml" className="px-4 py-2">Entegrasyonlar (XML)</TabsTrigger>
                 </TabsList>
 
                 {/* Main Settings Form Wrapper */}
@@ -430,6 +431,80 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                             </CardContent>
                         </Card>
                     </TabsContent>
+
+                    <TabsContent value="xml" className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>XML Ürün Entegrasyonu</CardTitle>
+                                <CardDescription>
+                                    Bayiler ve pazar yerleri için XML ürün çıktısı ayarları
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="xmlApiKey">API Güvenlik Anahtarı (Secret Key)</Label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            id="xmlApiKey"
+                                            value={settings.xmlApiKey || ""}
+                                            onChange={(e) => updateField("xmlApiKey", e.target.value)}
+                                            placeholder="Örn: a1b2c3d4e5..."
+                                            className="font-mono"
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => {
+                                                const key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                                                updateField("xmlApiKey", key);
+                                            }}
+                                        >
+                                            Yeni Oluştur
+                                        </Button>
+                                    </div>
+                                    <p className="text-xs text-gray-500">
+                                        Bu anahtar XML linkinin güvenliğini sağlar. Değiştirirseniz eski linkler çalışmayı durdurur.
+                                    </p>
+                                </div>
+
+                                {settings.xmlApiKey && (
+                                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border space-y-2">
+                                        <Label>XML Feed Linkiniz</Label>
+                                        <div className="flex items-center gap-2">
+                                            <code className="flex-1 bg-white dark:bg-black p-2 rounded border font-mono text-sm break-all">
+                                                {typeof window !== 'undefined' ? `${window.location.origin}/api/xml/products?key=${settings.xmlApiKey}` : `/api/xml/products?key=${settings.xmlApiKey}`}
+                                            </code>
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                onClick={() => {
+                                                    const url = `${window.location.origin}/api/xml/products?key=${settings.xmlApiKey}`;
+                                                    navigator.clipboard.writeText(url);
+                                                    toast.success("Link kopyalandı!");
+                                                }}
+                                            >
+                                                Kopyala
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label className="text-base">Fiyat Seçeneği</Label>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch
+                                            id="useSalePrice"
+                                            checked={settings.xmlUseSalePrice === "true"}
+                                            onCheckedChange={(checked) => updateField("xmlUseSalePrice", String(checked))}
+                                        />
+                                        <Label htmlFor="useSalePrice" className="font-normal">
+                                            İndirimli satış fiyatlarını gönder (Kapalıysa liste fiyatı gönderilir)
+                                        </Label>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
                 </form>
 
                 {/* Independent Cargo Tab - Outside of Main Form */}
@@ -466,7 +541,7 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                     {loading ? "Kaydediliyor..." : "Tüm Ayarları Kaydet"}
                 </Button>
             </div>
-        </div>
+        </div >
     );
 }
 
