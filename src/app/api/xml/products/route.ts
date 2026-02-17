@@ -30,6 +30,12 @@ export async function GET(req: NextRequest) {
     }
 
     const settings = await getSiteSettings();
+
+    // Check if service is disabled (default to true if not set)
+    if (settings.xmlFeedActive === "false") {
+        return new NextResponse("Service Unavailable: XML Feed is disabled", { status: 503 });
+    }
+
     const validKey = settings.xmlApiKey;
 
     if (!validKey || key !== validKey) {

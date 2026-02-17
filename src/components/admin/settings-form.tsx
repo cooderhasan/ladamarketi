@@ -441,6 +441,20 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
+                                <div className="flex items-center space-x-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                                    <Switch
+                                        id="xmlFeedActive"
+                                        checked={settings.xmlFeedActive !== "false"}
+                                        onCheckedChange={(checked) => updateField("xmlFeedActive", String(checked))}
+                                    />
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="xmlFeedActive" className="text-base">XML Servisi Aktif</Label>
+                                        <p className="text-sm text-gray-500">
+                                            Kapatırsanız, anahtar doğru olsa bile XML linki çalışmaz.
+                                        </p>
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2">
                                     <Label htmlFor="xmlApiKey">API Güvenlik Anahtarı (Secret Key)</Label>
                                     <div className="flex gap-2">
