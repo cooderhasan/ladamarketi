@@ -158,6 +158,7 @@ export function ProductCardV2({
                                 "object-contain p-4 transition-transform duration-500 group-hover:scale-110",
                                 product.stock === 0 && "opacity-50 grayscale"
                             )}
+                            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                         />
                     ) : (
                         <div className="text-gray-300">

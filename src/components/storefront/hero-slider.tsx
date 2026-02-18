@@ -81,6 +81,7 @@ export function HeroSlider({ sliders }: HeroSliderProps) {
                                 fill
                                 className="object-cover object-right"
                                 priority={true}
+                                sizes="100vw"
                             />
                         )}
                     </div>

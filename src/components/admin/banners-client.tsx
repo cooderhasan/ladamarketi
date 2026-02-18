@@ -139,6 +139,7 @@ export function BannersClient({ initialBanners }: BannersClientProps) {
                                                 alt={banner.title || "Banner"}
                                                 fill
                                                 className="object-cover"
+                                                sizes="96px"
                                             />
                                         </div>
                                     </TableCell>
