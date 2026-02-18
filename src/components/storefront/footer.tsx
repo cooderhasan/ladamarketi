@@ -35,7 +35,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                                     alt={settings?.siteName || "Logo"}
                                     width={0}
                                     height={0}
-                                    sizes="100vw"
+                                    sizes="200px"
                                     className="h-10 w-auto object-contain brightness-0 invert"
                                 />
                             ) : (
