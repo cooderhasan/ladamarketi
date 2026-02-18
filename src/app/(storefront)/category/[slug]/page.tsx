@@ -248,7 +248,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                     ) : (
                         <>
                             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                                {products.map((product) => (
+                                {products.map((product, index) => (
                                     <ProductCardModern
                                         key={product.id}
                                         product={{
@@ -263,6 +263,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                                         }}
                                         discountRate={discountRate}
                                         isDealer={isDealer}
+                                        priority={index < 4}
                                     />
                                 ))}
                             </div>

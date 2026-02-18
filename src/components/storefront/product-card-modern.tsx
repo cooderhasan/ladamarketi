@@ -43,6 +43,7 @@ interface ProductCardProps {
     discountRate: number;
     isDealer: boolean;
     badge?: string;
+    priority?: boolean;
 }
 
 export function ProductCardModern({
@@ -50,6 +51,7 @@ export function ProductCardModern({
     discountRate,
     isDealer,
     badge,
+    priority = false,
 }: ProductCardProps) {
     const { addItem, openAddedToCartModal } = useCartStore();
     const [quantity, setQuantity] = useState(product.minQuantity || 1);
@@ -146,8 +148,8 @@ export function ProductCardModern({
                             alt={product.name}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            priority={false}
-                            loading="lazy"
+                            priority={priority}
+                            loading={priority ? "eager" : "lazy"}
                             className={cn(
                                 "object-contain p-2 transition-all duration-700 ease-in-out group-hover/card:scale-110",
                                 product.stock === 0 && "opacity-50 grayscale"
