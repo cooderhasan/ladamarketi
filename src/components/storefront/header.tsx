@@ -107,7 +107,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
     }, [sidebarCategories, categories]);
 
     return (
-        <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60 shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
+        <header className="sticky top-0 z-50 w-full bg-white/95 supports-[backdrop-filter]:bg-white/80 dark:bg-gray-900/95 supports-[backdrop-filter]:dark:bg-gray-900/80 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
 
             {/* Top Row: Logo, Search, User Actions */}
             <div className="border-b dark:border-gray-800/50">
@@ -311,7 +311,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
 
             {/* Bottom Row: Category Navigation (Desktop) - STRIKING DESIGN */}
             <div
-                className="hidden md:block relative overflow-hidden bg-gradient-to-r from-[#0081AF]/95 via-[#009AD0]/95 to-[#0081AF]/95 backdrop-blur-md shadow-lg"
+                className="hidden md:block relative overflow-hidden bg-[#009AD0] bg-gradient-to-r from-[#0081AF]/95 via-[#009AD0]/95 to-[#0081AF]/95 backdrop-blur-md shadow-lg"
             >
                 {/* Glowing Line Effect */}
                 <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#4FC3F7] to-transparent opacity-50" />
@@ -372,7 +372,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
 
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden border-b dark:border-gray-800/50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl supports-[backdrop-filter]:bg-white/90 animate-in slide-in-from-top-2 duration-200 max-h-[80vh] overflow-y-auto">
+                <div className="md:hidden border-b dark:border-gray-800/50 bg-white dark:bg-gray-900 supports-[backdrop-filter]:bg-white/95 supports-[backdrop-filter]:dark:bg-gray-900/95 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200 max-h-[80vh] overflow-y-auto">
                     <div className="container mx-auto px-4 py-4 space-y-4">
                         {/* Mobile Search */}
                         <SearchInput />
