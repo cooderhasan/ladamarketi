@@ -14,7 +14,7 @@ function SubmitButton() {
 
     return (
         <Button
-            className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-2"
+            className="w-full h-12 bg-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 hover:bg-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-2"
             type="submit"
             disabled={pending}
         >
@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
     const [errorMessage, dispatch] = useActionState(authenticateAdmin, undefined);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 px-4 py-8 relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-gray-900 bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 px-4 py-8 relative overflow-hidden">
             {/* Animated Background Grid */}
             <div className="absolute inset-0 opacity-20">
                 <div className="absolute inset-0" style={{
@@ -59,11 +59,11 @@ export default function AdminLoginPage() {
 
             <div className="max-w-md w-full relative z-10">
                 {/* Glass Card */}
-                <div className="backdrop-blur-xl bg-gray-800/50 border border-gray-700/50 rounded-3xl shadow-2xl overflow-hidden">
+                <div className="bg-gray-800/95 supports-[backdrop-filter]:bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-3xl shadow-2xl overflow-hidden">
                     {/* Header Section */}
                     <div className="px-8 pt-10 pb-8 text-center relative">
                         {/* Shield Icon */}
-                        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30 transform hover:scale-105 transition-transform">
+                        <div className="w-20 h-20 bg-blue-600 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30 transform hover:scale-105 transition-transform">
                             <Shield className="h-10 w-10 text-white" />
                         </div>
 
