@@ -219,7 +219,7 @@ export default async function AdminDashboardPage() {
                         <div className="space-y-4">
                             {stats.recentOrders.map((order) => (
                                 <Link
-                                    href={`/admin/orders/${order.id}`}
+                                    href={`/admin/orders`}
                                     key={order.id}
                                     className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0 hover:bg-gray-50 dark:hover:bg-gray-900/50 p-2 rounded-lg transition-colors cursor-pointer group"
                                 >
