@@ -25,9 +25,13 @@ export async function POST(req: NextRequest) {
 
         if (status === "success") {
             // 2. Update Order and Payment status
+            // merchant_oid is sent as order.id in the token route
             const order = await prisma.order.findFirst({
                 where: {
-                    orderNumber: orderId, // Use orderId (which is merchant_oid) for orderNumber
+                    OR: [
+                        { id: orderId },           // Primary: matches order.id (sent as merchant_oid)
+                        { orderNumber: orderId },   // Fallback: matches orderNumber (legacy)
+                    ]
                 },
                 include: {
                     payment: true,
@@ -114,7 +118,14 @@ export async function POST(req: NextRequest) {
             console.log(`Order ${orderId} payment failed:`, params.failed_reason_msg);
             // Hatayı nota ekle ama statüyü değiştirme (Böylece WAITING_FOR_PAYMENT kalır ve panelde gizli kalmaya devam eder)
             // Ayrıca 'where' sorgusunu orderNumber olarak düzeltiyoruz (id değil)
-            const orderForFail = await prisma.order.findUnique({ where: { orderNumber: orderId } });
+            const orderForFail = await prisma.order.findFirst({
+                where: {
+                    OR: [
+                        { id: orderId },
+                        { orderNumber: orderId },
+                    ]
+                }
+            });
             if (orderForFail) {
                 await prisma.order.update({
                     where: { id: orderForFail.id },
