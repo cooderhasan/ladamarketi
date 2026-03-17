@@ -40,12 +40,13 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         if (Object.values(OrderStatus).includes(normalizedStatus as OrderStatus)) {
             where.status = normalizedStatus as OrderStatus;
         }
-    } else {
-        // Varsayılan görünüm: "Ödeme Bekleniyor" olanları gizle (Başarısız/Yarım kalan PayTR işlemleri)
+    } else if (!status || status === "") {
+        // Varsayılan görünüm (filtre yok): "Ödeme Bekleniyor" olanları gizle (Başarısız/Yarım kalan PayTR işlemleri)
         where.NOT = {
             status: "WAITING_FOR_PAYMENT"
         };
     }
+    // status === "ALL" ise hiçbir filtre ekleme - tüm durumları göster
 
     // Date Filtering
     if (startDate || endDate) {
