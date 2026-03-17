@@ -180,24 +180,24 @@ export function ProductCardModern({
 
                     {/* Price Section */}
                     <div className="mt-auto pt-3 md:pt-4 border-t border-dashed border-gray-200 dark:border-gray-700">
-                        <div className="flex items-end justify-between gap-1.5 min-w-0">
-                            <div className="flex flex-col min-w-0">
+                        <div className="flex flex-wrap items-end justify-between gap-y-2 gap-x-1.5 min-w-0">
+                            <div className="flex flex-col min-w-0 pr-1">
                                 {showStrikethrough && (
                                     <span className="text-[10px] md:text-xs text-gray-400 line-through font-medium truncate">
                                         {formatPrice(strikethroughPrice)}
                                     </span>
                                 )}
-                                <span className="text-base md:text-xl font-black text-gray-900 dark:text-white tracking-tight truncate">
+                                <span className="text-base md:text-lg font-black text-gray-900 dark:text-white tracking-tight truncate">
                                     {formatPrice(displayPrice)}
                                 </span>
                             </div>
 
                             {/* Modern Add Button */}
-                            <div className="relative shrink-0">
+                            <div className="relative shrink-0 ml-auto">
                                 {product.stock > 0 && !hasVariants ? (
                                     <button
                                         onClick={handleAddToCart}
-                                        className="h-9 w-9 md:w-auto md:px-4 flex items-center justify-center rounded-full bg-blue-600 text-white text-[11px] font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:scale-105 hover:shadow-blue-600/40 transition-all duration-300 active:scale-95 gap-1.5 whitespace-nowrap"
+                                        className="h-9 w-9 md:w-auto md:px-3.5 flex items-center justify-center rounded-full bg-blue-600 text-white text-[11px] font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:scale-105 hover:shadow-blue-600/40 transition-all duration-300 active:scale-95 gap-1.5 whitespace-nowrap"
                                         title="Sepete Ekle"
                                     >
                                         <span className="hidden md:inline">Sepete Ekle</span>
@@ -205,7 +205,7 @@ export function ProductCardModern({
                                     </button>
                                 ) : (
                                     <Link href={`/products/${product.slug}`}>
-                                        <button className="h-10 px-4 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white text-xs font-bold hover:bg-gray-200 transition-colors">
+                                        <button className="h-9 px-3.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white text-xs font-bold hover:bg-gray-200 transition-colors">
                                             {hasVariants ? "SEÇENEKLER" : "TÜKENDİ"}
                                         </button>
                                     </Link>
