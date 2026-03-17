@@ -42,29 +42,28 @@ export async function POST(req: NextRequest) {
             }
 
             // Ödeme Başarılı
-            await prisma.$transaction([
-                prisma.order.update({
-                    where: { id: order.id },
-                    data: { status: "CONFIRMED" },
-                }),
-                prisma.payment.upsert({
-                    where: { orderId: order.id },
-                    update: {
-                        status: "COMPLETED",
-                        amount: Number(total_amount) / 100,
-                        providerRef: orderId,
-                        providerData: params as any,
-                    },
-                    create: {
-                        orderId: order.id,
-                        method: "CREDIT_CARD",
-                        status: "COMPLETED",
-                        amount: Number(total_amount) / 100,
-                        providerRef: orderId,
-                        providerData: params as any,
-                    },
-                }),
-            ]);
+            await prisma.order.update({
+                where: { id: order.id },
+                data: { status: "CONFIRMED" },
+            });
+
+            await prisma.payment.upsert({
+                where: { orderId: order.id },
+                update: {
+                    status: "COMPLETED",
+                    amount: Number(total_amount) / 100,
+                    providerRef: orderId,
+                    providerData: params as any,
+                },
+                create: {
+                    orderId: order.id,
+                    method: "CREDIT_CARD",
+                    status: "COMPLETED",
+                    amount: Number(total_amount) / 100,
+                    providerRef: orderId,
+                    providerData: params as any,
+                },
+            });
             console.log(`Order ${orderId} confirmed via PayTR`);
 
             // --- SEND EMAILS (Now that payment is confirmed) ---
