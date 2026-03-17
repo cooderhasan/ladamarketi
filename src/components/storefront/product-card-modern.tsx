@@ -180,7 +180,7 @@ export function ProductCardModern({
 
                     {/* Price Section */}
                     <div className="mt-auto pt-3 md:pt-4 border-t border-dashed border-gray-200 dark:border-gray-700">
-                        <div className="flex flex-wrap items-end justify-between gap-y-2 gap-x-1.5 min-w-0">
+                        <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-1.5 min-w-0">
                             <div className="flex flex-col min-w-0 pr-1">
                                 {showStrikethrough && (
                                     <span className="text-[10px] md:text-xs text-gray-400 line-through font-medium truncate">
