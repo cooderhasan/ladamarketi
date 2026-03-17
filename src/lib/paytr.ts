@@ -110,42 +110,27 @@ export function verifyPayTRCallback(params: any) {
 }
 
 export async function getInstallmentRates() {
-    const request_id = Date.now().toString(); // Daha basit bir ID deneyelim
+    const request_id = Date.now().toString();
     const hash_str = config.merchantId + request_id + config.merchantSalt;
 
-    // Standart Base64 formatına geri dönüyoruz.
     const paytr_token = crypto
         .createHmac("sha256", config.merchantKey)
         .update(hash_str)
         .digest("base64");
 
-    const params = {
-        merchant_id: config.merchantId,
-        request_id: request_id,
-        paytr_token: paytr_token,
-    };
-
-    console.log("PayTR İstek Parametreleri (Şifresiz):", {
-        merchant_id: config.merchantId,
-        request_id: request_id,
-        // Anahtarları loglamıyoruz (Güvenlik)
-    });
-
-
-    console.log("DEBUG: PayTR Installment Check", {
-        merchantId: config.merchantId,
-        requestId: request_id,
-        hashBaslangic: hash_str.substring(0, 5) + "...",
-    });
+    const params = new URLSearchParams();
+    params.append('merchant_id', config.merchantId);
+    params.append('request_id', request_id);
+    params.append('paytr_token', paytr_token);
 
     try {
         const response = await fetch("https://www.paytr.com/odeme/api/get-installment-rates", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             },
-            body: new URLSearchParams(params as any).toString(),
+            body: params.toString(),
+            cache: 'no-store'
         });
 
         console.log("PayTR API Status:", response.status, response.statusText);
