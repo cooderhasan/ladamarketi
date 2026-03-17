@@ -218,16 +218,17 @@ export default async function AdminDashboardPage() {
                     ) : (
                         <div className="space-y-4">
                             {stats.recentOrders.map((order) => (
-                                <div
+                                <Link
+                                    href={`/admin/orders/${order.id}`}
                                     key={order.id}
-                                    className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0"
+                                    className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0 hover:bg-gray-50 dark:hover:bg-gray-900/50 p-2 rounded-lg transition-colors cursor-pointer group"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                                            <ShoppingCart className="h-5 w-5 text-gray-500" />
+                                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
+                                            <ShoppingCart className="h-5 w-5 text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                                         </div>
                                         <div>
-                                            <p className="font-medium text-gray-900 dark:text-white">
+                                            <p className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
                                                 {order.orderNumber}
                                             </p>
                                             <p className="text-sm text-gray-500">
@@ -251,7 +252,7 @@ export default async function AdminDashboardPage() {
                                             </span>
                                         </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     )}
