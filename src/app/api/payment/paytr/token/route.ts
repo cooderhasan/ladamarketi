@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
         }
 
-        if (order.status !== "PENDING") {
+        if (order.status !== "PENDING" && order.status !== "WAITING_FOR_PAYMENT") {
             return NextResponse.json({ error: "Sipariş ödeme bekliyor durumunda değil" }, { status: 400 });
         }
 
