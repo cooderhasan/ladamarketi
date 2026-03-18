@@ -4,7 +4,7 @@ import { AdminNewOrderEmail } from '@/emails/admin-new-order';
 import { ShippingNotificationEmail } from '@/emails/shipping-notification';
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789");
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "ladamarketi@gmail.com";
 
 interface SendOrderConfirmationProps {
     to: string;
