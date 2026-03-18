@@ -474,7 +474,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
 
             {/* Order Detail Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="max-w-5xl w-full">
+                <DialogContent className="max-w-5xl w-11/12 md:w-full max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
                             Sipariş Detayı - {selectedOrder?.orderNumber}
@@ -483,7 +483,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                     {selectedOrder && (
                         <div className="space-y-4">
                             {/* Top Grid: Customer, Address, Cargo/Status - 3 Columns */}
-                            <div className="grid grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {/* Column 1: Customer Info */}
                                 <div className="space-y-4">
                                     <div>
