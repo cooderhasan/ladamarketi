@@ -473,7 +473,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
 
             {/* Order Detail Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="max-w-5xl min-w-[900px]">
+                <DialogContent className="max-w-5xl w-full">
                     <DialogHeader>
                         <DialogTitle>
                             Sipariş Detayı - {selectedOrder?.orderNumber}
@@ -590,7 +590,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                             {/* Order Items Table - Compact */}
                             <div>
                                 <h4 className="font-semibold mb-2 text-sm">Ürünler ({selectedOrder.items.length})</h4>
-                                <div className="border rounded-md overflow-hidden max-h-[300px] overflow-y-auto">
+                                <div className="border rounded-md overflow-hidden max-h-[300px] overflow-y-auto overflow-x-auto">
                                     <Table>
                                         <TableHeader className="bg-gray-50 sticky top-0">
                                             <TableRow>
