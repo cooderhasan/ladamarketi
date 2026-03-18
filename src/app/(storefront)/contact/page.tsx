@@ -48,7 +48,7 @@ export default async function ContactPage() {
                     </a>
 
                     {(() => {
-                        let cleanPhone = (settings.phone || "05345194472").replace(/[^0-9]/g, "");
+                        let cleanPhone = (settings.whatsappNumber || settings.phone || "05345194472").replace(/[^0-9]/g, "");
                         if (cleanPhone.startsWith('0')) cleanPhone = '90' + cleanPhone.substring(1);
                         else if (!cleanPhone.startsWith('90') && cleanPhone.length === 10) cleanPhone = '90' + cleanPhone;
 

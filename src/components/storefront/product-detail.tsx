@@ -548,13 +548,19 @@ export function ProductDetail({
                                             {/* WhatsApp */}
                                             {whatsappNumber && (
                                                 <div className="col-span-10 sm:w-full sm:mt-0 sm:basis-full sm:order-last">
+                                            {(() => {
+                                                let cleanPhone = (whatsappNumber || "").replace(/[^0-9]/g, "");
+                                                if (cleanPhone.startsWith('0')) cleanPhone = '90' + cleanPhone.substring(1);
+                                                else if (!cleanPhone.startsWith('90') && cleanPhone.length === 10) cleanPhone = '90' + cleanPhone;
+
+                                                return (
                                                     <Button
                                                         variant="outline"
                                                         className="w-full h-11 font-semibold border-green-200 text-green-700 hover:bg-green-50 hover:border-green-400 rounded-lg transition-all"
                                                         asChild
                                                     >
                                                         <a
-                                                            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+                                                            href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(
                                                                 `Merhaba, ${product.name} ürününü sipariş etmek istiyorum.${product.sku ? ` Stok Kodu: ${product.sku}` : ''}`
                                                             )}`}
                                                             target="_blank"
@@ -566,6 +572,8 @@ export function ProductDetail({
                                                             WhatsApp ile Sor
                                                         </a>
                                                     </Button>
+                                                );
+                                            })()}
                                                 </div>
                                             )}
 
