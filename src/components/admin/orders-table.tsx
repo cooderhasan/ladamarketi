@@ -594,6 +594,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                     <Table>
                                         <TableHeader className="bg-gray-50 sticky top-0">
                                             <TableRow>
+                                                <TableHead className="py-2 h-9 w-14">Görsel</TableHead>
                                                 <TableHead className="py-2 h-9">Ürün</TableHead>
                                                 <TableHead className="py-2 h-9 text-center w-20">Adet</TableHead>
                                                 <TableHead className="py-2 h-9 text-right w-32">Birim Fiyat</TableHead>
@@ -603,7 +604,25 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                         <TableBody>
                                             {selectedOrder.items.map((item) => (
                                                 <TableRow key={item.id} className="hover:bg-gray-50">
-                                                    <TableCell className="py-2">{item.productName}</TableCell>
+                                                    <TableCell className="py-2">
+                                                        {item.product?.images?.[0] ? (
+                                                            <img
+                                                                src={item.product.images[0]}
+                                                                alt={item.productName}
+                                                                className="w-10 h-10 object-cover rounded border border-gray-200"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-10 h-10 bg-gray-100 rounded border border-gray-200 flex items-center justify-center text-gray-400 text-xs">-</div>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="py-2">
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <span>{item.productName}</span>
+                                                            {item.product?.sku && (
+                                                                <span className="text-xs text-gray-400 font-mono">SKU: {item.product.sku}</span>
+                                                            )}
+                                                        </div>
+                                                    </TableCell>
                                                     <TableCell className="py-2 text-center font-medium">
                                                         {item.quantity}
                                                     </TableCell>

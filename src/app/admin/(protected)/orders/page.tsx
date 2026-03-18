@@ -70,7 +70,13 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                 user: {
                     select: { id: true, companyName: true, email: true, phone: true },
                 },
-                items: true,
+                items: {
+                    include: {
+                        product: {
+                            select: { sku: true, images: true },
+                        },
+                    },
+                },
                 payment: true,
             },
             orderBy: { createdAt: "desc" },

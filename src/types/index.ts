@@ -131,6 +131,10 @@ export interface OrderWithItems {
         discountRate: number;
         vatRate: number;
         lineTotal: number;
+        product: {
+            sku: string | null;
+            images: string[];
+        } | null;
     }[];
     payment: {
         id: string;
