@@ -27,35 +27,43 @@ export default async function ContactPage() {
             {/* Quick Contact Badges */}
             <section className="container mx-auto px-4 -mt-8 relative z-20 mb-10">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <a href="tel:05345194472" className="group flex items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-xl p-5 ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1">
+                    <a href={`tel:${settings.phone?.replace(/[^0-9+]/g, '') || '05345194472'}`} className="group flex items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-xl p-5 ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1">
                         <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-500 transition-colors">
                             <Phone className="w-5 h-5 text-green-600 group-hover:text-white transition-colors" />
                         </div>
                         <div>
                             <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Telefon</p>
-                            <p className="font-bold text-gray-900 dark:text-white text-sm">0534 519 44 72</p>
+                            <p className="font-bold text-gray-900 dark:text-white text-sm">{settings.phone || "0534 519 44 72"}</p>
                         </div>
                     </a>
 
-                    <a href="mailto:info@ladamarketi.com" className="group flex items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-xl p-5 ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1">
+                    <a href={`mailto:${settings.email || 'info@ladamarketi.com'}`} className="group flex items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-xl p-5 ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1">
                         <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center group-hover:bg-purple-500 transition-colors">
                             <Mail className="w-5 h-5 text-purple-600 group-hover:text-white transition-colors" />
                         </div>
                         <div>
                             <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">E-posta</p>
-                            <p className="font-bold text-gray-900 dark:text-white text-sm">info@ladamarketi.com</p>
+                            <p className="font-bold text-gray-900 dark:text-white text-sm">{settings.email || "info@ladamarketi.com"}</p>
                         </div>
                     </a>
 
-                    <a href="https://wa.me/905345194472" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-xl p-5 ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1">
-                        <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:bg-emerald-500 transition-colors">
-                            <MessageCircle className="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors" />
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">WhatsApp</p>
-                            <p className="font-bold text-gray-900 dark:text-white text-sm">Hızlı İletişim</p>
-                        </div>
-                    </a>
+                    {(() => {
+                        let cleanPhone = (settings.phone || "05345194472").replace(/[^0-9]/g, "");
+                        if (cleanPhone.startsWith('0')) cleanPhone = '90' + cleanPhone.substring(1);
+                        else if (!cleanPhone.startsWith('90') && cleanPhone.length === 10) cleanPhone = '90' + cleanPhone;
+
+                        return (
+                            <a href={`https://wa.me/${cleanPhone}`} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-xl p-5 ring-1 ring-black/5 transition-all duration-300 hover:-translate-y-1">
+                                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center group-hover:bg-emerald-500 transition-colors">
+                                    <MessageCircle className="w-5 h-5 text-emerald-600 group-hover:text-white transition-colors" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">WhatsApp</p>
+                                    <p className="font-bold text-gray-900 dark:text-white text-sm">Hızlı İletişim</p>
+                                </div>
+                            </a>
+                        );
+                    })()}
                 </div>
             </section>
 
@@ -101,11 +109,8 @@ export default async function ContactPage() {
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-0.5">Telefon</p>
-                                        <a href="tel:05345194472" className="block text-sm text-gray-700 dark:text-gray-300 hover:text-[#009AD0] transition-colors font-medium">
-                                            0534 519 44 72
-                                        </a>
-                                        <a href="tel:05388168400" className="block text-sm text-gray-700 dark:text-gray-300 hover:text-[#009AD0] transition-colors font-medium">
-                                            0538 816 84 00
+                                        <a href={`tel:${settings.phone?.replace(/[^0-9+]/g, '') || '05345194472'}`} className="block text-sm text-gray-700 dark:text-gray-300 hover:text-[#009AD0] transition-colors font-medium">
+                                            {settings.phone || "0534 519 44 72"}
                                         </a>
                                     </div>
                                 </div>
