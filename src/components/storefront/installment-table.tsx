@@ -1,128 +1,82 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { formatPrice } from "@/lib/helpers";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-
-interface InstallmentRate {
-    count: number;
-    rate: number;
-    amount: number;
-}
-
-interface BankRates {
-    [key: string]: string | InstallmentRate[];
-}
+import { useEffect, useRef } from "react";
 
 interface InstallmentTableProps {
     price: number;
 }
 
+const PAYTR_TOKEN = "9b1ae477fc7a222ba4e52328780a106f96b0ecfeab47494afbd0e8c74107645c";
+const PAYTR_MERCHANT_ID = "278525";
+
 export function InstallmentTable({ price }: InstallmentTableProps) {
-    const [rates, setRates] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const scriptRef = useRef<HTMLScriptElement | null>(null);
+
+    // Fiyatı PayTR'nin beklediği formata çevir (örn: 1881.38)
+    const formattedPrice = price.toFixed(2);
 
     useEffect(() => {
-        async function fetchRates() {
-            setLoading(true);
-            try {
-                const response = await fetch("/api/payment/paytr/installment-rates");
-                const data = await response.json();
+        const containerId = "paytr_taksit_tablosu";
 
-                if (data.status === "success") {
-                    setRates(data.properties);
-                } else {
-                    setError(data.err_msg || "Taksit oranları yüklenemedi");
-                }
-            } catch (err) {
-                setError("Bağlantı hatası oluştu");
-            } finally {
-                setLoading(false);
-            }
+        // Önceki script varsa kaldır
+        if (scriptRef.current) {
+            scriptRef.current.remove();
+            scriptRef.current = null;
         }
 
-        fetchRates();
-    }, []);
+        // Konteyneri temizle
+        const container = document.getElementById(containerId);
+        if (container) container.innerHTML = "";
 
-    if (loading) {
-        return (
-            <div className="space-y-4">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-32 w-full" />
-            </div>
-        );
-    }
+        // Yeni script ekle
+        const script = document.createElement("script");
+        script.src = `https://www.paytr.com/odeme/taksit-tablosu/v2?token=${PAYTR_TOKEN}&merchant_id=${PAYTR_MERCHANT_ID}&amount=${formattedPrice}&taksit=0&tumu=0`;
+        script.async = true;
+        document.body.appendChild(script);
+        scriptRef.current = script;
 
-    if (error) {
-        return (
-            <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-4 rounded-lg flex flex-col gap-2">
-                <p className="font-bold">Hata oluştu:</p>
-                <p>{error}</p>
-                <p className="text-[10px] opacity-70">Lütfen API ayarlarınızı ve internet bağlantınızı kontrol edin.</p>
-            </div>
-        );
-    }
-
-    if (!rates || Object.keys(rates).length === 0) {
-        return (
-            <div className="text-sm text-gray-500 p-4 border border-dashed rounded-lg text-center">
-                Bu ürün için taksit seçeneği bulunmamaktadır.
-            </div>
-        );
-    }
+        return () => {
+            if (scriptRef.current) {
+                scriptRef.current.remove();
+                scriptRef.current = null;
+            }
+        };
+    }, [formattedPrice]);
 
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Object.entries(rates).map(([bank, cardRates]: [string, any]) => {
-                if (!Array.isArray(cardRates)) return null;
-
-                return (
-                    <Card key={bank} className="overflow-hidden border-blue-100 dark:border-blue-900/30">
-                        <div className="bg-blue-50 dark:bg-blue-900/20 px-4 py-2 border-b border-blue-100 dark:border-blue-900/30">
-                            <h4 className="font-bold text-sm text-blue-700 dark:text-blue-400 uppercase tracking-wide">
-                                {bank}
-                            </h4>
-                        </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="hover:bg-transparent">
-                                    <TableHead className="h-8 text-[10px] font-bold uppercase">Taksit</TableHead>
-                                    <TableHead className="h-8 text-[10px] font-bold uppercase text-right">Aylık</TableHead>
-                                    <TableHead className="h-8 text-[10px] font-bold uppercase text-right">Toplam</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {cardRates.map((row: any) => {
-                                    const totalAmount = price * (1 + Number(row.rate) / 100);
-                                    const monthlyAmount = totalAmount / Number(row.count);
-
-                                    return (
-                                        <TableRow key={row.count} className="h-8">
-                                            <TableCell className="py-1 text-xs font-medium">{row.count}</TableCell>
-                                            <TableCell className="py-1 text-xs text-right font-medium">
-                                                {formatPrice(monthlyAmount)}
-                                            </TableCell>
-                                            <TableCell className="py-1 text-xs text-right font-bold text-blue-600 dark:text-blue-400">
-                                                {formatPrice(totalAmount)}
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </Card>
-                );
-            })}
-        </div>
+        <>
+            <style>{`
+                #paytr_taksit_tablosu {
+                    clear: both;
+                    font-size: 12px;
+                    max-width: 100%;
+                    text-align: center;
+                    font-family: Arial, sans-serif;
+                }
+                #paytr_taksit_tablosu::before { display: table; content: " "; }
+                #paytr_taksit_tablosu::after { content: ""; clear: both; display: table; }
+                .taksit-tablosu-wrapper {
+                    margin: 5px;
+                    width: 260px;
+                    padding: 12px;
+                    cursor: default;
+                    text-align: center;
+                    display: inline-block;
+                    border: 1px solid #e1e1e1;
+                    border-radius: 8px;
+                }
+                .taksit-logo img { max-height: 28px; padding-bottom: 10px; }
+                .taksit-tutari-text { float: left; width: 126px; color: #a2a2a2; margin-bottom: 5px; }
+                .taksit-tutar-wrapper { display: inline-block; background-color: #f7f7f7; }
+                .taksit-tutar-wrapper:hover { background-color: #e8e8e8; }
+                .taksit-tutari { float: left; width: 126px; padding: 6px 0; color: #474747; border: 2px solid #ffffff; }
+                .taksit-tutari-bold { font-weight: bold; }
+                @media all and (max-width: 600px) {
+                    .taksit-tablosu-wrapper { margin: 5px 0; width: 100%; }
+                }
+            `}</style>
+            <div id="paytr_taksit_tablosu" ref={containerRef} />
+        </>
     );
 }
