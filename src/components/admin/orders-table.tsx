@@ -669,25 +669,27 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
             </Dialog>
 
             {/* Lightbox */}
-            {lightboxImage && (
-                <div
-                    className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
-                    onClick={() => setLightboxImage(null)}
+            <Dialog open={!!lightboxImage} onOpenChange={(open) => !open && setLightboxImage(null)}>
+                <DialogContent 
+                    className="max-w-screen-xl bg-transparent border-none shadow-none flex flex-col items-center justify-center pointer-events-none p-0" 
+                    showCloseButton={false}
                 >
-                    <button
-                        className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors"
-                        onClick={() => setLightboxImage(null)}
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
-                    <img
-                        src={lightboxImage}
-                        alt="Ürün Görseli"
-                        className="max-h-[85vh] max-w-[85vw] object-contain rounded-lg shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
-                    />
-                </div>
-            )}
+                    <div className="relative w-full h-full flex items-center justify-center pointer-events-auto">
+                        <button
+                            className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors z-50"
+                            onClick={() => setLightboxImage(null)}
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
+                        <img
+                            src={lightboxImage || ""}
+                            alt="Ürün Görseli"
+                            className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
