@@ -474,7 +474,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
 
             {/* Order Detail Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="max-w-5xl w-11/12 md:w-full max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-5xl sm:max-w-5xl w-11/12 md:w-full max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>
                             Sipariş Detayı - {selectedOrder?.orderNumber}
