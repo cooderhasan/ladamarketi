@@ -76,6 +76,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
     // Selection State
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isBulkLoading, setIsBulkLoading] = useState(false);
+    const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
     // Sync local order state when props change (due to server refetch)
     useEffect(() => {
@@ -609,7 +610,8 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                             <img
                                                                 src={item.product.images[0]}
                                                                 alt={item.productName}
-                                                                className="w-10 h-10 object-cover rounded border border-gray-200"
+                                                                className="w-10 h-10 object-cover rounded border border-gray-200 cursor-zoom-in hover:opacity-80 transition-opacity"
+                                                                onClick={() => setLightboxImage(item.product!.images[0])}
                                                             />
                                                         ) : (
                                                             <div className="w-10 h-10 bg-gray-100 rounded border border-gray-200 flex items-center justify-center text-gray-400 text-xs">-</div>
@@ -665,6 +667,27 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                     )}
                 </DialogContent>
             </Dialog>
+
+            {/* Lightbox */}
+            {lightboxImage && (
+                <div
+                    className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
+                    onClick={() => setLightboxImage(null)}
+                >
+                    <button
+                        className="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors"
+                        onClick={() => setLightboxImage(null)}
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                    <img
+                        src={lightboxImage}
+                        alt="Ürün Görseli"
+                        className="max-h-[85vh] max-w-[85vw] object-contain rounded-lg shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
         </div>
     );
 }
