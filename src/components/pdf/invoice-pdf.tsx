@@ -197,7 +197,7 @@ export const InvoicePDF = ({ order, settings }: InvoicePDFProps) => (
             <View style={styles.section}>
                 <View style={styles.column}>
                     <Text style={styles.sectionTitle}>Müşteri Bilgileri</Text>
-                    <Text style={[styles.text, { fontWeight: 'bold' }]}>{order.user?.companyName || order.user?.email || order.guestEmail || 'Misafir'}</Text>
+                    <Text style={[styles.text, { fontWeight: 'bold' }]}>{order.shippingAddress?.name || order.user?.companyName || order.user?.email || order.guestEmail || 'Misafir'}</Text>
                     <Text style={styles.text}>{order.user?.email || order.guestEmail}</Text>
                     <Text style={styles.text}>{order.user?.phone || '-'}</Text>
                     {/* Fallback address logic */}

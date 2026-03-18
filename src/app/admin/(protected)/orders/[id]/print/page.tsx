@@ -90,7 +90,7 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
                 <div>
                     <h3 className="text-gray-500 font-semibold mb-2 uppercase tracking-wider text-sm">Müşteri Bilgileri</h3>
                     <div className="text-gray-800">
-                        <p className="font-bold text-lg">{order.user?.companyName || order.user?.email || (order as any).guestEmail || "Misafir"}</p>
+                        <p className="font-bold text-lg">{shippingAddress?.name || order.user?.companyName || order.user?.email || (order as any).guestEmail || "Misafir"}</p>
                         <p>{order.user?.email || (order as any).guestEmail}</p>
                         <p>{order.user?.phone || "-"}</p>
                         {/* Fallback to user address if no specific shipping address is in the JSON yet (depending on implementation) */}

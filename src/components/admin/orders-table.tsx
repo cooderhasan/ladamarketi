@@ -349,7 +349,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                         <TableCell>
                                             <div className="flex flex-col">
                                                 <span className="font-medium">
-                                                    {order.user?.companyName || order.user?.email || order.guestEmail || "Misafir"}
+                                                    {(order.shippingAddress as any)?.name || order.user?.companyName || order.user?.email || order.guestEmail || "Misafir"}
                                                 </span>
                                                 <span className="text-xs text-gray-500 flex items-center gap-1">
                                                     {order.user?.phone || "-"}

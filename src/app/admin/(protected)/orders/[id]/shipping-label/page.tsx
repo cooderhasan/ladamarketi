@@ -98,7 +98,7 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
                     <h2 className="text-sm font-bold text-gray-500 uppercase mb-2 border-b border-gray-300 pb-1">ALICI (TESLİMAT ADRESİ)</h2>
                     <div className="pl-2">
                         <div className="text-2xl font-bold uppercase mb-2 leading-tight">
-                            {shippingAddress?.title || order.user?.companyName || order.user?.email || (order as any).guestEmail || "Müşteri"}
+                            {shippingAddress?.name || order.user?.companyName || order.user?.email || (order as any).guestEmail || "Müşteri"}
                         </div>
                         <div className="text-lg font-medium whitespace-pre-wrap leading-snug mb-2">
                             {shippingAddress?.address || order.user?.address || "Adres bilgisi yok"}
