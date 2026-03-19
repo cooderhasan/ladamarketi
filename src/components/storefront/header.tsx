@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,11 +57,17 @@ interface StorefrontHeaderProps {
 
 export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sidebarCategories = [], phone, facebookUrl, instagramUrl, twitterUrl, linkedinUrl }: StorefrontHeaderProps) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const items = useCartStore((state) => state.items);
     const clearCart = useCartStore((state) => state.clearCart);
     const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Auto-close mobile menu on navigation
+    useEffect(() => {
+        setIsMobileMenuOpen(false);
+    }, [pathname, searchParams]);
     const [mounted, setMounted] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -307,6 +313,11 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile Search Row - ALWAYS VISIBLE */}
+                <div className="md:hidden border-t dark:border-gray-800/50 bg-white/50 dark:bg-gray-900/50 py-3 px-4 animate-in slide-in-from-top-1 duration-300">
+                    <SearchInput />
+                </div>
             </div>
 
             {/* Bottom Row: Category Navigation (Desktop) - STRIKING DESIGN */}
@@ -374,9 +385,6 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
             {isMobileMenuOpen && (
                 <div className="md:hidden border-b dark:border-gray-800/50 bg-white dark:bg-gray-900 supports-[backdrop-filter]:bg-white/95 supports-[backdrop-filter]:dark:bg-gray-900/95 backdrop-blur-xl animate-in slide-in-from-top-2 duration-200 max-h-[80vh] overflow-y-auto">
                     <div className="container mx-auto px-4 py-4 space-y-4">
-                        {/* Mobile Search */}
-                        <SearchInput />
-
                         {/* Mobile Quick Actions */}
                         <div className="grid grid-cols-2 gap-2">
                             <Link
