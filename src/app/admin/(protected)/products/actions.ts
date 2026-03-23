@@ -346,7 +346,7 @@ export async function fixAllSlugs() {
                 currentPure = parts.slice(0, -1).join('-');
             }
 
-            if (currentPure !== expectedBase && currentPure.length < expectedBase.length - 3) {
+            if (currentPure !== expectedBase) {
                 let newSlug = expectedBase;
                 let isUnique = false;
                 let counter = 0;
