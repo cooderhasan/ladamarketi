@@ -54,24 +54,27 @@ export function InstallmentTable({ price }: InstallmentTableProps) {
                     text-align: center;
                     font-family: Arial, sans-serif;
                 }
-                #paytr_taksit_tablosu::before { display: table; content: " "; }
+                #paytr_taksit_tablosu::before { display: table; content: ""; }
                 #paytr_taksit_tablosu::after { content: ""; clear: both; display: table; }
                 .taksit-tablosu-wrapper {
-                    margin: 5px;
-                    width: 260px;
-                    padding: 12px;
+                    margin: 8px;
+                    width: 270px;
+                    padding: 16px 12px;
                     cursor: default;
                     text-align: center;
                     display: inline-block;
                     border: 1px solid #e1e1e1;
-                    border-radius: 8px;
+                    border-radius: 12px;
+                    box-sizing: border-box;
+                    background: #fff;
                 }
-                .taksit-logo img { max-height: 28px; padding-bottom: 10px; }
-                .taksit-tutari-text { float: left; width: 126px; color: #a2a2a2; margin-bottom: 5px; }
-                .taksit-tutar-wrapper { display: inline-block; background-color: #f7f7f7; }
-                .taksit-tutar-wrapper:hover { background-color: #e8e8e8; }
-                .taksit-tutari { float: left; width: 126px; padding: 6px 0; color: #474747; border: 2px solid #ffffff; }
-                .taksit-tutari-bold { font-weight: bold; }
+                .taksit-logo img { max-height: 28px; padding-bottom: 12px; object-fit: contain; }
+                .taksit-tutari-text { float: left; width: 50%; color: #888; font-size: 11px; margin-bottom: 8px; box-sizing: border-box; }
+                .taksit-tutar-wrapper { display: flex; width: 100%; background-color: #f8f9fa; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+                .taksit-tutar-wrapper:hover { background-color: #e9ecef; }
+                .taksit-tutari { flex: 1; padding: 8px 4px; color: #444; border-right: 2px solid #fff; box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
+                .taksit-tutari:last-child { border-right: none; }
+                .taksit-tutari-bold { font-weight: bold; color: #222; }
                 @media all and (max-width: 600px) {
                     .taksit-tablosu-wrapper { margin: 5px 0; width: 100%; }
                 }
