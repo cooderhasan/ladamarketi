@@ -34,19 +34,22 @@ interface ImportResult {
     errors: { row: number; message: string }[];
 }
 
-function generateSlug(name: string): string {
-    return name
+function generateSlug(text: string): string {
+    if (!text) return "";
+
+    const turkishChars: Record<string, string> = {
+        'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
+        'Ç': 'c', 'Ğ': 'g', 'I': 'i', 'İ': 'i', 'Ö': 'o', 'Ş': 's', 'Ü': 'u',
+    };
+
+    return text
+        .normalize('NFC')
+        .replace(/[çğıöşüÇĞIİÖŞÜ]/g, (char) => turkishChars[char] || char)
         .toLowerCase()
-        .replace(/ğ/g, 'g')
-        .replace(/ü/g, 'u')
-        .replace(/ş/g, 's')
-        .replace(/ı/g, 'i')
-        .replace(/ö/g, 'o')
-        .replace(/ç/g, 'c')
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
-        .trim();
+        .replace(/^-|-$/g, '');
 }
 
 export async function parseExcelFile(formData: FormData): Promise<ParseResult> {

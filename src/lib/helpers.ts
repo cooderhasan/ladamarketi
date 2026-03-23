@@ -149,24 +149,17 @@ export function generateOrderNumber(): string {
  * Generate slug from text
  */
 export function generateSlug(text: string): string {
+    if (!text) return "";
+
     const turkishChars: Record<string, string> = {
-        ğ: "g",
-        ü: "u",
-        ş: "s",
-        ı: "i",
-        ö: "o",
-        ç: "c",
-        Ğ: "g",
-        Ü: "u",
-        Ş: "s",
-        İ: "i",
-        Ö: "o",
-        Ç: "c",
+        'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u',
+        'Ç': 'c', 'Ğ': 'g', 'I': 'i', 'İ': 'i', 'Ö': 'o', 'Ş': 's', 'Ü': 'u',
     };
 
     return text
+        .normalize('NFC') // Handle decomposed unicode characters
+        .replace(/[çğıöşüÇĞIİÖŞÜ]/g, (char) => turkishChars[char] || char)
         .toLowerCase()
-        .replace(/[ğüşıöçĞÜŞİÖÇ]/g, (char) => turkishChars[char] || char)
         .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
