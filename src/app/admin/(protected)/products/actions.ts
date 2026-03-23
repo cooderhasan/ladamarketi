@@ -323,3 +323,59 @@ export async function syncProductToMarketplaces(productId: string) {
 
     return { success: true, message: results.join(" | ") };
 }
+
+export async function fixAllSlugs() {
+    const session = await auth();
+    if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    try {
+        const products = await prisma.product.findMany({
+            select: { id: true, name: true, slug: true }
+        });
+
+        let fixedCount = 0;
+
+        for (const product of products) {
+            const expectedBase = generateSlug(product.name);
+            
+            let currentPure = product.slug;
+            const parts = product.slug.split('-');
+            if (parts.length > 1 && parts[parts.length - 1].length < 10 && !isNaN(parseInt(parts[parts.length - 1], 36))) {
+                currentPure = parts.slice(0, -1).join('-');
+            }
+
+            if (currentPure !== expectedBase && currentPure.length < expectedBase.length - 3) {
+                let newSlug = expectedBase;
+                let isUnique = false;
+                let counter = 0;
+                
+                while (!isUnique) {
+                    const checkSlug = counter === 0 ? newSlug : `${newSlug}-${counter}`;
+                    const existing = await prisma.product.findFirst({ where: { slug: checkSlug } });
+                    if (!existing || existing.id === product.id) {
+                        newSlug = checkSlug;
+                        isUnique = true;
+                    } else {
+                        counter++;
+                    }
+                }
+
+                await prisma.product.update({
+                    where: { id: product.id },
+                    data: { slug: newSlug }
+                });
+                
+                fixedCount++;
+            }
+        }
+
+        revalidatePath("/admin/products");
+        revalidatePath("/products");
+        return { success: true, fixedCount };
+    } catch (e: any) {
+        console.error("Fix slugs error:", e);
+        return { success: false, message: e.message || "An error occurred" };
+    }
+}

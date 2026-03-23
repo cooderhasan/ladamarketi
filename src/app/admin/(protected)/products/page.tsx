@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProductsTable } from "@/components/admin/products-table";
+import { FixSlugsButton } from "@/components/admin/fix-slugs-button";
 import { Plus } from "lucide-react";
 
 interface ProductsPageProps {
@@ -93,12 +94,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                         Ürünleri arayın, filtreleyin ve yönetin.
                     </p>
                 </div>
-                <Link href="/admin/products/new">
-                    <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Yeni Ürün
-                    </Button>
-                </Link>
+                <div className="flex items-center gap-4">
+                    <FixSlugsButton />
+                    <Link href="/admin/products/new">
+                        <Button>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Yeni Ürün
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             <ProductsTable
