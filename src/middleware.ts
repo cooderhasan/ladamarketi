@@ -58,8 +58,8 @@ export async function middleware(request: NextRequest) {
         // Replace dashes with spaces
         searchPhrase = searchPhrase.replace(/-/g, ' ');
 
-        const searchUrl = new URL(`/arama`, request.url);
-        searchUrl.searchParams.set("q", searchPhrase);
+        const searchUrl = new URL(`/products`, request.url);
+        searchUrl.searchParams.set("search", searchPhrase);
         return NextResponse.redirect(searchUrl, 302); // 302 temporary is better for search redirects
     }
 
