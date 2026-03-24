@@ -46,9 +46,10 @@ export async function middleware(request: NextRequest) {
 
     // 1.5. OLD URL SMART FALLBACK (Redirect to Search)
     const fileName = pathname.split('/').pop() || "";
-    // Match .html ending OR path starting directly with numbers and dash like /25-elektrik-aksami
-    const isOldPrestashopUrl = fileName.endsWith(".html") || /^\/[0-9]+-/.test(pathname) || /^\/[\w-]+\/[0-9]+-/.test(pathname);
-    const isExcludedPath = pathname.startsWith('/admin') || pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname.startsWith('/images');
+    // Sadece .html ile biten veya hiç uzantısı olmayan (nokta içermeyen) yolları işle
+    const isOldFormat = fileName.endsWith(".html") || !fileName.includes(".");
+    const isOldPrestashopUrl = isOldFormat && (/^\/[0-9]+-/.test(pathname) || /^\/[\w-]+\/[0-9]+-/.test(pathname));
+    const isExcludedPath = pathname.startsWith('/admin') || pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname.startsWith('/images') || pathname.startsWith('/uploads');
 
     if (isOldPrestashopUrl && !isExcludedPath) {
         let searchPhrase = fileName.replace(/\.html$/, '');
