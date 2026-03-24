@@ -43,7 +43,7 @@ async function main() {
       if (product) {
         redirects.push({
           source: pathname,
-          destination: `/urun/${product.slug}`,
+          destination: `/products/${product.slug}`,
           permanent: true,
         });
         continue;
@@ -56,7 +56,7 @@ async function main() {
       if (category) {
         redirects.push({
           source: pathname,
-          destination: `/kategori/${category.slug}`,
+          destination: `/category/${category.slug}`,
           permanent: true,
         });
         continue;

@@ -40,6 +40,16 @@ const nextConfig: NextConfig = {
         destination: 'https://www.ladamarketi.com/:path*',
         permanent: true,
       },
+      {
+        source: '/urun/:path*',
+        destination: '/products/:path*',
+        permanent: true,
+      },
+      {
+        source: '/kategori/:path*',
+        destination: '/category/:path*',
+        permanent: true,
+      },
       ...customRedirects
     ];
   },
