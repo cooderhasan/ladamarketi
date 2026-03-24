@@ -42,6 +42,26 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    const { pathname } = request.nextUrl;
+
+    // 1.5. OLD URL SMART FALLBACK (Redirect to Search)
+    const fileName = pathname.split('/').pop() || "";
+    // Match .html ending OR path starting directly with numbers and dash like /25-elektrik-aksami
+    const isOldPrestashopUrl = fileName.endsWith(".html") || /^\/[0-9]+-/.test(pathname) || /^\/[\w-]+\/[0-9]+-/.test(pathname);
+    const isExcludedPath = pathname.startsWith('/admin') || pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname.startsWith('/images');
+
+    if (isOldPrestashopUrl && !isExcludedPath) {
+        let searchPhrase = fileName.replace(/\.html$/, '');
+        // Remove leading IDs (e.g. 472-lada-vega -> lada-vega)
+        searchPhrase = searchPhrase.replace(/^[0-9]+-/, '');
+        // Replace dashes with spaces
+        searchPhrase = searchPhrase.replace(/-/g, ' ');
+
+        const searchUrl = new URL(`/arama`, request.url);
+        searchUrl.searchParams.set("q", searchPhrase);
+        return NextResponse.redirect(searchUrl, 302); // 302 temporary is better for search redirects
+    }
+
     // 2. AUTHENTICATION & SECURITY HEADERS
     const token = await getToken({
         req: request,
@@ -49,8 +69,6 @@ export async function middleware(request: NextRequest) {
         cookieName: "next-auth.session-token", // Explicitly match the name defined in auth.ts
         secureCookie: process.env.NODE_ENV === "production",
     });
-
-    const { pathname } = request.nextUrl;
 
     // Admin routes - require ADMIN or OPERATOR role
     if (pathname.startsWith("/admin")) {
