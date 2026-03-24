@@ -28,7 +28,7 @@ import {
     RefreshCcw,
     Star
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -96,6 +96,12 @@ export function AdminSidebarModern({ settings }: { settings?: any }) {
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+
+    useEffect(() => {
+        const handleToggle = () => setMobileOpen(true);
+        window.addEventListener('toggle-admin-sidebar', handleToggle);
+        return () => window.removeEventListener('toggle-admin-sidebar', handleToggle);
+    }, []);
 
     const logoUrl = settings?.logoUrl;
     const siteName = settings?.siteName || "B2B";
@@ -310,16 +316,6 @@ export function AdminSidebarModern({ settings }: { settings?: any }) {
                 </div>
             </aside >
 
-            {/* Mobile menu button */}
-            < Button
-                variant="outline"
-                size="icon"
-                className="lg:hidden fixed top-4 left-4 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm border-gray-200 dark:border-gray-800 h-10 w-10 rounded-xl"
-                onClick={() => setMobileOpen(true)
-                }
-            >
-                <Menu className="h-5 w-5" />
-            </Button >
         </>
     );
 }

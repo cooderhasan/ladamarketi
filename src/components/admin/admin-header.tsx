@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2 } from "lucide-react";
+import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2, Menu } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart-store";
 import type { UserRole, UserStatus } from "@prisma/client";
@@ -81,8 +81,16 @@ export function AdminHeader({ user }: AdminHeaderProps) {
 
     return (
         <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-gray-100 dark:border-gray-800 bg-white/50 backdrop-blur-xl dark:bg-gray-900/50 px-4 sm:px-6 lg:px-8 print:hidden">
-            <div className="flex-1 pl-12 lg:pl-0">
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="flex-1 flex items-center gap-2 lg:pl-0">
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="lg:hidden shrink-0" 
+                    onClick={() => window.dispatchEvent(new Event('toggle-admin-sidebar'))}
+                >
+                    <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                </Button>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                     Yönetim Paneli
                 </h1>
             </div>
