@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, Building2, Package, MapPin, AlertTriangle, Truck, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { BankTransferForm } from "@/components/storefront/bank-transfer-form";
 
 interface OrderPageProps {
     params: Promise<{
@@ -219,6 +220,23 @@ export default async function OrderPage({ params }: OrderPageProps) {
                                             </p>
                                         </div>
                                     )}
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Havale Bildirim Formu */}
+                        {isBankTransfer && order.payment?.status === "PENDING" && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2 text-green-700">
+                                        💳 Havale Bildirimi
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <BankTransferForm
+                                        orderId={order.id}
+                                        orderTotal={Number(order.total)}
+                                    />
                                 </CardContent>
                             </Card>
                         )}
