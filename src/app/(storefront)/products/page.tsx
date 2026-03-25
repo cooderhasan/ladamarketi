@@ -311,6 +311,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                                             height: product.height ? Number(product.height) : null,
                                             length: product.length ? Number(product.length) : null,
                                             desi: product.desi ? Number(product.desi) : null,
+                                            googlePrice: (product as any).googlePrice ? Number((product as any).googlePrice) : null,
                                         }}
                                         discountRate={discountRate}
                                         isDealer={isDealer}

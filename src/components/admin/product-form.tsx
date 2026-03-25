@@ -74,6 +74,8 @@ interface Product {
     isTrendyolActive?: boolean;
     isN11Active?: boolean;
     isHepsiburadaActive?: boolean;
+    isGoogleActive?: boolean;
+    googlePrice?: number | null;
     weight?: number | null;
     width?: number | null;
     height?: number | null;
@@ -119,6 +121,8 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         isTrendyolActive: product?.isTrendyolActive ?? false,
         isN11Active: product?.isN11Active ?? false,
         isHepsiburadaActive: product?.isHepsiburadaActive ?? false,
+        isGoogleActive: product?.isGoogleActive ?? false,
+        googlePrice: product?.googlePrice || "",
         isFeatured: product?.isFeatured || false,
         isNew: product?.isNew || false,
         isBestSeller: product?.isBestSeller || false,
@@ -853,6 +857,34 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                     onCheckedChange={(c) => handleChange("isHepsiburadaActive", c)}
                                 />
                             </div>
+
+                            <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/10">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base text-blue-700 dark:text-blue-300">🛒 Google Shopping Feed</Label>
+                                    <p className="text-sm text-muted-foreground">Bu ürünü Google Merchant Center feed'ine ekle?</p>
+                                </div>
+                                <Checkbox
+                                    checked={formData.isGoogleActive}
+                                    onCheckedChange={(c) => handleChange("isGoogleActive", c)}
+                                />
+                            </div>
+
+                            {formData.isGoogleActive && (
+                                <div className="p-4 border border-blue-200 rounded-lg bg-blue-50/50 space-y-3">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="googlePrice" className="text-blue-700">Google Fiyatı (₺) <span className="font-normal text-gray-500">— Boş bırakılırsa liste fiyatı kullanılır</span></Label>
+                                        <Input
+                                            id="googlePrice"
+                                            type="number"
+                                            step="0.01"
+                                            value={formData.googlePrice}
+                                            onChange={(e) => handleChange("googlePrice", e.target.value)}
+                                            placeholder="Varsayılan: Liste Fiyatı"
+                                            className="border-blue-200 focus:border-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/10 mt-4">
                                 <div className="space-y-0.5">

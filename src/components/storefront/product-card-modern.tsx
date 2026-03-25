@@ -33,6 +33,7 @@ interface Product {
     height?: number | null;
     length?: number | null;
     desi?: number | null;
+    googlePrice?: number | null;
     _count?: {
         variants: number;
     };

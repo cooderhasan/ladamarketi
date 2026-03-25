@@ -51,6 +51,9 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
         height: anyProduct.height ? Number(anyProduct.height) : null,
         length: anyProduct.length ? Number(anyProduct.length) : null,
         desi: anyProduct.desi ? Number(anyProduct.desi) : null,
+        googlePrice: anyProduct.googlePrice ? Number(anyProduct.googlePrice) : null,
+        gtin: anyProduct.gtin || null,
+        mpn: anyProduct.mpn || null,
         variants: product.variants.map((v) => ({
             ...v,
             color: v.color || "",

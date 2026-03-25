@@ -90,7 +90,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
         height: product.height ? Number(product.height) : null,
         length: product.length ? Number(product.length) : null,
         desi: product.desi ? Number(product.desi) : null,
-        origin: product.origin, // Explicitly pass origin
+        googlePrice: (product as any).googlePrice ? Number((product as any).googlePrice) : null,
+        gtin: (product as any).gtin || null,
+        mpn: (product as any).mpn || null,
+        origin: product.origin,
         variants: product.variants.map(v => ({
             id: v.id,
             color: v.color,
@@ -143,7 +146,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     height: p.height ? Number(p.height) : null,
                     length: p.length ? Number(p.length) : null,
                     desi: p.desi ? Number(p.desi) : null,
-                    origin: p.origin, // Explicitly pass origin
+                    googlePrice: (p as any).googlePrice ? Number((p as any).googlePrice) : null,
+                    origin: p.origin,
                 }))}
                 discountRate={discountRate}
                 isDealer={isDealer}
