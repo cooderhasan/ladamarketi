@@ -60,6 +60,7 @@ const menuGroups: MenuGroup[] = [
         items: [
             { title: "Siparişler", href: "/admin/orders", icon: ShoppingCart },
             { title: "Müşteriler", href: "/admin/customers", icon: Users },
+            { title: "Havale Bildirimleri", href: "/admin/bank-transfers", icon: FileText },
             { title: "Teklifler", href: "/admin/quotes", icon: FileQuestion },
             { title: "Mesajlar", href: "/admin/messages", icon: Mail },
             { title: "Stok Uyarı", href: "/admin/stock-alerts", icon: AlertTriangle },

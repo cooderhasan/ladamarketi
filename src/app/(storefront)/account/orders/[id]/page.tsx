@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Package, Truck, CreditCard, MapPin } from "lucide-react";
 import { ReturnModal } from "@/components/orders/return-modal";
+import { BankTransferForm } from "@/components/storefront/bank-transfer-form";
+import { getSiteSettings } from "@/lib/settings";
 
 interface OrderDetailPageProps {
     params: Promise<{ id: string }>;
@@ -48,6 +50,19 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     }
 
     const isDelivered = order.status === "DELIVERED";
+    const isBankTransfer = order.payment?.method === "BANK_TRANSFER";
+    const isPaymentPending = order.payment?.status === "PENDING";
+
+    // Banka bilgilerini çek
+    let bankInfo: any = undefined;
+    if (isBankTransfer) {
+        const settings = await getSiteSettings();
+        bankInfo = {
+            bankName: settings.bankName || "",
+            iban: settings.bankIban1 || "",
+            accountHolder: settings.bankAccountName || "",
+        };
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -191,12 +206,31 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                                 <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                                     <p className="text-gray-500 mb-1">Ödeme Yöntemi</p>
                                     <p className="font-medium">
-                                        {order.payment.method === "CREDIT_CARD" ? "Kredi Kartı" : "Havale / EFT"}
+                                        {order.payment.method === "CREDIT_CARD" ? "Kredi Kartı" :
+                                         order.payment.method === "CURRENT_ACCOUNT" ? "Cari Hesap" : "Havale / EFT"}
+                                    </p>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        Durum: {order.payment.status === "COMPLETED" ? "✅ Tamamlandı" :
+                                                order.payment.status === "PENDING" ? "⏳ Bekliyor" : order.payment.status}
                                     </p>
                                 </div>
                             )}
                         </div>
                     </div>
+
+                    {/* Havale Bildirim Formu */}
+                    {isBankTransfer && isPaymentPending && (
+                        <div className="bg-white dark:bg-gray-900 rounded-xl border border-green-200 dark:border-green-800 shadow-sm p-6">
+                            <h3 className="font-bold flex items-center gap-2 mb-4 text-green-700 dark:text-green-400">
+                                🏦 Havale Bildirimi
+                            </h3>
+                            <BankTransferForm
+                                orderId={order.id}
+                                orderTotal={Number(order.total)}
+                                bankInfo={bankInfo}
+                            />
+                        </div>
+                    )}
 
                     {/* Shipping Address */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
