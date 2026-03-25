@@ -22,6 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { getCities, getDistrictsOfCity } from "@/lib/cities";
 
 interface CheckoutFormProps {
     initialData?: {
@@ -58,6 +59,9 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
     const [loading, setLoading] = useState(false);
     const [selectedCargoId, setSelectedCargoId] = useState<string | null>(cargoCompanies[0]?.id || null);
     const [paymentMethod, setPaymentMethod] = useState<"BANK_TRANSFER" | "CREDIT_CARD" | "CURRENT_ACCOUNT">("BANK_TRANSFER");
+    const [selectedCity, setSelectedCity] = useState<string>(initialData?.city || "");
+    const [selectedDistrict, setSelectedDistrict] = useState<string>(initialData?.district || "");
+    const cities = getCities();
     const orderCompleted = useRef(false);
 
     useEffect(() => {
@@ -242,21 +246,48 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                 <div className="grid gap-4 md:grid-cols-2">
                                     <div className="space-y-2">
                                         <Label htmlFor="city">Şehir *</Label>
-                                        <Input
-                                            id="city"
+                                        <Select
                                             name="city"
                                             required
-                                            defaultValue={initialData?.city}
-                                        />
+                                            value={selectedCity}
+                                            onValueChange={(val) => {
+                                                setSelectedCity(val);
+                                                setSelectedDistrict("");
+                                            }}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Şehir seçiniz" />
+                                            </SelectTrigger>
+                                            <SelectContent className="max-h-60">
+                                                {cities.map((c) => (
+                                                    <SelectItem key={c.name} value={c.name}>
+                                                        {c.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="district">İlçe *</Label>
-                                        <Input
-                                            id="district"
+                                        <Select
                                             name="district"
                                             required
-                                            defaultValue={initialData?.district}
-                                        />
+                                            value={selectedDistrict}
+                                            onValueChange={setSelectedDistrict}
+                                            disabled={!selectedCity}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="İlçe seçiniz" />
+                                            </SelectTrigger>
+                                            <SelectContent className="max-h-60">
+                                                {selectedCity &&
+                                                    getDistrictsOfCity(selectedCity).map((d) => (
+                                                        <SelectItem key={d} value={d}>
+                                                            {d}
+                                                        </SelectItem>
+                                                    ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 </div>
                                 <div className="space-y-2">

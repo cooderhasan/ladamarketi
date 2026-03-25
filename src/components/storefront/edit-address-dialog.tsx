@@ -11,10 +11,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { updateAddress } from "@/app/(storefront)/account/actions";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
+import { getCities, getDistrictsOfCity } from "@/lib/cities";
 
 interface EditAddressDialogProps {
     initialData: {
@@ -28,6 +36,9 @@ interface EditAddressDialogProps {
 export function EditAddressDialog({ initialData }: EditAddressDialogProps) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [selectedCity, setSelectedCity] = useState<string>(initialData.city || "");
+    const [selectedDistrict, setSelectedDistrict] = useState<string>(initialData.district || "");
+    const cities = getCities();
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
@@ -57,20 +68,47 @@ export function EditAddressDialog({ initialData }: EditAddressDialogProps) {
                 <form action={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="city">Şehir</Label>
-                        <Input
-                            id="city"
+                        <Select
                             name="city"
-                            defaultValue={initialData.city || ""}
                             required
-                        />
+                            value={selectedCity}
+                            onValueChange={(val) => {
+                                setSelectedCity(val);
+                                setSelectedDistrict("");
+                            }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Şehir seçiniz" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-60">
+                                {cities.map((c) => (
+                                    <SelectItem key={c.name} value={c.name}>
+                                        {c.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="district">İlçe</Label>
-                        <Input
-                            id="district"
+                        <Select
                             name="district"
-                            defaultValue={initialData.district || ""}
-                        />
+                            value={selectedDistrict}
+                            onValueChange={setSelectedDistrict}
+                            disabled={!selectedCity}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="İlçe seçiniz" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-60">
+                                {selectedCity &&
+                                    getDistrictsOfCity(selectedCity).map((d) => (
+                                        <SelectItem key={d} value={d}>
+                                            {d}
+                                        </SelectItem>
+                                    ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="address">Adres</Label>
