@@ -123,6 +123,13 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
         setLoading(true);
 
         const formData = new FormData(e.currentTarget);
+        const phoneRaw = String(formData.get("phone")).replace(/\D/g, "");
+
+        if (phoneRaw.length < 10) {
+            toast.error("Lütfen geçerli bir telefon numarası giriniz (Örn: 05xx...)");
+            setLoading(false);
+            return;
+        }
 
         try {
             const result = await createOrder({
@@ -220,6 +227,21 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                             required
                                             defaultValue={initialData?.phone}
                                             placeholder="05XX XXX XX XX"
+                                            maxLength={15}
+                                            onChange={(e) => {
+                                                let val = e.target.value.replace(/\D/g, ""); // Sadece rakamlar
+                                                if (val.length > 11) val = val.substring(0, 11);
+                                                
+                                                // Format: 05XX XXX XX XX
+                                                let formatted = "";
+                                                if (val.length > 0) {
+                                                    formatted = val.substring(0, 4);
+                                                    if (val.length > 4) formatted += " " + val.substring(4, 7);
+                                                    if (val.length > 7) formatted += " " + val.substring(7, 9);
+                                                    if (val.length > 9) formatted += " " + val.substring(9, 11);
+                                                }
+                                                e.target.value = formatted;
+                                            }}
                                         />
                                     </div>
                                     {!initialData?.name && (
