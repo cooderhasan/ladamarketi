@@ -47,9 +47,13 @@ export async function GET(req: NextRequest) {
 
     // 2. Fetch Active Products
     const products = await prisma.product.findMany({
-        where: { isActive: true },
+        where: { 
+            isActive: true,
+            // isGoogleActive: true // Re-enable this if you want to filter specifically for Google
+        },
         include: {
             categories: {
+                orderBy: { order: "asc" },
                 take: 1
             },
             brand: true,
@@ -71,11 +75,22 @@ export async function GET(req: NextRequest) {
 
     for (const product of products) {
         const hasVariants = product.variants.length > 0;
-        const mainCategory = product.categories[0]?.name || "Diğer";
+        const category = product.categories[0];
+        const mainCategory = category?.name || "Diğer";
+        const googleCategory = category?.googleProductCategory || "";
+        
         const brandName = product.brand?.name || "Markasız";
         const productUrl = `${baseUrl}/products/${product.slug}`;
-        const mainImage = product.images[0] || "";
-        const additionalImages = product.images.slice(1);
+        
+        // Ensure image URLs are absolute
+        const getAbsoluteUrl = (path: string) => {
+            if (!path) return "";
+            if (path.startsWith("http")) return path;
+            return `${baseUrl}${path.startsWith("/") ? "" : "/"}${path}`;
+        };
+
+        const mainImage = getAbsoluteUrl(product.images[0] || "");
+        const additionalImages = product.images.slice(1).map(img => getAbsoluteUrl(img)).filter(img => !!img);
 
         // Base price logic
         const listPrice = Number(product.listPrice);
@@ -83,13 +98,16 @@ export async function GET(req: NextRequest) {
 
         const priceToUse = useSalePrice && salePrice && salePrice > 0 ? salePrice : listPrice;
         const priceFormatted = priceToUse.toFixed(2) + " TRY";
-        const listPriceFormatted = listPrice.toFixed(2) + " TRY"; // For 'price' field if sale_price is used
+        
+        // Shipping Weight
+        const weight = product.weight ? Number(product.weight) : null;
+        const weightFormatted = weight ? `${weight.toFixed(2)} kg` : "";
 
         // Items to output
         const itemsToProcess = hasVariants ? product.variants : [product];
 
         for (const item of itemsToProcess) {
-            const isVariant = "productId" in item; // Simple check if it's a variant object
+            const isVariant = "productId" in item; 
 
             // Access properties safely
             /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -130,8 +148,9 @@ ${additionalImages.map(img => `<g:additional_image_link>${escapeXml(img)}</g:add
 ${useSalePrice && salePrice && salePrice > 0 ? `<g:sale_price>${finalPriceFormatted}</g:sale_price>` : ""}
 ${itemSku ? `<g:mpn>${escapeXml(itemSku)}</g:mpn>` : ""}
 ${itemBarcode ? `<g:gtin>${escapeXml(itemBarcode)}</g:gtin>` : ""}
-<g:google_product_category>${escapeXml(mainCategory)}</g:google_product_category>
+${googleCategory ? `<g:google_product_category>${escapeXml(googleCategory)}</g:google_product_category>` : ""}
 <g:product_type>${escapeXml(mainCategory)}</g:product_type>
+${weightFormatted ? `<g:shipping_weight>${weightFormatted}</g:shipping_weight>` : ""}
 <g:custom_label_0>${itemStock}</g:custom_label_0>
 </item>
 `;
