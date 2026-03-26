@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
         const hasVariants = product.variants.length > 0;
         const mainCatData = product.categories?.[0] || (product as any).category;
         const mainCategory = mainCatData?.name || "Diğer";
-        const googleCategory = mainCatData?.googleProductCategory || "";
+        const googleCategory = mainCatData?.googleProductCategory || "Araçlar ve Motorlu Taşıtlar > Araç Parçaları ve Aksesuarları";
         
         const brandName = product.brand?.name || "Markasız";
         const productUrl = `${baseUrl}/products/${product.slug}`;

@@ -67,6 +67,7 @@ interface Category {
     trendyolCategoryId?: number | null;
     n11CategoryId?: number | null;
     hbCategoryId?: string | null;
+    googleProductCategory?: string | null;
     parent?: {
         name: string;
     } | null;
@@ -200,6 +201,7 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
     const [trendyolCategoryId, setTrendyolCategoryId] = useState<number | undefined>(undefined);
     const [n11CategoryId, setN11CategoryId] = useState<number | undefined>(undefined);
     const [hbCategoryId, setHbCategoryId] = useState<string | undefined>(undefined);
+    const [googleProductCategory, setGoogleProductCategory] = useState<string | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [reorderMode, setReorderMode] = useState<"none" | "sidebar" | "header">("none");
@@ -337,7 +339,8 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                     headerOrder,
                     trendyolCategoryId,
                     n11CategoryId,
-                    hbCategoryId
+                    hbCategoryId,
+                    googleProductCategory
                 });
                 toast.success("Kategori güncellendi.");
             } else {
@@ -352,7 +355,8 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                     headerOrder,
                     trendyolCategoryId,
                     n11CategoryId,
-                    hbCategoryId
+                    hbCategoryId,
+                    googleProductCategory
                 });
                 toast.success("Kategori oluşturuldu.");
             }
@@ -398,6 +402,7 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setTrendyolCategoryId(undefined);
         setN11CategoryId(undefined);
         setHbCategoryId(undefined);
+        setGoogleProductCategory(undefined);
         setEditCategory(null);
     };
 
@@ -414,6 +419,7 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setTrendyolCategoryId(category.trendyolCategoryId ?? undefined);
         setN11CategoryId(category.n11CategoryId ?? undefined);
         setHbCategoryId(category.hbCategoryId ?? undefined);
+        setGoogleProductCategory(category.googleProductCategory ?? undefined);
         setIsOpen(true);
     };
 
@@ -533,6 +539,19 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                                         placeholder="Örn: telefon-kiliflari"
                                         className="border-orange-200"
                                     />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="googleProductCategory" className="text-blue-600">Google Ürün Kategorisi (Taxonomy)</Label>
+                                    <Input
+                                        id="googleProductCategory"
+                                        value={googleProductCategory || ""}
+                                        onChange={(e) => setGoogleProductCategory(e.target.value)}
+                                        placeholder="Örn: Araçlar ve Motorlu Taşıtlar > Araç Parçaları ve Aksesuarları"
+                                        className="border-blue-200"
+                                    />
+                                    <p className="text-[10px] text-gray-500">
+                                        Google Merchant Center için geçerli taksonomi yolunu tam olarak girin.
+                                    </p>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="order">Sıralama</Label>

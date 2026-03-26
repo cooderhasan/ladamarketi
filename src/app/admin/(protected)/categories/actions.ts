@@ -14,7 +14,7 @@ export async function getCategories() {
     });
 }
 
-export async function createCategory(data: { name: string; slug: string; order?: number; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null }) {
+export async function createCategory(data: { name: string; slug: string; order?: number; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null; googleProductCategory?: string | null }) {
     await prisma.category.create({
         data: {
             name: data.name,
@@ -28,13 +28,14 @@ export async function createCategory(data: { name: string; slug: string; order?:
             trendyolCategoryId: data.trendyolCategoryId ?? null,
             n11CategoryId: data.n11CategoryId ?? null,
             hbCategoryId: data.hbCategoryId ?? null,
+            googleProductCategory: data.googleProductCategory ?? null,
         },
     });
     revalidatePath("/admin/categories");
     revalidatePath("/");
 }
 
-export async function updateCategory(id: string, data: { name?: string; slug?: string; order?: number; isActive?: boolean; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null }) {
+export async function updateCategory(id: string, data: { name?: string; slug?: string; order?: number; isActive?: boolean; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null; googleProductCategory?: string | null }) {
     console.log("updateCategory called with:", { id, data });
     try {
         const result = await prisma.category.update({

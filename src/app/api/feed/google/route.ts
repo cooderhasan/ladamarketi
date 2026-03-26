@@ -50,10 +50,12 @@ export async function GET(request: Request) {
       const mainCatData = product.categories?.[0] || product.category;
       const productTypeName = mainCatData?.name || "";
       
+      const googleCategoryFallback = "Araçlar ve Motorlu Taşıtlar > Araç Parçaları ve Aksesuarları";
+      
       const googleCategory = 
         product.categories?.find((c: any) => c.googleProductCategory)?.googleProductCategory || 
         product.category?.googleProductCategory || 
-        "";
+        googleCategoryFallback;
 
       // Ensure image URLs are absolute
       const getAbsoluteUrl = (path: string) => {
