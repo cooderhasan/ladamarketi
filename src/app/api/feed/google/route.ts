@@ -20,14 +20,13 @@ function escapeXml(str: string): string {
 
 export async function GET(request: Request) {
   try {
-    const { origin } = new URL(request.url);
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
 
     // Aktif ve Google'a işaretlenmiş ürünleri çek
     const products = await (prisma as any).product.findMany({
       where: {
         isActive: true,
         isGoogleActive: true,
-        stock: { gt: 0 },
       },
       include: {
         brand: true,
@@ -50,13 +49,15 @@ export async function GET(request: Request) {
         product.categories?.find((c: any) => c.googleProductCategory)
           ?.googleProductCategory ?? "";
 
-      const imageUrl = product.images?.[0]
-        ? product.images[0].startsWith("http")
-          ? product.images[0]
-          : `${origin}${product.images[0]}`
-        : "";
+      // Ensure image URLs are absolute
+      const getAbsoluteUrl = (path: string) => {
+          if (!path) return "";
+          if (path.startsWith("http")) return path;
+          return `${baseUrl}${path.startsWith("/") ? "" : "/"}${path}`;
+      };
 
-      const productUrl = `${origin}/urun/${escapeXml(product.slug)}`;
+      const imageUrl = getAbsoluteUrl(product.images?.[0] || "");
+      const productUrl = `${baseUrl}/urun/${escapeXml(product.slug)}`;
       const availability = product.stock > 0 ? "in_stock" : "out_of_stock";
 
       // GTIN: önce product.gtin, yoksa product.barcode
@@ -66,6 +67,10 @@ export async function GET(request: Request) {
       const descriptionRaw = product.description
         ? product.description.replace(/<[^>]*>/g, "").substring(0, 5000)
         : product.name;
+        
+      // Shipping Weight
+      const weight = product.weight ? Number(product.weight) : null;
+      const weightFormatted = weight ? `${weight.toFixed(2)} kg` : "";
 
       items += `
     <item>
@@ -74,7 +79,7 @@ export async function GET(request: Request) {
       <g:description>${escapeXml(descriptionRaw)}</g:description>
       <g:link>${productUrl}</g:link>
       ${imageUrl ? `<g:image_link>${escapeXml(imageUrl)}</g:image_link>` : ""}
-      ${product.images?.[1] ? `<g:additional_image_link>${escapeXml(product.images[1].startsWith("http") ? product.images[1] : `${origin}${product.images[1]}`)}</g:additional_image_link>` : ""}
+      ${product.images?.[1] ? `<g:additional_image_link>${getAbsoluteUrl(product.images[1])}</g:additional_image_link>` : ""}
       <g:availability>${availability}</g:availability>
       <g:price>${priceFormatted}</g:price>
       ${product.salePrice && Number(product.salePrice) < Number(product.listPrice) ? `<g:sale_price>${Number(product.salePrice).toFixed(2)} TRY</g:sale_price>` : ""}
@@ -83,6 +88,7 @@ export async function GET(request: Request) {
       ${product.brand?.name ? `<g:brand>${escapeXml(product.brand.name)}</g:brand>` : ""}
       ${gtin ? `<g:gtin>${escapeXml(gtin)}</g:gtin>` : ""}
       ${mpn ? `<g:mpn>${escapeXml(mpn)}</g:mpn>` : ""}
+      ${weightFormatted ? `<g:shipping_weight>${weightFormatted}</g:shipping_weight>` : ""}
       ${product.sku ? `<g:item_group_id>${escapeXml(product.sku)}</g:item_group_id>` : ""}
     </item>`;
     }
@@ -91,7 +97,7 @@ export async function GET(request: Request) {
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
   <channel>
     <title>Ürün Kataloğu</title>
-    <link>${origin}</link>
+    <link>${baseUrl}</link>
     <description>Google Merchant Center Ürün Beslemesi</description>
     <pubDate>${now}</pubDate>
     ${items}
