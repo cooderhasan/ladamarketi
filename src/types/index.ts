@@ -141,6 +141,7 @@ export interface OrderWithItems {
         method: string;
         status: string;
         amount: number;
+        providerData?: any;
     } | null;
 }
 

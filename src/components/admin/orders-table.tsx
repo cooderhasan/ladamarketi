@@ -370,7 +370,17 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                         </TableCell>
                                         <TableCell>{formatDate(order.createdAt)}</TableCell>
                                         <TableCell className="font-medium">
-                                            {formatPrice(Number(order.total))}
+                                            <div className="flex flex-col">
+                                                <span>{formatPrice(Number(order.total))}</span>
+                                                {order.payment && order.payment.method !== "BANK_TRANSFER" && order.payment.amount > 0 && Math.abs(order.payment.amount - Number(order.total)) > 0.5 && (
+                                                    <span className="text-[10px] text-blue-600 font-bold">
+                                                        Net: {formatPrice(order.payment.amount)}
+                                                        {order.payment.providerData?.installment_count && Number(order.payment.providerData.installment_count) > 1 && (
+                                                            ` (${order.payment.providerData.installment_count} Taksit)`
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell onClick={(e) => e.stopPropagation()}>
                                             <div className="w-[180px] flex flex-col gap-1">
@@ -661,6 +671,19 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                         <span>Genel Toplam</span>
                                         <span>{formatPrice(Number(selectedOrder.total))}</span>
                                     </div>
+                                    {selectedOrder.payment && selectedOrder.payment.amount > 0 && Math.abs(selectedOrder.payment.amount - Number(selectedOrder.total)) > 0.5 && (
+                                        <div className="flex justify-between text-sm font-bold text-blue-600 mt-2 pt-2 border-t border-blue-200">
+                                            <div className="flex flex-col">
+                                                <span>Alınan Net Ödeme</span>
+                                                {selectedOrder.payment.providerData?.installment_count && Number(selectedOrder.payment.providerData.installment_count) > 1 && (
+                                                    <span className="text-[10px] font-normal italic">
+                                                        ({selectedOrder.payment.providerData.installment_count} Taksit / Vade Farkı Dahil)
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span>{formatPrice(selectedOrder.payment.amount)}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
