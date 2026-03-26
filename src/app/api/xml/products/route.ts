@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSiteSettings } from "@/lib/settings";
 
-// Cache for 8 hours (3 times a day)
-export const revalidate = 28800;
+// Cache for 60 seconds (Testing phase)
+export const revalidate = 60;
 
 function escapeXml(unsafe: string | null | undefined): string {
     if (!unsafe) return "";
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     }
 
     const useSalePrice = settings.xmlUseSalePrice === "true";
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ladamarketi.com";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
 
     // 2. Fetch Active Products
     const products = await prisma.product.findMany({
