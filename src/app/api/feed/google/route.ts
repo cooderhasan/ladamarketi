@@ -53,8 +53,8 @@ export async function GET(request: Request) {
       const googleCategoryFallback = "Araçlar ve Motorlu Taşıtlar > Araç Parçaları ve Aksesuarları";
       
       const googleCategory = 
-        product.categories?.find((c: any) => c.googleProductCategory)?.googleProductCategory || 
-        product.category?.googleProductCategory || 
+        product.categories?.find((c: any) => c.googleProductCategory && c.googleProductCategory.trim() !== "")?.googleProductCategory || 
+        (product.category?.googleProductCategory && product.category.googleProductCategory.trim() !== "" ? product.category.googleProductCategory : null) || 
         googleCategoryFallback;
 
       // Ensure image URLs are absolute

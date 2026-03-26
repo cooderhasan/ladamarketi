@@ -78,7 +78,12 @@ export async function GET(req: NextRequest) {
         const hasVariants = product.variants.length > 0;
         const mainCatData = product.categories?.[0] || (product as any).category;
         const mainCategory = mainCatData?.name || "Diğer";
-        const googleCategory = mainCatData?.googleProductCategory || "Araçlar ve Motorlu Taşıtlar > Araç Parçaları ve Aksesuarları";
+        const fallbackCat = "Araçlar ve Motorlu Taşıtlar > Araç Parçaları ve Aksesuarları";
+        
+        let googleCategory = fallbackCat;
+        if (mainCatData?.googleProductCategory && mainCatData.googleProductCategory.trim() !== "") {
+            googleCategory = mainCatData.googleProductCategory;
+        }
         
         const brandName = product.brand?.name || "Markasız";
         const productUrl = `${baseUrl}/products/${product.slug}`;
@@ -161,13 +166,12 @@ ${weightFormatted ? `<g:shipping_weight>${weightFormatted}</g:shipping_weight>` 
     xml += `</channel>
 </rss>`;
 
-    return new NextResponse(xml, {
+        return new NextResponse(xml, {
         headers: {
             "Content-Type": "application/xml",
-            // Cache in Vercel Edge Cache/CDN
-            // s-maxage=28800: Cached on CDN for 8 hours
-            // stale-while-revalidate=3600: Serve stale content for 1 more hour while updating
-            "Cache-Control": "s-maxage=28800, stale-while-revalidate=3600"
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
         }
     });
 }
