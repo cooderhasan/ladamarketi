@@ -56,6 +56,7 @@ export async function GET(req: NextRequest) {
                 orderBy: { order: "asc" },
                 take: 1
             },
+            category: true, // Legacy field
             brand: true,
             variants: {
                 where: { isActive: true }
@@ -75,9 +76,9 @@ export async function GET(req: NextRequest) {
 
     for (const product of products) {
         const hasVariants = product.variants.length > 0;
-        const category = product.categories[0];
-        const mainCategory = category?.name || "Diğer";
-        const googleCategory = category?.googleProductCategory || "";
+        const mainCatData = product.categories?.[0] || (product as any).category;
+        const mainCategory = mainCatData?.name || "Diğer";
+        const googleCategory = mainCatData?.googleProductCategory || "";
         
         const brandName = product.brand?.name || "Markasız";
         const productUrl = `${baseUrl}/products/${product.slug}`;

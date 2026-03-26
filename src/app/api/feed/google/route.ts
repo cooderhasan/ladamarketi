@@ -31,6 +31,7 @@ export async function GET(request: Request) {
       include: {
         brand: true,
         categories: true,
+        category: true, // Legacy category field
       },
       orderBy: { updatedAt: "desc" },
       take: 5000, // Google limit
@@ -44,10 +45,15 @@ export async function GET(request: Request) {
       const price = product.googlePrice ?? product.salePrice ?? product.listPrice;
       const priceFormatted = `${Number(price).toFixed(2)} TRY`;
 
-      // Kategori eşleştirmesi: products'ın kategorilerinden google atanmış olanı bul
-      const googleCategory =
-        product.categories?.find((c: any) => c.googleProductCategory)
-          ?.googleProductCategory ?? "";
+      // Kategori ve Google Kategori eşleştirmesi
+      // Hem yeni 'categories' dizisine hem de eski 'category' alanına bakıyoruz
+      const mainCatData = product.categories?.[0] || product.category;
+      const productTypeName = mainCatData?.name || "";
+      
+      const googleCategory = 
+        product.categories?.find((c: any) => c.googleProductCategory)?.googleProductCategory || 
+        product.category?.googleProductCategory || 
+        "";
 
       // Ensure image URLs are absolute
       const getAbsoluteUrl = (path: string) => {
@@ -85,6 +91,7 @@ export async function GET(request: Request) {
       ${product.salePrice && Number(product.salePrice) < Number(product.listPrice) ? `<g:sale_price>${Number(product.salePrice).toFixed(2)} TRY</g:sale_price>` : ""}
       <g:condition>new</g:condition>
       ${googleCategory ? `<g:google_product_category>${escapeXml(googleCategory)}</g:google_product_category>` : ""}
+      ${productTypeName ? `<g:product_type>${escapeXml(productTypeName)}</g:product_type>` : ""}
       ${product.brand?.name ? `<g:brand>${escapeXml(product.brand.name)}</g:brand>` : ""}
       ${gtin ? `<g:gtin>${escapeXml(gtin)}</g:gtin>` : ""}
       ${mpn ? `<g:mpn>${escapeXml(mpn)}</g:mpn>` : ""}
