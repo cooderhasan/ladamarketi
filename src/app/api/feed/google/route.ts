@@ -108,6 +108,8 @@ export async function GET(request: Request) {
     <title>Ürün Kataloğu</title>
     <link>${baseUrl}</link>
     <description>Google Merchant Center Ürün Beslemesi</description>
+    <g:content_language>tr</g:content_language>
+    <g:target_country>TR</g:target_country>
     <pubDate>${now}</pubDate>
     ${items}
   </channel>
