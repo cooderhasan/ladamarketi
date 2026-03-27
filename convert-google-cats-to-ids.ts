@@ -15,7 +15,10 @@ async function main() {
 
   const categories = await prisma.category.findMany({
     where: {
-      googleProductCategory: { not: null, not: "" }
+      AND: [
+        { googleProductCategory: { not: null } },
+        { googleProductCategory: { not: "" } }
+      ]
     }
   });
 
