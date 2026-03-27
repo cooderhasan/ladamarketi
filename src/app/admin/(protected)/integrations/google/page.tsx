@@ -275,10 +275,14 @@ export default function GoogleMerchantPage() {
                   >
                     <option value="">-- Seçin --</option>
                     {filteredTaxonomy(cat.id).map((t) => (
-                      <option key={t.id} value={t.name}>
+                      <option key={t.id} value={t.id}>
                         {t.name}
                       </option>
                     ))}
+                    {/* Fallback for cases where value is a name but we have only IDs in list, or vice versa */}
+                    {(cat as any).googleProductCategory && !googleTaxonomy.find(t => t.id === (cat as any).googleProductCategory) && (
+                        <option value={(cat as any).googleProductCategory}>{(cat as any).googleProductCategory}</option>
+                    )}
                   </select>
                 </div>
                 {savingCat === cat.id && (
