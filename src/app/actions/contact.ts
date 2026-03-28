@@ -18,6 +18,51 @@ export type ContactState = {
 }
 
 export async function submitContactForm(prevState: ContactState, formData: FormData): Promise<ContactState> {
+    // 1. Honeypot Kontrolü
+    const hpField = formData.get("hp_field")
+    if (hpField && hpField.toString().length > 0) {
+        console.warn("Spam detected: Honeypot field filled")
+        return { error: "Spam koruması tetiklendi." }
+    }
+
+    // 2. Zaman Kontrolü (En az 3 saniye)
+    const loadTime = formData.get("form_load_time")
+    if (loadTime) {
+        const duration = Date.now() - parseInt(loadTime.toString())
+        if (duration < 3000) {
+            console.warn("Spam detected: Form submitted too fast", duration)
+            return { error: "Lütfen formu doldurmadan önce biraz bekleyin." }
+        }
+    }
+
+    // 3. Turnstile (Captcha) Doğrulaması
+    const turnstileToken = formData.get("cf-turnstile-response")
+    if (!turnstileToken) {
+        return { error: "Lütfen robot olmadığınızı doğrulayın." }
+    }
+
+    try {
+        const verifyResponse = await fetch(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `secret=${encodeURIComponent(process.env.TURNSTILE_SECRET_KEY!)}&response=${encodeURIComponent(turnstileToken.toString())}`,
+            }
+        )
+
+        const verifyData = await verifyResponse.json()
+        if (!verifyData.success) {
+            console.warn("Turnstile verification failed:", verifyData)
+            return { error: "Güvenlik doğrulaması başarısız oldu." }
+        }
+    } catch (error) {
+        console.error("Turnstile fetch error:", error)
+        return { error: "Güvenlik servisine ulaşılamadı." }
+    }
+
     const parsed = contactSchema.safeParse({
         name: formData.get("name"),
         email: formData.get("email"),
