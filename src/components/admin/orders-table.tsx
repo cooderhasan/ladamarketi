@@ -33,7 +33,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updateOrderStatus, updateOrderTracking, bulkUpdateOrderStatus, sendOrderToYurtici, cancelYKOrder, queryYKOrder } from "@/app/admin/(protected)/orders/actions";
+import { updateOrderStatus, updateOrderTracking, bulkUpdateOrderStatus, sendOrderToYurtici, cancelYKOrder, queryYKOrder, bulkSendOrdersToYurtici } from "@/app/admin/(protected)/orders/actions";
 import { getYKStatusLabel, getYKStatusColor } from "@/services/yurtici/api";
 import { toast } from "sonner";
 import { OrderWithItems } from "@/types";
@@ -67,6 +67,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
     // Filter States
     const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
     const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "ALL");
+    const [cargoFilter, setCargoFilter] = useState(searchParams.get("cargo") || "ALL");
     const [startDate, setStartDate] = useState(searchParams.get("startDate") || "");
     const [endDate, setEndDate] = useState(searchParams.get("endDate") || "");
 
@@ -96,6 +97,9 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
         if (statusFilter && statusFilter !== "ALL") params.set("status", statusFilter);
         else params.delete("status");
 
+        if (cargoFilter && cargoFilter !== "ALL") params.set("cargo", cargoFilter);
+        else params.delete("cargo");
+
         if (startDate) params.set("startDate", startDate);
         else params.delete("startDate");
 
@@ -112,6 +116,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
     const resetFilters = () => {
         setSearchTerm("");
         setStatusFilter("ALL");
+        setCargoFilter("ALL");
         setStartDate("");
         setEndDate("");
         router.push("/admin/orders");
@@ -187,6 +192,35 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
         window.open(`/admin/orders/bulk-print?ids=${selectedIds.join(',')}`, '_blank');
     };
 
+    const handleBulkShippingLabels = () => {
+        if (selectedIds.length === 0) return;
+        window.open(`/admin/orders/bulk-shipping-labels?ids=${selectedIds.join(',')}`, '_blank');
+    };
+
+    const handleBulkSendYK = async () => {
+        if (selectedIds.length === 0) return;
+
+        if (!confirm(`${selectedIds.length} adet sipariş Yurtiçi Kargo'ya gönderilecek. Onaylıyor musunuz?`)) {
+            return;
+        }
+
+        setIsBulkLoading(true);
+        try {
+            const result = await bulkSendOrdersToYurtici(selectedIds);
+            if (result.success) {
+                toast.success(result.message);
+                setSelectedIds([]);
+                router.refresh();
+            } else {
+                toast.error(result.error);
+            }
+        } catch (error) {
+            toast.error("Toplu gönderim sırasında bir hata oluştu");
+        } finally {
+            setIsBulkLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-4">
             {/* Bulk Actions Bar */}
@@ -211,6 +245,25 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                 ))}
                             </SelectContent>
                         </Select>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white dark:bg-gray-800 gap-2 border-orange-200 text-orange-700 hover:bg-orange-50"
+                            onClick={handleBulkShippingLabels}
+                        >
+                            <Truck className="h-4 w-4" />
+                            Toplu Etiket
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white dark:bg-gray-800 gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                            onClick={handleBulkSendYK}
+                            disabled={isBulkLoading}
+                        >
+                            <SendHorizonal className="h-4 w-4" />
+                            Toplu YK Gönder
+                        </Button>
                         <Button
                             variant="outline"
                             size="sm"
@@ -251,7 +304,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                     </div>
 
                     {/* Status */}
-                    <div className="w-full md:w-[180px] space-y-2">
+                    <div className="w-full md:w-[160px] space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Durum</label>
                         <Select value={statusFilter} onValueChange={setStatusFilter}>
                             <SelectTrigger>
@@ -263,6 +316,22 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                         {status.label}
                                     </SelectItem>
                                 ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Cargo Filter */}
+                    <div className="w-full md:w-[160px] space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Kargo</label>
+                        <Select value={cargoFilter} onValueChange={setCargoFilter}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Tümü" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Tümü</SelectItem>
+                                <SelectItem value="YURTICI">Yurtiçi Kargo</SelectItem>
+                                <SelectItem value="ARAS">Aras Kargo</SelectItem>
+                                <SelectItem value="OTHER">Diğer</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

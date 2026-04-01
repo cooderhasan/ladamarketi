@@ -7,6 +7,7 @@ interface OrdersPageProps {
         page?: string;
         search?: string;
         status?: string;
+        cargo?: string;
         startDate?: string;
         endDate?: string;
     }>;
@@ -20,6 +21,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
     const search = params.search || "";
     const status = params.status as OrderStatus | string | undefined;
+    const cargo = params.cargo;
     const startDate = params.startDate ? new Date(params.startDate) : undefined;
     const endDate = params.endDate ? new Date(params.endDate) : undefined;
 
@@ -47,6 +49,15 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         };
     }
     // status === "ALL" ise hiçbir filtre ekleme - tüm durumları göster
+
+    // Cargo Filtering
+    if (cargo && cargo !== "ALL") {
+        if (cargo === "OTHER") {
+            where.cargoCompany = { notIn: ["YURTICI", "ARAS", null] };
+        } else {
+            where.cargoCompany = cargo;
+        }
+    }
 
     // Date Filtering
     if (startDate || endDate) {

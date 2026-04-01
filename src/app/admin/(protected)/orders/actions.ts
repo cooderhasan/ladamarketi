@@ -507,3 +507,42 @@ export async function saveYurticiConfig(data: {
         return { success: false, error: error instanceof Error ? error.message : "Kayıt hatası" };
     }
 }
+
+/**
+ * Birden fazla siparişi toplu olarak Yurtiçi Kargo'ya gönderir.
+ */
+export async function bulkSendOrdersToYurtici(orderIds: string[]) {
+    try {
+        const session = await auth();
+        if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+            throw new Error("Unauthorized");
+        }
+
+        const results = {
+            success: 0,
+            failed: 0,
+            errors: [] as string[]
+        };
+
+        // YK kısıtlamaları ve güvenli işlem için seri (sequential) işleme
+        for (const id of orderIds) {
+            const res = await sendOrderToYurtici(id);
+            if (res.success) {
+                results.success++;
+            } else {
+                results.failed++;
+                results.errors.push(`${id}: ${res.error}`);
+            }
+        }
+
+        revalidatePath("/admin/orders");
+        return { 
+            success: true, 
+            message: `${results.success} sipariş kargoya verildi. ${results.failed} hata oluştu.`,
+            details: results 
+        };
+    } catch (error) {
+        console.error("[YK Bulk Send] error:", error);
+        return { success: false, error: error instanceof Error ? error.message : "Toplu gönderim başarısız." };
+    }
+}
