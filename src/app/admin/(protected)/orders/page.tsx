@@ -73,7 +73,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                 items: {
                     include: {
                         product: {
-                            select: { sku: true, images: true },
+                            select: { id: true, sku: true, slug: true, images: true },
                         },
                     },
                 },

@@ -125,6 +125,7 @@ export interface OrderWithItems {
     } | null;
     items: {
         id: string;
+        productId: string;
         productName: string;
         quantity: number;
         unitPrice: number;
@@ -132,7 +133,9 @@ export interface OrderWithItems {
         vatRate: number;
         lineTotal: number;
         product: {
+            id: string;
             sku: string | null;
+            slug: string;
             images: string[];
         } | null;
     }[];

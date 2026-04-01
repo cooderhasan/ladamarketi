@@ -16,7 +16,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, FileDown, Search, X, Printer, CheckCircle2, Truck, MessageCircle } from "lucide-react";
+import { Eye, FileDown, Search, X, Printer, CheckCircle2, Truck, MessageCircle, ExternalLink, Pencil } from "lucide-react";
 import {
     formatDate,
     getOrderStatusLabel,
@@ -639,11 +639,37 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                         )}
                                                     </TableCell>
                                                     <TableCell className="py-2">
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <span>{item.productName}</span>
-                                                            {item.product?.sku && (
-                                                                <span className="text-xs text-gray-400 font-mono">SKU: {item.product.sku}</span>
-                                                            )}
+                                                        <div className="flex flex-col gap-1.5">
+                                                            <span className="font-medium text-gray-900 dark:text-gray-100">{item.productName}</span>
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                {item.product?.sku && (
+                                                                    <span className="text-xs text-gray-500 font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">SKU: {item.product.sku}</span>
+                                                                )}
+                                                                {item.product && (
+                                                                    <>
+                                                                        <a
+                                                                            href={`/product/${item.product.slug}`}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="text-[10px] text-blue-600 dark:text-blue-400 hover:text-blue-800 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-1.5 py-0.5 rounded transition-colors inline-flex items-center gap-1 border border-blue-100 dark:border-blue-800"
+                                                                            title="Sitede Görüntüle"
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                        >
+                                                                            <ExternalLink className="h-3 w-3" /> Ürüne Git
+                                                                        </a>
+                                                                        <a
+                                                                            href={`/admin/products/${item.productId}/edit`}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="text-[10px] text-orange-600 dark:text-orange-400 hover:text-orange-800 bg-orange-50 dark:bg-orange-900/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 px-1.5 py-0.5 rounded transition-colors inline-flex items-center gap-1 border border-orange-100 dark:border-orange-800"
+                                                                            title="Ürün Fiyat / Bilgi Güncelle"
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                        >
+                                                                            <Pencil className="h-3 w-3" /> Fiyat Güncelle
+                                                                        </a>
+                                                                    </>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="py-2 text-center font-medium">
