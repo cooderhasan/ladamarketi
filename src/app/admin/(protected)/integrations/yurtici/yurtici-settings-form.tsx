@@ -24,8 +24,8 @@ import { ShieldCheck, ShieldAlert, Save, RefreshCw, CheckCircle, AlertCircle } f
 const formSchema = z.object({
     username: z.string().min(2, "Kullanıcı adı en az 2 karakter olmalıdır"),
     password: z.string().min(2, "Şifre en az 2 karakter olmalıdır"),
-    isTestMode: z.boolean().default(true),
-    isActive: z.boolean().default(false),
+    isTestMode: z.boolean(),
+    isActive: z.boolean(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
