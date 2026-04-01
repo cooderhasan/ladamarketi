@@ -11,15 +11,15 @@ import { getYKStatusLabel, getYKStatusColor } from "@/services/yurtici/api";
 interface YKOrder {
     id: string;
     orderNumber: string;
-    ykCargoKey?: string | null;
-    ykJobId?: number | null;
-    ykDocId?: string | null;
-    ykStatus?: string | null;
-    ykStatusMessage?: string | null;
-    ykError?: string | null;
-    ykSyncedAt?: Date | string | null;
-    trackingUrl?: string | null;
-    status?: string | null;
+    ykCargoKey: string | null;
+    ykJobId: number | null;
+    ykDocId: string | null;
+    ykStatus: string | null;
+    ykStatusMessage: string | null;
+    ykError: string | null;
+    ykSyncedAt: Date | string | null;
+    trackingUrl: string | null;
+    status: string;
 }
 
 interface YurticiKargoPanelProps {

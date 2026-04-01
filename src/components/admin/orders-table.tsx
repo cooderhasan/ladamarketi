@@ -624,8 +624,8 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                             <YurticiKargoPanel
                                 order={selectedOrder}
                                 onUpdate={(updatedFields) => {
-                                    setSelectedOrder(prev => prev ? { ...prev, ...updatedFields } : null);
-                                    setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, ...updatedFields } : o));
+                                    setSelectedOrder(prev => prev ? { ...prev, ...updatedFields } as any : null);
+                                    setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, ...updatedFields } as any : o));
                                 }}
                             />
 

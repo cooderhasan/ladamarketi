@@ -114,6 +114,13 @@ export interface OrderWithItems {
     shippingAddress: unknown;
     cargoCompany: string | null;
     trackingUrl: string | null;
+    ykCargoKey: string | null;
+    ykJobId: number | null;
+    ykDocId: string | null;
+    ykStatus: string | null;
+    ykStatusMessage: string | null;
+    ykSyncedAt: Date | string | null;
+    ykError: string | null;
     notes: string | null;
     guestEmail: string | null;
     createdAt: Date;
