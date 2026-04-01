@@ -52,17 +52,27 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
     // Cargo Filtering
     if (cargo && cargo !== "ALL") {
+        if (!where.AND) where.AND = [];
+        
         if (cargo === "YURTICI") {
-            where.cargoCompany = { contains: "Yurtici", mode: "insensitive" };
+            where.AND.push({
+                OR: [
+                    { cargoCompany: { contains: "Yurt", mode: "insensitive" } },
+                    { cargoCompany: { contains: "Yü", mode: "insensitive" } }
+                ]
+            });
         } else if (cargo === "ARAS") {
-            where.cargoCompany = { contains: "Aras", mode: "insensitive" };
+            where.AND.push({
+                cargoCompany: { contains: "Aras", mode: "insensitive" }
+            });
         } else if (cargo === "OTHER") {
-            where.AND = [
-                ...(where.AND || []),
-                { NOT: { cargoCompany: { contains: "Yurtici", mode: "insensitive" } } },
-                { NOT: { cargoCompany: { contains: "Aras", mode: "insensitive" } } },
-                { NOT: { cargoCompany: null } }
-            ];
+            where.AND.push({
+                AND: [
+                    { NOT: { cargoCompany: { contains: "Yurt", mode: "insensitive" } } },
+                    { NOT: { cargoCompany: { contains: "Aras", mode: "insensitive" } } },
+                    { NOT: { cargoCompany: null } }
+                ]
+            });
         }
     }
 
