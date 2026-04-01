@@ -648,7 +648,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                                 {item.product && (
                                                                     <>
                                                                         <a
-                                                                            href={`/product/${item.product.slug}`}
+                                                                            href={`/products/${item.product.slug}`}
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
                                                                             className="text-[10px] text-blue-600 dark:text-blue-400 hover:text-blue-800 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-1.5 py-0.5 rounded transition-colors inline-flex items-center gap-1 border border-blue-100 dark:border-blue-800"
