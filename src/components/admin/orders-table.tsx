@@ -485,10 +485,21 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
             {/* Order Detail Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="max-w-5xl sm:max-w-5xl w-11/12 md:w-full max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>
+                    <DialogHeader className="flex flex-row items-center justify-between pr-6 border-b pb-2 mb-2">
+                        <DialogTitle className="text-xl">
                             Sipariş Detayı - {selectedOrder?.orderNumber}
                         </DialogTitle>
+                        {selectedOrder && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-2 shrink-0"
+                                onClick={() => window.open(`/admin/orders/${selectedOrder.id}/print`, '_blank')}
+                            >
+                                <Printer className="h-4 w-4" />
+                                Siparişi Yazdır
+                            </Button>
+                        )}
                     </DialogHeader>
                     {selectedOrder && (
                         <div className="space-y-4">
