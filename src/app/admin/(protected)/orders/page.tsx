@@ -52,10 +52,17 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
     // Cargo Filtering
     if (cargo && cargo !== "ALL") {
-        if (cargo === "OTHER") {
-            where.cargoCompany = { notIn: ["YURTICI", "ARAS", null] };
-        } else {
-            where.cargoCompany = cargo;
+        if (cargo === "YURTICI") {
+            where.cargoCompany = { contains: "Yurtici", mode: "insensitive" };
+        } else if (cargo === "ARAS") {
+            where.cargoCompany = { contains: "Aras", mode: "insensitive" };
+        } else if (cargo === "OTHER") {
+            where.AND = [
+                ...(where.AND || []),
+                { NOT: { cargoCompany: { contains: "Yurtici", mode: "insensitive" } } },
+                { NOT: { cargoCompany: { contains: "Aras", mode: "insensitive" } } },
+                { NOT: { cargoCompany: null } }
+            ];
         }
     }
 
