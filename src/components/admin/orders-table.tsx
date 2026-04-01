@@ -16,7 +16,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, FileDown, Search, X, Printer, CheckCircle2, Truck, MessageCircle, ExternalLink, Pencil } from "lucide-react";
+import { Eye, FileDown, Search, X, Printer, CheckCircle2, Truck, MessageCircle, ExternalLink, Pencil, Package, RefreshCw, XCircle, SendHorizonal } from "lucide-react";
 import {
     formatDate,
     getOrderStatusLabel,
@@ -33,11 +33,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updateOrderStatus, updateOrderTracking, bulkUpdateOrderStatus } from "@/app/admin/(protected)/orders/actions";
+import { updateOrderStatus, updateOrderTracking, bulkUpdateOrderStatus, sendOrderToYurtici, cancelYKOrder, queryYKOrder } from "@/app/admin/(protected)/orders/actions";
+import { getYKStatusLabel, getYKStatusColor } from "@/services/yurtici/api";
 import { toast } from "sonner";
 import { OrderWithItems } from "@/types";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { YurticiKargoPanel } from "@/components/admin/yurtici-kargo-panel";
 
 interface OrdersTableProps {
     orders: OrderWithItems[];
@@ -315,6 +317,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                 <TableHead>Müşteri</TableHead>
                                 <TableHead>Tarih</TableHead>
                                 <TableHead>Tutar</TableHead>
+                                <TableHead>Kargo</TableHead>
                                 <TableHead>Durum</TableHead>
                                 <TableHead className="text-right">İşlemler</TableHead>
                             </TableRow>
@@ -322,7 +325,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                         <TableBody>
                             {orders.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                                         Sipariş bulunamadı.
                                     </TableCell>
                                 </TableRow>
@@ -380,6 +383,14 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                         )}
                                                     </span>
                                                 )}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-1.5">
+                                                <Truck className="h-3.5 w-3.5 text-gray-400" />
+                                                <span className="text-sm font-medium">
+                                                    {order.cargoCompany === "YURTICI" ? "Yurtiçi Kargo" : order.cargoCompany || "-"}
+                                                </span>
                                             </div>
                                         </TableCell>
                                         <TableCell onClick={(e) => e.stopPropagation()}>
@@ -608,6 +619,15 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Yurtiçi Kargo Entegrasyon Bölümü */}
+                            <YurticiKargoPanel
+                                order={selectedOrder}
+                                onUpdate={(updatedFields) => {
+                                    setSelectedOrder(prev => prev ? { ...prev, ...updatedFields } : null);
+                                    setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, ...updatedFields } : o));
+                                }}
+                            />
 
                             {/* Order Items Table - Compact */}
                             <div>

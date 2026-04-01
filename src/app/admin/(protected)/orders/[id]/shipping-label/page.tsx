@@ -4,6 +4,7 @@ import { getSiteSettings } from "@/lib/settings";
 import { notFound } from "next/navigation";
 import { PrintButton } from "@/components/admin/print-button";
 import { AutoPrint } from "@/components/admin/auto-print";
+import { Barcode } from "@/components/admin/barcode";
 
 export default async function ShippingLabelPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -131,8 +132,16 @@ export default async function ShippingLabelPage({ params }: { params: Promise<{ 
                     )}
 
                     <div className="col-span-2 mt-4 pt-4 border-t border-black">
-                        <div className="text-center text-xs text-gray-400 font-medium uppercase tracking-widest">
-                            {settings.companyName || "Firma Adı"} - Kargo Etiketi
+                        <div className="flex flex-col items-center justify-center space-y-2">
+                             <Barcode 
+                                value={(order as any).ykCargoKey || order.orderNumber} 
+                                width={2.5} 
+                                height={100} 
+                                className="mb-2"
+                             />
+                             <div className="text-center text-[10px] text-gray-400 font-medium uppercase tracking-widest">
+                                {settings.companyName || "Firma Adı"} - Kargo Etiketi
+                            </div>
                         </div>
                     </div>
                 </div>

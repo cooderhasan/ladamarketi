@@ -284,6 +284,14 @@ model Order {
   shippingDesi         Decimal?      @db.Decimal(8, 2)  // Toplam sipariş desisi
   cargoCompany         String?       // Kargo Firması
   trackingUrl          String?       // Kargo Takip Linki
+  // Yurtiçi Kargo Entegrasyonu
+  ykCargoKey          String?       // YK'ya gönderilen tekil kargo anahtarı
+  ykJobId             Int?          // YK Talep Numarası (createShipment'tan döner)
+  ykDocId             String?       // YK Gönderi Numarası (queryShipment'tan gelir)
+  ykStatus            String?       // NOP | IND | ISR | CNL | ISC | DLV | BI
+  ykStatusMessage     String?       // YK durum açıklaması
+  ykSyncedAt          DateTime?     // Son YK senkronizasyon zamanı
+  ykError             String?       // Son YK hata mesajı
   notes                String?
   items                OrderItem[]
   payment              Payment?
@@ -672,4 +680,18 @@ model BankTransferNotification {
   @@index([orderId])
   @@index([status])
   @@map("bank_transfer_notifications")
+}
+
+// ==================== YURTİÇİ KARGO ENTEGRASYONu ====================
+
+model YurticiKargoConfig {
+  id               String   @id @default(cuid())
+  username         String   // YK Web Servis Kullanıcı Adı (Alıcı Ödemeli)
+  password         String   // YK Web Servis Şifresi
+  isTestMode       Boolean  @default(true)  // true = test, false = canlı
+  isActive         Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("yurtici_kargo_configs")
 }

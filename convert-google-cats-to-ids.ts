@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 async function main() {
   const taxonomyPath = path.join(process.cwd(), 'src', 'data', 'google-taxonomy.json');
   const taxonomy = JSON.parse(fs.readFileSync(taxonomyPath, 'utf8'));
-  
+
   const nameToId = new Map();
   taxonomy.forEach((item: any) => {
     nameToId.set(item.name, item.id);
