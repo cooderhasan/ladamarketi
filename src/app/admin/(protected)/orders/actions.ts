@@ -188,7 +188,14 @@ export async function sendOrderToYurtici(orderId: string) {
         });
 
         if (!order) return { success: false, error: "Sipariş bulunamadı." };
-        if (order.ykJobId) return { success: false, error: "Bu sipariş zaten Yurtiçi Kargo sistemine gönderilmiş. (Job ID: " + order.ykJobId + ")" };
+        if (order.ykJobId) {
+            const errMsg = "Bu sipariş zaten Yurtiçi Kargo sistemine gönderilmiş. (Job ID: " + order.ykJobId + ")";
+            await prisma.order.update({
+                where: { id: orderId },
+                data: { ykError: errMsg }
+            });
+            return { success: false, error: errMsg };
+        }
 
         const shippingAddr = order.shippingAddress as any;
         if (!shippingAddr) return { success: false, error: "Siparişe ait teslimat adresi bulunamadı." };
@@ -539,6 +546,7 @@ export async function bulkSendOrdersToYurtici(orderIds: string[]) {
         return { 
             success: true, 
             message: `${results.success} sipariş kargoya verildi. ${results.failed} hata oluştu.`,
+            error: results.failed > 0 ? results.errors.join("\n") : undefined,
             details: results 
         };
     } catch (error) {

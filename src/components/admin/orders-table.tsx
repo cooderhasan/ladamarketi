@@ -208,7 +208,14 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
         try {
             const result = await bulkSendOrdersToYurtici(selectedIds);
             if (result.success) {
-                toast.success(result.message);
+                if (result.error) {
+                    toast.error(result.message, {
+                        description: "Hatalar:\n" + result.error,
+                        duration: 5000,
+                    });
+                } else {
+                    toast.success(result.message);
+                }
                 setSelectedIds([]);
                 router.refresh();
             } else {
