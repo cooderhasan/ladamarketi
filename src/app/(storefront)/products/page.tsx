@@ -83,24 +83,39 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         }
     }
 
-    // Search
+    // Search - Kelime bazlı çoklu arama (her kelime ayrı AND koşulu ile aranır)
     if (params.search) {
-        where.OR = [
-            { name: { contains: params.search, mode: "insensitive" } },
-            { sku: { contains: params.search, mode: "insensitive" } },
-            { barcode: { contains: params.search, mode: "insensitive" } },
-            {
-                variants: {
-                    some: {
-                        OR: [
-                            { sku: { contains: params.search, mode: "insensitive" } },
-                            { barcode: { contains: params.search, mode: "insensitive" } },
-                        ],
+        const searchWords = params.search
+            .trim()
+            .split(/\s+/)
+            .filter(w => w.length > 0);
+
+        if (searchWords.length === 1) {
+            // Tek kelime: isim, sku, barkod içinde ara
+            const word = searchWords[0];
+            where.OR = [
+                { name: { contains: word, mode: "insensitive" } },
+                { sku: { contains: word, mode: "insensitive" } },
+                { barcode: { contains: word, mode: "insensitive" } },
+                {
+                    variants: {
+                        some: {
+                            OR: [
+                                { sku: { contains: word, mode: "insensitive" } },
+                                { barcode: { contains: word, mode: "insensitive" } },
+                            ],
+                        },
                     },
                 },
-            },
-        ];
+            ];
+        } else {
+            // Çoklu kelime: her kelimenin ürün adında GEÇMESİ gerekiyor (AND mantığı)
+            where.AND = searchWords.map(word => ({
+                name: { contains: word, mode: "insensitive" },
+            }));
+        }
     }
+
 
     // Price Range
     if (params.min_price || params.max_price) {
