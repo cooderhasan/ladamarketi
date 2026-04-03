@@ -45,4 +45,5 @@ next-env.d.ts
 # Product images (too large for git)
 /public/img/
 *.sql
+!prisma/migrations/**/*.sql
 *.dump
