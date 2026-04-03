@@ -688,6 +688,9 @@ model YurticiKargoConfig {
   id               String   @id @default(cuid())
   username         String   // YK Web Servis Kullanıcı Adı (Alıcı Ödemeli)
   password         String   // YK Web Servis Şifresi
+  customerCode     String?  // Müşteri Kodu (Opsiyonel Bilgi)
+  unitCode         String?  // Birim Kodu (Opsiyonel Bilgi)
+  demandNo         String?  // Talep No (Opsiyonel Bilgi)
   isTestMode       Boolean  @default(true)  // true = test, false = canlı
   isActive         Boolean  @default(false)
   createdAt        DateTime @default(now())

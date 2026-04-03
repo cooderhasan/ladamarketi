@@ -22,6 +22,9 @@ const YK_TEST_PASSWORD = "YK";
 export interface YKCredentials {
     username: string;
     password: string;
+    customerCode?: string | null;
+    unitCode?: string | null;
+    demandNo?: string | null;
     isTestMode: boolean;
 }
 

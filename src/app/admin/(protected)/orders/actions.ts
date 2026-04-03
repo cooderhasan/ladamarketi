@@ -160,7 +160,10 @@ async function getYKConfig(): Promise<YKCredentials | null> {
     return {
         username: config.username,
         password: config.password,
-        isTestMode: config.isTestMode, // CANLI BİLGİLERİ ALIYANA KADAR true KALACAK
+        customerCode: config.customerCode,
+        unitCode: config.unitCode,
+        demandNo: config.demandNo,
+        isTestMode: config.isTestMode,
     };
 }
 
@@ -491,6 +494,9 @@ export async function syncAllYKOrders() {
 export async function saveYurticiConfig(data: {
     username: string;
     password: string;
+    customerCode?: string;
+    unitCode?: string;
+    demandNo?: string;
     isTestMode: boolean;
     isActive: boolean;
 }) {

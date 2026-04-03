@@ -24,6 +24,9 @@ import { ShieldCheck, ShieldAlert, Save, RefreshCw, CheckCircle, AlertCircle } f
 const formSchema = z.object({
     username: z.string().min(2, "Kullanıcı adı en az 2 karakter olmalıdır"),
     password: z.string().min(2, "Şifre en az 2 karakter olmalıdır"),
+    customerCode: z.string().optional(),
+    unitCode: z.string().optional(),
+    demandNo: z.string().optional(),
     isTestMode: z.boolean(),
     isActive: z.boolean(),
 });
@@ -58,6 +61,9 @@ export function YurticiKargoSettingsForm({ config }: YurticiKargoSettingsFormPro
         defaultValues: {
             username: config?.username || "",
             password: config?.password || "",
+            customerCode: config?.customerCode || "",
+            unitCode: config?.unitCode || "",
+            demandNo: config?.demandNo || "",
             isTestMode: config?.isTestMode ?? true,
             isActive: config?.isActive ?? false,
         },
@@ -184,6 +190,57 @@ export function YurticiKargoSettingsForm({ config }: YurticiKargoSettingsFormPro
                                         </FormItem>
                                     )}
                                 />
+                            </div>
+
+                            <div className="bg-gray-50 dark:bg-gray-800/30 p-4 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 space-y-4">
+                                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                    <AlertCircle className="h-4 w-4 text-orange-500" />
+                                    Referans Kodları (Opsiyonel)
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="customerCode"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs">Müşteri Kodu</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="558..." className="h-8 text-sm" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="unitCode"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs">Birim Kodu</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="7065" className="h-8 text-sm" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="demandNo"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs">Talep No</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="780..." className="h-8 text-sm" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <p className="text-[10px] text-gray-500 italic">
+                                    * Bu alanlar Yurtiçi Kargo tarafından size iletilen maildeki bilgilere göre doldurulmalıdır.
+                                </p>
                             </div>
 
                             <div className="space-y-4 pt-2">
