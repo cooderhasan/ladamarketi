@@ -31,7 +31,7 @@ export interface YKCredentials {
 export interface YKShipmentInput {
     cargoKey: string;        // max 20 karakter, tekil (orderNumber kullanılır)
     invoiceKey: string;      // max 20 karakter, tekil
-    receiverCustName: string; // min 5 karakter, min 4 harf
+    receiverCustName: string; // min 2 karakter, min 2 harf
     receiverAddress: string;  // min 10, max 200 karakter (şehir/ilçe hariç)
     cityName: string;         // İl adı
     townName: string;         // İlçe adı

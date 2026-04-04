@@ -205,8 +205,8 @@ export async function sendOrderToYurtici(orderId: string) {
 
         // Alıcı adı: teslimat adresindeki isim
         const receiverName = (shippingAddr.name || shippingAddr.fullName || shippingAddr.title || order.user?.email || "Müşteri").trim();
-        if (receiverName.length < 5) {
-            return { success: false, error: `Alıcı adı çok kısa (min 5 karakter): "${receiverName}"` };
+        if (receiverName.length < 2) {
+            return { success: false, error: `Alıcı adı çok kısa (min 2 karakter): "${receiverName}"` };
         }
 
         // Adres: şehir ve ilçe ayrı gönderildiğinden onları adresten çıkarmaya gerek yok
