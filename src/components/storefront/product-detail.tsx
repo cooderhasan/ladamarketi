@@ -16,6 +16,7 @@ import { InstallmentTable } from "./installment-table";
 import { WishlistButton } from "@/components/products/wishlist-button";
 import { ReviewForm } from "@/components/products/review-form";
 import { ReviewList } from "@/components/products/review-list";
+import { ShippingInfoBanner } from "./shipping-info-banner";
 import {
     Tabs,
     TabsContent,
@@ -505,6 +506,9 @@ export function ProductDetail({
                             <div className="mt-auto space-y-3">
                                 {product.stock > 0 ? (
                                     <>
+                                        {/* Dynamic Shipping Banner */}
+                                        <ShippingInfoBanner />
+
                                         {/* Stock indicator */}
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
