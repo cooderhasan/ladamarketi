@@ -81,8 +81,8 @@ export async function POST(req: NextRequest) {
             headers: {
                 "Authorization": `Bearer ${config.openRouterApiKey}`,
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://localhost:3000", // Required by OpenRouter
-                "X-Title": "B2B Ecommerce"
+                "HTTP-Referer": "https://ladamarketi.com", // Required by OpenRouter
+                "X-Title": "Ladamarketi B2B"
             },
             body: JSON.stringify({
                 model: modelId,
