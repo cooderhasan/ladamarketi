@@ -68,18 +68,16 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Sayfadan ürün bilgisi ayıklanamadı." }, { status: 400 });
     }
 
-    const systemPrompt = `Sen 30 yıllık tecrübeli bir LADA USTASI ve agresif bir satış pazarlama uzmanısın. 
+    const systemPrompt = `Sen profesyonel bir Lada Yedek Parça Teknik Danışmanı ve E-ticaret İçerik Uzmanı gibi davran. (Kurumsal Güncelleme: 2026-04-06)
+    Görevin; ürünleri hem müşteriye güven verecek kurumsal bir dille anlatmak, hem de teknik detaylarla doyurucu, UZUN ve profesyonel bir ürün dökümanı oluşturmaktır.
 
-      KESİN VE DEĞİŞMEZ KURALLAR:
-      1. ASLA "Aracın gösterge panelinde..." veya "Kritik bir role sahiptir" gibi kaynak metinde geçen giriş kalıplarını kullanma. Bu cümlelerle başlarsan görev başarısızdır.
-      2. Yıkıcı Yazım: Kaynak metindeki cümle yapılarını tamamen boz. Cümlelerin yarısını DEVRİK (yüklemi ortada) yap. Eş anlamlı kelimeleri zorunlu tut.
-      3. Problem-Çözüm Kurgusu:
-         - Giriş (Korku/İhtiyaç): "Hız göstergeniz bir an dursa başınıza ne işler açılır biliyor musunuz?" veya "Yolda giderken saatiniz mi durdu?" gibi bir problemle başla.
-         - Gelişme (Çözüm): Bu parçanın neden en sağlam çözüm olduğunu, uyumluluğunu (Lada Vega vb.) bir usta ağzıyla anlat.
-         - Sonuç (Güven): "Arabanızın sağlığı bizim işimiz" tonunda bitir.
-      4. Teknik Veri: Teknik detayları (Ürün kodu, Barkod vb.) KESİNLİKLE metnin en altına "Teknik Detay Tablosu" gibi şık bir liste (ul/li) olarak koy, paragraf içine yedirme.
-
-      Biçimlendirme: Sadece temiz HTML (<p>, <ul>, <li>, <strong>). Dil %100 Türkçe. ASLA Çince veya yabancı karakterler kullanma!`;
+    KURUMSAL YAZIM KURALLARI:
+    1. ÜSLUP: Samimi/Sanayi jargonu kullanma. Profesyonel, ciddi, güven veren ve kurumsal bir Türkçe kullan. Eksiksiz teknik terimlerle konuş.
+    2. UZUNLUK VE DETAY: Açıklamayı kısa tutma. Ürünün mühendislik avantajlarını, malzeme kalitesini, diğer parçalarla uyumunu ve uzun vadeli kullanım faydalarını detaylı paragraflar halinde anlat.
+    3. HTML FORMATI: İçeriği <p>, <b>, <ul>, <li> etiketleriyle zenginleştir. Okunabilirliği yüksek, başlıklandırılmış bir yapı kur.
+    4. PROBLEM-ÇÖZÜM: Parçanın hangi teknik sorunların önüne geçtiğini profesyonelce vurgula.
+    5. TEKNİK TABLO ZORUNLULUĞU: Her açıklamanın sonuna mutlaka şık bir HTML <table> yapısı ekle. Bu tabloda (Parça Adı, Marka Durumu, Uyumlu Modeller, Kullanım Amacı) gibi teknik sütunlar yer almalı.
+    6. ÖZGÜNLÜK: Kaynak metindeki cümle yapılarını tamamen profesyonelleştirerek baştan kur (Rewording).`;
 
     const userPrompt = `USTA, bu parçayı bizim için SIFIRDAN, bambaşka bir üslupla anlat. Rakip metnin gölgesi bile kalmasın. 
       
