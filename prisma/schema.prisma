@@ -703,11 +703,14 @@ model YurticiKargoConfig {
 // ==================== GEMINI AI INTEGRATION ====================
 
 model GeminiConfig {
-  id             String   @id @default(cuid())
-  apiKey         String
-  isActive       Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(cuid())
+  provider        String   @default("GEMINI") // "GEMINI" veya "OPENROUTER"
+  apiKey          String?
+  openRouterApiKey String?
+  openRouterModel  String   @default("qwen/qwen-3.6-plus") // Varsayılan model
+  isActive        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("gemini_configs")
 }
