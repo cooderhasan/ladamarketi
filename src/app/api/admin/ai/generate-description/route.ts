@@ -76,8 +76,9 @@ export async function POST(req: NextRequest) {
     2. VURGULAMA (BOLD): Önemli teknik terimleri, uyumluluk bilgilerini ve kritik avantajları <b>...</b> etiketleri içinde mutlaka vurgula.
     3. MADDELEME (LISTING): "Avantajları" veya "Özellikleri" bölümünde mutlaka <ul> ve <li> etiketlerini kullanarak maddeler halinde yaz.
     4. ÜSLUP: Kesinlikle 'usta', 'tecrübem' gibi kişisel ifadeler kullanma. Tamamen kurumsal ve ciddi bir Türkçe kullan.
-    5. TEKNİK TABLO: Her dökümanın sonuna mutlaka STANDART HTML <table> yapısı ekle. Mutlaka <thead> (sütun başlıkları için <th> kullanarak) ve <tbody> (veriler için <td> kullanarak) bölümlerini ayır.
-    6. UZUNLUK: İçeriği kısa kesme; her bölümü (paragraf, maddeler, tablo) doyurucu ve teknik olarak zengin tut.`;
+    5. GARANTİ YASAĞI: Metnin hiçbir yerinde KESİNLİKLE "garanti", "garantilidir", "garantisi vardır" veya benzeri bir garanti taahhüdü içeren ifade kullanma.
+    6. TEKNİK TABLO: Her dökümanın sonuna mutlaka STANDART HTML <table> yapısı ekle. Mutlaka <thead> (sütun başlıkları için <th> kullanarak) ve <tbody> (veriler için <td> kullanarak) bölümlerini ayır.
+    7. UZUNLUK: İçeriği kısa kesme; her bölümü (paragraf, maddeler, tablo) doyurucu ve teknik olarak zengin tut.`;
 
     const userPrompt = `USTA, bu parçayı bizim için SIFIRDAN, bambaşka bir üslupla anlat. Rakip metnin gölgesi bile kalmasın. 
       
