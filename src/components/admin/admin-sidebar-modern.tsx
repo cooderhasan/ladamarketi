@@ -26,7 +26,8 @@ import {
     Image as LucideImage,
     Search,
     RefreshCcw,
-    Star
+    Star,
+    Brain,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,7 @@ const menuGroups: MenuGroup[] = [
             { title: "N11", href: "/admin/integrations/n11", icon: Zap },
             { title: "Hepsiburada", href: "/admin/integrations/hepsiburada", icon: Zap },
             { title: "Google Merchant", href: "/admin/integrations/google", icon: Zap },
+            { title: "Gemini AI", href: "/admin/integrations/gemini", icon: Brain },
             { title: "Yurtiçi Kargo", href: "/admin/integrations/yurtici", icon: Truck },
             { title: "Toplu İşlemler", href: "/admin/bulk-updates", icon: Zap },
         ],

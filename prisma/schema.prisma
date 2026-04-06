@@ -228,6 +228,7 @@ model Product {
   googlePrice  Decimal?  @db.Decimal(12, 2) // Google'a özel fiyat (boşsa listPrice kullanılır)
   gtin         String?   // GTIN / EAN (Global Trade Item Number)
   mpn          String?   // Manufacturer Part Number
+  referenceUrl String?   // AI için referans alınan kaynak URL
 
   categoryId  String? // Deprecated: Use categories relation instead
   category    Category?   @relation("LegacyCategory", fields: [categoryId], references: [id])
@@ -697,4 +698,16 @@ model YurticiKargoConfig {
   updatedAt        DateTime @updatedAt
 
   @@map("yurtici_kargo_configs")
+}
+
+// ==================== GEMINI AI INTEGRATION ====================
+
+model GeminiConfig {
+  id             String   @id @default(cuid())
+  apiKey         String
+  isActive       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("gemini_configs")
 }

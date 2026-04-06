@@ -51,6 +51,7 @@ export async function createProduct(formData: FormData) {
         height: formData.get("height") ? Number(formData.get("height")) : null,
         length: formData.get("length") ? Number(formData.get("length")) : null,
         desi: formData.get("desi") ? Number(formData.get("desi")) : null,
+        referenceUrl: (formData.get("referenceUrl") as string) || undefined,
     };
 
     const categoryIdsJson = formData.get("categoryIds") as string;
@@ -166,6 +167,7 @@ export async function updateProduct(productId: string, formData: FormData) {
         height: formData.get("height") ? Number(formData.get("height")) : null,
         length: formData.get("length") ? Number(formData.get("length")) : null,
         desi: formData.get("desi") ? Number(formData.get("desi")) : null,
+        referenceUrl: (formData.get("referenceUrl") as string) || undefined,
     };
 
     const categoryIdsJson = formData.get("categoryIds") as string;

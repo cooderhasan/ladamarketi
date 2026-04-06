@@ -52,6 +52,7 @@ export const productSchema = z.object({
     height: z.number().min(0, "Yükseklik negatif olamaz").nullable().optional(),
     length: z.number().min(0, "Uzunluk negatif olamaz").nullable().optional(),
     desi: z.number().min(0, "Desi negatif olamaz").nullable().optional(),
+    referenceUrl: z.string().url("Geçerli bir URL giriniz").or(z.literal("")).nullable().optional(),
 });
 
 // ==================== PRODUCT VARIANT VALIDATIONS ====================

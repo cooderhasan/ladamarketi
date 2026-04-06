@@ -17,7 +17,7 @@ import { createProduct, updateProduct, syncProductToMarketplaces } from "@/app/a
 import { generateSlug, generateSKU, generateBarcode } from "@/lib/helpers";
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package, RefreshCw } from "lucide-react";
+import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package, RefreshCw, Brain } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { calculateDesi } from "@/lib/shipping";
@@ -83,6 +83,7 @@ interface Product {
     desi?: number | null;
     variants?: ProductVariant[];
     categories?: { id: string }[];
+    referenceUrl?: string | null;
 }
 
 interface ProductFormProps {
@@ -131,6 +132,7 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         height: product?.height ?? "",
         length: product?.length ?? "",
         desi: product?.desi ?? "",
+        referenceUrl: product?.referenceUrl || "",
     });
 
     // Otomatik desi hesaplama
@@ -336,6 +338,62 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 p-4 bg-indigo-50/30 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/30 rounded-xl">
+                                <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-semibold mb-1">
+                                    <Brain className="w-5 h-5 text-indigo-600" />
+                                    <span>AI İçerik Asistanı (Opsiyonel)</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="referenceUrl" className="text-xs">Referans Ürün Linki (Toptancı / Rakip)</Label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            id="referenceUrl"
+                                            value={formData.referenceUrl}
+                                            onChange={(e) => handleChange("referenceUrl", e.target.value)}
+                                            placeholder="https://rakipsite.com/urun-detay"
+                                            className="bg-white dark:bg-gray-800"
+                                        />
+                                        <Button
+                                            type="button"
+                                            onClick={async () => {
+                                                if (!formData.referenceUrl) {
+                                                    toast.error("Lütfen bir referans linki girin.");
+                                                    return;
+                                                }
+                                                setLoading(true);
+                                                try {
+                                                    const res = await fetch("/api/admin/ai/generate-description", {
+                                                        method: "POST",
+                                                        body: JSON.stringify({ url: formData.referenceUrl }),
+                                                    });
+                                                    const result = await res.json();
+                                                    if (result.success) {
+                                                        handleChange("description", result.data);
+                                                        if (!formData.name && result.sourceName) {
+                                                            handleChange("name", result.sourceName);
+                                                        }
+                                                        toast.success("Özgün içerik başarıyla oluşturuldu.");
+                                                    } else {
+                                                        toast.error(result.error || "İşlem başarısız.");
+                                                    }
+                                                } catch {
+                                                    toast.error("Bir hata oluştu.");
+                                                } finally {
+                                                    setLoading(false);
+                                                }
+                                            }}
+                                            disabled={loading}
+                                            className="bg-indigo-600 hover:bg-indigo-700 shrink-0"
+                                        >
+                                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "AI ile Yaz"}
+                                        </Button>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 italic">
+                                        * Linkten ürün ismi ve açıklaması çekilip AI ile özgünleştirilir.
+                                    </p>
                                 </div>
                             </div>
 
