@@ -95,11 +95,7 @@ export async function POST(req: NextRequest) {
         // HATA FIX: Veritabanındaki eski ':beta' takısını veya ekleri temizle
         modelId = modelId.replace(":beta", "").trim();
 
-        // Qwen Fix: 'qwen/' ile başlayanları 'alibaba/'ya çevir
-        if (modelId.startsWith("qwen/")) {
-            modelId = modelId.replace("qwen/", "alibaba/");
-        }
-        
+        // Qwen modelleri için artık manuel prefix eklemiyoruz, direkt veritabanındaki ID'yi kullanıyoruz (Nihai Fix: 2026-04-06)
         const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {

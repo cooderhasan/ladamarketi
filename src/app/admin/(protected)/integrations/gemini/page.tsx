@@ -14,13 +14,13 @@ import { Brain, Save, ExternalLink, Zap, Globe, Edit3 } from "lucide-react";
 
 const RECOMMENDED_MODELS = [
     { value: "openai/gpt-4o-mini", label: "GPT-4o Mini (Hızlı & Ekonomik)", category: "En İyi Seçenek" },
-    { value: "openai/gpt-4o", label: "GPT-4o (Güçlü & Akıllı)", category: "En İyi Seçenek" },
+    { value: "openai/gpt-4o", label: "GPT-4o (En Zeki & Kapsamlı)", category: "En İyi Seçenek" },
     { value: "anthropic/claude-3.5-sonnet", label: "Claude 3.5 Sonnet (Üst Düzey Yazım)", category: "Premium" },
-    { value: "google/gemini-flash-1.5", label: "Gemini 1.5 Flash (Dengeli)", category: "Google" },
-    { value: "google/gemini-pro-1.5", label: "Gemini 1.5 Pro (Zeki)", category: "Google" },
+    { value: "qwen/qwen-plus", label: "Qwen Plus (Dengeli & Kaliteli)", category: "Qwen" },
+    { value: "qwen/qwen-turbo", label: "Qwen Turbo (Çok Hızlı)", category: "Qwen" },
     { value: "qwen/qwen-2.5-72b-instruct", label: "Qwen 2.5 72B (Kapsamlı)", category: "Teknik" },
-    { value: "alibaba/qwen-plus", label: "Qwen Plus (Ücretsiz/Yedek)", category: "Ücretsiz" },
-    { value: "meta-llama/llama-3.1-70b-instruct", label: "Llama 3.1 70B (Meta)", category: "Meta" },
+    { value: "google/gemini-pro-1.5", label: "Gemini 1.5 Pro (Google Zekası)", category: "Google" },
+    { value: "meta-llama/llama-3.2-11b-vision-instruct", label: "Llama 3.2 11B (Yeni)", category: "Meta" },
 ];
 
 export default function GeminiIntegrationPage() {
