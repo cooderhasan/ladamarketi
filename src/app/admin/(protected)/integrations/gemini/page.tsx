@@ -9,19 +9,38 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Brain, Save, ExternalLink, Zap, Globe } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Brain, Save, ExternalLink, Zap, Globe, Edit3 } from "lucide-react";
+
+const RECOMMENDED_MODELS = [
+    { value: "qwen/qwen3.6-plus:free", label: "Qwen 3.6 Plus (Ücretsiz - En İyi Teknik)", category: "Ücretsiz" },
+    { value: "openai/gpt-4o-mini", label: "GPT-4o Mini (Hızlı & Çok Ucuz - Tavsiye Edilen)", category: "Ekonomik" },
+    { value: "anthropic/claude-3-5-sonnet", label: "Claude 3.5 Sonnet (En Kaliteli Yazım - Ücretli)", category: "Premium" },
+    { value: "google/gemini-flash-1.5-8b", label: "Gemini 1.5 Flash (Google - Çok Hızlı)", category: "Google" },
+    { value: "google/gemini-pro-1.5", label: "Gemini 1.5 Pro (Google - En Zeki)", category: "Google" },
+    { value: "qwen/qwen-2.5-72b-instruct", label: "Qwen 2.5 72B (Hızlı & Teknik - Ücretli)", category: "Teknik" },
+    { value: "meta-llama/llama-3.1-70b-instruct", label: "Llama 3.1 70B (Dengeli & Güçlü)", category: "Meta" },
+];
 
 export default function GeminiIntegrationPage() {
     const [config, setConfig] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [provider, setProvider] = useState<string>("GEMINI");
+    const [selectedModel, setSelectedModel] = useState<string>("");
+    const [isCustomModel, setIsCustomModel] = useState(false);
 
     useEffect(() => {
         getGeminiConfig().then(res => {
             if (res.success && res.data) {
                 setConfig(res.data);
                 setProvider(res.data.provider || "GEMINI");
+                const model = res.data.openRouterModel || "qwen/qwen3.6-plus:free";
+                setSelectedModel(model);
+                
+                // Eğer mevcut model önerilenler listesinde yoksa manuel girişi aktif et
+                const isRecommended = RECOMMENDED_MODELS.some(m => m.value === model);
+                setIsCustomModel(!isRecommended);
             }
             setLoading(false);
         });
@@ -31,6 +50,12 @@ export default function GeminiIntegrationPage() {
         e.preventDefault();
         setSaving(true);
         const formData = new FormData(e.currentTarget);
+        
+        // Eğer custom model değilse seçili modeli ekle (Select değeri FormData'ya otomatik gitmeyebilir)
+        if (!isCustomModel) {
+            formData.set("openRouterModel", selectedModel);
+        }
+
         const res = await saveGeminiConfig(formData);
         if (res.success) {
             toast.success("Ayarlar başarıyla kaydedildi.");
@@ -78,39 +103,39 @@ export default function GeminiIntegrationPage() {
                         {/* Provider Selection */}
                         <div className="space-y-4">
                             <Label className="text-sm font-bold">Yapay Zeka Sağlayıcısı</Label>
-                            <RadioGroup 
-                                name="provider" 
-                                value={provider} 
-                                onValueChange={setProvider}
-                                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                            >
-                                <div>
-                                    <RadioGroupItem value="GEMINI" id="gemini" className="peer sr-only" />
-                                    <Label
-                                        htmlFor="gemini"
-                                        className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-indigo-600 peer-data-[state=checked]:bg-indigo-50/50 dark:peer-data-[state=checked]:bg-indigo-900/20 peer-data-[state=checked]:text-indigo-600 cursor-pointer transition-all"
+                                    <RadioGroup 
+                                        name="provider" 
+                                        value={provider} 
+                                        onValueChange={setProvider}
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-4"
                                     >
-                                        <Globe className="mb-3 h-6 w-6" />
-                                        <div className="text-center">
-                                            <div className="font-bold">Google Gemini</div>
-                                            <div className="text-[10px] text-muted-foreground mt-1">Hızlı ve Geniş Ücretsiz Katman</div>
+                                        <div>
+                                            <RadioGroupItem value="GEMINI" id="gemini" className="peer sr-only" />
+                                            <Label
+                                                htmlFor="gemini"
+                                                className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-indigo-600 peer-data-[state=checked]:bg-indigo-50/50 dark:peer-data-[state=checked]:bg-indigo-900/20 peer-data-[state=checked]:text-indigo-600 cursor-pointer transition-all"
+                                            >
+                                                <Globe className="mb-3 h-6 w-6" />
+                                                <div className="text-center">
+                                                    <div className="font-bold">Google Gemini</div>
+                                                    <div className="text-[10px] text-muted-foreground mt-1">Hızlı ve Geniş Ücretsiz Katman</div>
+                                                </div>
+                                            </Label>
                                         </div>
-                                    </Label>
-                                </div>
 
-                                <div>
-                                    <RadioGroupItem value="OPENROUTER" id="openrouter" className="peer sr-only" />
-                                    <Label
-                                        htmlFor="openrouter"
-                                        className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-purple-600 peer-data-[state=checked]:bg-purple-50/50 dark:peer-data-[state=checked]:bg-purple-900/20 peer-data-[state=checked]:text-purple-600 cursor-pointer transition-all"
-                                    >
-                                        <Zap className="mb-3 h-6 w-6" />
-                                        <div className="text-center">
-                                            <div className="font-bold">OpenRouter</div>
-                                            <div className="text-[10px] text-muted-foreground mt-1">Llama 3, Mistral, Qwen vb. Çoklu Model</div>
+                                        <div>
+                                            <RadioGroupItem value="OPENROUTER" id="openrouter" className="peer sr-only" />
+                                            <Label
+                                                htmlFor="openrouter"
+                                                className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-purple-600 peer-data-[state=checked]:bg-purple-50/50 dark:peer-data-[state=checked]:bg-purple-900/20 peer-data-[state=checked]:text-purple-600 cursor-pointer transition-all"
+                                            >
+                                                <Zap className="mb-3 h-6 w-6" />
+                                                <div className="text-center">
+                                                    <div className="font-bold">OpenRouter</div>
+                                                    <div className="text-[10px] text-muted-foreground mt-1">Llama 3, Mistral, Qwen vb. Çoklu Model</div>
+                                                </div>
+                                            </Label>
                                         </div>
-                                    </Label>
-                                </div>
                             </RadioGroup>
                         </div>
 
@@ -153,18 +178,63 @@ export default function GeminiIntegrationPage() {
                                             </a>
                                         </p>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="openRouterModel" className="text-sm font-medium">Model Belirleyin</Label>
-                                        <Input
-                                            id="openRouterModel"
-                                            name="openRouterModel"
-                                            type="text"
-                                            defaultValue={config?.openRouterModel || "qwen/qwen3.6-plus:free"}
-                                            placeholder="örn: qwen/qwen3.6-plus:free"
-                                        />
-                                        <p className="text-[10px] text-gray-500 italic">
-                                            * Ücretsiz modeller için "free" etiketli olanları kullanabilirsiniz.
-                                        </p>
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-medium">Kullanılacak Model</Label>
+                                        
+                                        <Select 
+                                            value={isCustomModel ? "custom" : selectedModel} 
+                                            onValueChange={(val) => {
+                                                if (val === "custom") {
+                                                    setIsCustomModel(true);
+                                                } else {
+                                                    setIsCustomModel(false);
+                                                    setSelectedModel(val);
+                                                }
+                                            }}
+                                        >
+                                            <SelectTrigger className="bg-purple-50/10 border-purple-100 w-full">
+                                                <SelectValue placeholder="Model seçin" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {RECOMMENDED_MODELS.map((model) => (
+                                                    <SelectItem key={model.value} value={model.value}>
+                                                        <div className="flex items-center justify-between w-full gap-4">
+                                                            <span>{model.label}</span>
+                                                            <span className="text-[9px] px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500">{model.category}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                                <SelectItem value="custom" className="text-purple-600 font-semibold">
+                                                    <div className="flex items-center gap-2">
+                                                        <Edit3 className="w-3 h-3" />
+                                                        Özel (Manuel Giriş)
+                                                    </div>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+
+                                        {isCustomModel && (
+                                            <div className="pt-2 animate-in slide-in-from-top-2 duration-200">
+                                                <Input
+                                                    id="openRouterModel"
+                                                    name="openRouterModel"
+                                                    type="text"
+                                                    value={selectedModel}
+                                                    onChange={(e) => setSelectedModel(e.target.value)}
+                                                    placeholder="örn: deepseek/deepseek-chat"
+                                                    className="bg-white dark:bg-gray-800"
+                                                />
+                                                <p className="text-[10px] text-gray-500 mt-1 italic">
+                                                    * OpenRouter model kodunu tam olarak girin.
+                                                </p>
+                                            </div>
+                                        )}
+                                        
+                                        {!isCustomModel && (
+                                            <p className="text-[10px] text-gray-500 italic">
+                                                * Seçili Model: {selectedModel}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             )}
