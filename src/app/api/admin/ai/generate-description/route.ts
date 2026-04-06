@@ -53,21 +53,22 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Sayfadan ürün bilgisi ayıklanamadı." }, { status: 400 });
     }
 
-    const systemPrompt = `Sen profesyonel bir otomotiv editörü ve dijital pazarlama uzmanısın. 
-      KESİN KURAL: Kaynak metinden ASLA art arda 4-5 kelime dahi olsa kopyalama yapma. Cümle yapılarını, kelime seçimlerini ve anlatım sırasını tamamen değiştir.
+    const systemPrompt = `Sen 30 yıllık tecrübeli bir LADA USTASI ve otomotiv içerik yazarı ufuksun. 
+      GÖREVİN: Ürünü teknik bir katalog gibi değil, bu parçayı yıllardır takan bir usta samimiyetiyle ve uzmanlığıyla anlatmak.
 
-      Yazım Stratejisi:
-      1. Paragraf (Heyecan Verici Giriş): Ürünün aracın performansına ve sürücü güvenliğine olan hayati etkisini etkileyici bir dille anlat. "Bu parça sadece bir bileşen değil..." gibi bir yaklaşımla başla.
-      2. Paragraf (Benzersiz Teknik Anlatım): Teknik özellikleri kuru bir liste olarak değil, bir uzmanın tavsiyesi gibi metnin içine ya da modern bir listeye yayarak anlat.
-      3. Paragraf (Satış ve Güven): Müşterinin neden bu ürünü seçmesi gerektiğini (kalite, uyumluluk, uzun ömür) vurgula ve harekete geçirici bir mesajla bitir.
+      KESİN KURALLAR:
+      1. Üslup: "Bu parça aracınızın can damarıdır..." gibi samimi, güven veren ve uzman bir "Usta" dili kullan. Rakip sitelerdeki o resmi ve soğuk cümle yapılarını ASLA kullanma.
+      2. Yasak: Kaynak metindeki hiçbir cümleyi, hatta 3 kelimelik öbeği bile kopyalama. Cümle yapılarını devrik yap, eş anlamlı kelimeler kullan. Metin sonunda kaynak metinden eser kalmasın.
+      3. Hedef: Müşteri okuduğunda "Bunu gerçekten bilen biri yazmış" demeli.
 
-      Biçimlendirme:
-      - Sadece temiz HTML (<p>, <ul>, <li>, <strong>). 
-      - Önemli kısımları (Araba modellerini, kritik avantajları) <strong> içine al.
-      - Başlık kullanma. 
-      - Dil %100 Türkçe ve sadece standart Latin alfabesi.`;
+      Yazım Planı:
+      - 1. Paragraf: Parçanın sürüş keyfine ve konforuna etkisini usta ağzıyla anlat.
+      - 2. Paragraf: Teknik detayları (saat, mesafe, dijital ekran vb.) bir öneri şeklinde metne yedir.
+      - 3. Paragraf: Montajın önemini ve parça kalitesini vurgula.
 
-    const userPrompt = `DİKKAT: Kaynak metindeki cümle kalıplarını asla kullanma. Kendi profesyonel üslubunla SIFIRDAN bir anlatım oluştur.
+      Format: Sadece temiz HTML (<p>, <ul>, <li>, <strong>). Başlık kullanma. Dil %100 Türkçe.`;
+
+    const userPrompt = `USTA, bu parçayı bizim için sıfırdan, kendi cümlelerinle anlatır mısın? Rakip metinden tek bir kelime bile kopyalama.
       
       ÜRÜN ADI: ${productName}
       KAYNAK METİN: ${productDescription}`;
@@ -76,7 +77,6 @@ export async function POST(req: NextRequest) {
 
     // 4. Generate Content based on Provider
     if (config.provider === "OPENROUTER" && config.openRouterApiKey) {
-        // Eski hatalı ID'yi (qwen-3.6) otomatik olarak düzelt (qwen3.6)
         let modelId = config.openRouterModel || "qwen/qwen3.6-plus:free";
         if (modelId === "qwen/qwen-3.6-plus") modelId = "qwen/qwen3.6-plus:free";
 
@@ -85,17 +85,14 @@ export async function POST(req: NextRequest) {
             headers: {
                 "Authorization": `Bearer ${config.openRouterApiKey}`,
                 "Content-Type": "application/json",
-                "HTTP-Referer": "https://ladamarketi.com", // Required by OpenRouter
+                "HTTP-Referer": "https://ladamarketi.com", 
                 "X-Title": "Ladamarketi B2B"
             },
             body: JSON.stringify({
                 model: modelId,
-                temperature: 0.8, // Daha özgün ve yaratıcı sonuçlar için
+                temperature: 0.8,
                 messages: [
-                    { 
-                        role: "system", 
-                        content: systemPrompt 
-                    },
+                    { role: "system", content: systemPrompt },
                     { role: "user", content: userPrompt }
                 ]
             })
@@ -107,14 +104,18 @@ export async function POST(req: NextRequest) {
 
     } else if (config.provider === "GEMINI" && config.apiKey) {
         const genAI = new GoogleGenerativeAI(config.apiKey);
+        // Correctly handle model ID from config for Gemini provider (strip prefix like google/)
+        const modelIdFromConfig = config.openRouterModel?.split("/").pop() || "gemini-1.5-flash";
+        
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash-latest",
+            model: modelIdFromConfig,
             systemInstruction: systemPrompt 
         });
         const result = await model.generateContent(userPrompt);
         const aiResponse = await result.response;
         generatedHtml = aiResponse.text();
-    } else {
+    }
+ else {
         return NextResponse.json({ error: "Seçilen sağlayıcı için API anahtarı eksik." }, { status: 400 });
     }
 
