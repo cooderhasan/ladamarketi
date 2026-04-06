@@ -55,7 +55,10 @@ export async function POST(req: NextRequest) {
 
     // 4. Initialize Gemini AI
     const genAI = new GoogleGenerativeAI(config.apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel(
+        { model: "gemini-1.5-flash" },
+        { apiVersion: "v1" }
+    );
 
     const prompt = `
       Sen uzman bir e-ticaret içerik yazarı ve SEO uzmanısın. 
