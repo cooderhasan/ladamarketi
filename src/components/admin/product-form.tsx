@@ -259,10 +259,14 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
 
             if (result?.success) {
                 toast.success(product ? "Ürün güncellendi" : "Ürün oluşturuldu");
-                setTimeout(() => {
-                    router.push("/admin/products");
+                if (!product) {
+                    setTimeout(() => {
+                        router.push("/admin/products");
+                        router.refresh();
+                    }, 1000);
+                } else {
                     router.refresh();
-                }, 1000);
+                }
             } else {
                 toast.error((result as any)?.error || "Bir hata oluştu");
             }
