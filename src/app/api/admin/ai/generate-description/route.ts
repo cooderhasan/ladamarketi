@@ -72,6 +72,10 @@ export async function POST(req: NextRequest) {
 
     // 4. Generate Content based on Provider
     if (config.provider === "OPENROUTER" && config.openRouterApiKey) {
+        // Eski hatalı ID'yi (qwen-3.6) otomatik olarak düzelt (qwen3.6)
+        let modelId = config.openRouterModel || "qwen/qwen3.6-plus:free";
+        if (modelId === "qwen/qwen-3.6-plus") modelId = "qwen/qwen3.6-plus:free";
+
         const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -81,7 +85,7 @@ export async function POST(req: NextRequest) {
                 "X-Title": "B2B Ecommerce"
             },
             body: JSON.stringify({
-                model: config.openRouterModel || "qwen/qwen3.6-plus:free",
+                model: modelId,
                 messages: [
                     { role: "system", content: "Sen profesyonel bir içerik yazarı ve e-ticaret uzmanısın." },
                     { role: "user", content: prompt }
