@@ -49,12 +49,11 @@ export default function GeminiIntegrationPage() {
     const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setSaving(true);
+        
         const formData = new FormData(e.currentTarget);
         
-        // Eğer custom model değilse seçili modeli ekle (Select değeri FormData'ya otomatik gitmeyebilir)
-        if (!isCustomModel) {
-            formData.set("openRouterModel", selectedModel);
-        }
+        // HATA FIX: openRouterModel degerinin her zaman doğru teknik ID olmasını sagliyoruz
+        formData.set("openRouterModel", selectedModel);
 
         const res = await saveGeminiConfig(formData);
         if (res.success) {
@@ -181,6 +180,9 @@ export default function GeminiIntegrationPage() {
                                     <div className="space-y-3">
                                         <Label className="text-sm font-medium">Kullanılacak Model</Label>
                                         
+                                        {/* GIZLI INPUT: Verinin DB'ye doğru teknik kodla gitmesini garanti eder */}
+                                        <input type="hidden" name="openRouterModel" value={selectedModel} />
+
                                         <Select 
                                             value={isCustomModel ? "custom" : selectedModel} 
                                             onValueChange={(val) => {
@@ -192,7 +194,7 @@ export default function GeminiIntegrationPage() {
                                                 }
                                             }}
                                         >
-                                            <SelectTrigger className="bg-purple-50/10 border-purple-100 w-full">
+                                            <SelectTrigger className="bg-purple-50/10 border-purple-100 w-full focus:ring-purple-600">
                                                 <SelectValue placeholder="Model seçin" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -216,25 +218,22 @@ export default function GeminiIntegrationPage() {
                                         {isCustomModel && (
                                             <div className="pt-2 animate-in slide-in-from-top-2 duration-200">
                                                 <Input
-                                                    id="openRouterModel"
-                                                    name="openRouterModel"
+                                                    id="customModelInput"
                                                     type="text"
                                                     value={selectedModel}
                                                     onChange={(e) => setSelectedModel(e.target.value)}
-                                                    placeholder="örn: deepseek/deepseek-chat"
-                                                    className="bg-white dark:bg-gray-800"
+                                                    placeholder="örn: anthropic/claude-3-5-sonnet"
+                                                    className="bg-white dark:bg-gray-800 border-purple-100 focus:border-purple-600"
                                                 />
                                                 <p className="text-[10px] text-gray-500 mt-1 italic">
-                                                    * OpenRouter model kodunu tam olarak girin.
+                                                    * OpenRouter model kodunu tam olarak girin (örn: anthropic/claude-3-5-sonnet).
                                                 </p>
                                             </div>
                                         )}
                                         
-                                        {!isCustomModel && (
-                                            <p className="text-[10px] text-gray-500 italic">
-                                                * Seçili Model: {selectedModel}
-                                            </p>
-                                        )}
+                                        <p className="text-[10px] text-gray-500 italic">
+                                            * Kaydedilecek Teknik ID: <span className="font-mono text-purple-600">{selectedModel}</span>
+                                        </p>
                                     </div>
                                 </div>
                             )}
