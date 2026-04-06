@@ -19,7 +19,7 @@ const RECOMMENDED_MODELS = [
     { value: "google/gemini-flash-1.5", label: "Gemini 1.5 Flash (Dengeli)", category: "Google" },
     { value: "google/gemini-pro-1.5", label: "Gemini 1.5 Pro (Zeki)", category: "Google" },
     { value: "qwen/qwen-2.5-72b-instruct", label: "Qwen 2.5 72B (Kapsamlı)", category: "Teknik" },
-    { value: "qwen/qwen-plus:free", label: "Qwen Plus (Ücretsiz/Yedek)", category: "Ücretsiz" },
+    { value: "alibaba/qwen-plus", label: "Qwen Plus (Ücretsiz/Yedek)", category: "Ücretsiz" },
     { value: "meta-llama/llama-3.1-70b-instruct", label: "Llama 3.1 70B (Meta)", category: "Meta" },
 ];
 

@@ -21,14 +21,29 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Fetch Page Content
-    const response = await fetch(url, {
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-    });
+    let response;
+    try {
+        response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Referer': 'https://www.google.com/',
+            },
+            next: { revalidate: 0 }
+        });
+    } catch (err: any) {
+        return NextResponse.json({ 
+            success: false, 
+            error: `Kaynak siteye erişilirken ağ hatası oluştu: ${err.message || "Bilinmeyen ağ hatası"}` 
+        }, { status: 500 });
+    }
 
     if (!response.ok) {
-        return NextResponse.json({ error: "Sayfa içeriği çekilemedi." }, { status: 500 });
+        return NextResponse.json({ 
+            success: false, 
+            error: `Kaynak siteye ulaşılamadı (Hata Kodu: ${response.status}). Site botu engellemi olabilir.` 
+        }, { status: 400 });
     }
 
     const html = await response.text();
@@ -77,8 +92,13 @@ export async function POST(req: NextRequest) {
     if (config.provider === "OPENROUTER" && config.openRouterApiKey) {
         let modelId = config.openRouterModel || "openai/gpt-4o-mini";
         
-        // HATA FIX: Veritabanındaki eski ':beta' takısını veya geçersiz ekleri temizle
+        // HATA FIX: Veritabanındaki eski ':beta' takısını veya ekleri temizle
         modelId = modelId.replace(":beta", "").trim();
+
+        // Qwen Fix: 'qwen/' ile başlayanları 'alibaba/'ya çevir
+        if (modelId.startsWith("qwen/")) {
+            modelId = modelId.replace("qwen/", "alibaba/");
+        }
         
         const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
