@@ -13,13 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Brain, Save, ExternalLink, Zap, Globe, Edit3 } from "lucide-react";
 
 const RECOMMENDED_MODELS = [
-    { value: "openai/gpt-4o-mini", label: "GPT-4o Mini (En Hızlı & En Kararlı)", category: "En İyi Seçenek" },
-    { value: "anthropic/claude-3.5-sonnet", label: "Claude 3.5 Sonnet (En Kaliteli Yazım)", category: "Premium" },
-    { value: "anthropic/claude-3.5-sonnet:beta", label: "Claude 3.5 Sonnet (Alternatif Kanal)", category: "Premium" },
-    { value: "google/gemini-flash-1.5", label: "Gemini 1.5 Flash (Google)", category: "Google" },
-    { value: "google/gemini-pro-1.5", label: "Gemini 1.5 Pro (Google)", category: "Google" },
-    { value: "qwen/qwen-2.5-72b-instruct", label: "Qwen 2.5 72B (En İyi Teknik)", category: "Teknik" },
-    { value: "meta-llama/llama-3.1-70b-instruct", label: "Llama 3.1 70B (Çok Güçlü)", category: "Meta" },
+    { value: "openai/gpt-4o-mini", label: "GPT-4o Mini (Hızlı & Ekonomik)", category: "En İyi Seçenek" },
+    { value: "openai/gpt-4o", label: "GPT-4o (Güçlü & Akıllı)", category: "En İyi Seçenek" },
+    { value: "anthropic/claude-3.5-sonnet", label: "Claude 3.5 Sonnet (Üst Düzey Yazım)", category: "Premium" },
+    { value: "google/gemini-flash-1.5", label: "Gemini 1.5 Flash (Dengeli)", category: "Google" },
+    { value: "google/gemini-pro-1.5", label: "Gemini 1.5 Pro (Zeki)", category: "Google" },
+    { value: "qwen/qwen-2.5-72b-instruct", label: "Qwen 2.5 72B (Kapsamlı)", category: "Teknik" },
+    { value: "qwen/qwen-plus:free", label: "Qwen Plus (Ücretsiz/Yedek)", category: "Ücretsiz" },
+    { value: "meta-llama/llama-3.1-70b-instruct", label: "Llama 3.1 70B (Meta)", category: "Meta" },
 ];
 
 export default function GeminiIntegrationPage() {

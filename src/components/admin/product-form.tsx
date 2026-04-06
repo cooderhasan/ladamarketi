@@ -374,12 +374,14 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                                         body: JSON.stringify({ url: formData.referenceUrl }),
                                                     });
                                                     const result = await res.json();
-                                                    if (result.success) {
+                                                    if (result.success && result.data) {
                                                         handleChange("description", result.data);
                                                         if (!formData.name && result.sourceName) {
                                                             handleChange("name", result.sourceName);
                                                         }
                                                         toast.success("Özgün içerik başarıyla oluşturuldu.");
+                                                    } else if (result.success && !result.data) {
+                                                        toast.error("Yapay zeka içerik üretemedi. Lütfen tekrar deneyin.");
                                                     } else {
                                                         toast.error(result.error || "İşlem başarısız.");
                                                     }

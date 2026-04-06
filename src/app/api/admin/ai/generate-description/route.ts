@@ -64,18 +64,21 @@ export async function POST(req: NextRequest) {
          - Sonuç (Güven): "Arabanızın sağlığı bizim işimiz" tonunda bitir.
       4. Teknik Veri: Teknik detayları (Ürün kodu, Barkod vb.) KESİNLİKLE metnin en altına "Teknik Detay Tablosu" gibi şık bir liste (ul/li) olarak koy, paragraf içine yedirme.
 
-      Biçimlendirme: Sadece temiz HTML (<p>, <ul>, <li>, <strong>). Dil %100 Türkçe.`;
+      Biçimlendirme: Sadece temiz HTML (<p>, <ul>, <li>, <strong>). Dil %100 Türkçe. ASLA Çince veya yabancı karakterler kullanma!`;
 
     const userPrompt = `USTA, bu parçayı bizim için SIFIRDAN, bambaşka bir üslupla anlat. Rakip metnin gölgesi bile kalmasın. 
       
       ÜRÜN ADI: ${productName}
-      KAYNAK METİN: ${productDescription}`;
+      KAYNAK METİN: ${productDescription || "Rakip sitede açıklama metni bulunamadı. Lütfen sadece ürün adını ve tecrübeni kullanarak (30 yıllık Lada ustası gibi) araca ne gibi bir fayda sağlayacağını anlatan özgün bir tanıtım yaz."}`;
 
     let generatedHtml = "";
 
     // 4. Generate Content based on Provider
     if (config.provider === "OPENROUTER" && config.openRouterApiKey) {
         let modelId = config.openRouterModel || "openai/gpt-4o-mini";
+        
+        // HATA FIX: Veritabanındaki eski ':beta' takısını veya geçersiz ekleri temizle
+        modelId = modelId.replace(":beta", "").trim();
         
         const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
@@ -96,8 +99,23 @@ export async function POST(req: NextRequest) {
         });
 
         const orData = await orRes.json();
-        if (orData.error) throw new Error(`OpenRouter Error: ${orData.error.message || JSON.stringify(orData.error)}`);
-        generatedHtml = orData.choices[0].message.content;
+        
+        if (orData.error) {
+            throw new Error(`OpenRouter Hatası: ${orData.error.message || JSON.stringify(orData.error)}`);
+        }
+        
+        const choice = orData.choices?.[0];
+        const message = choice?.message;
+
+        if (message?.refusal) {
+            throw new Error(`Yapay Zeka Reddi: ${message.refusal}`);
+        }
+
+        generatedHtml = message?.content || "";
+        
+        if (!generatedHtml) {
+            throw new Error("Yapay zeka herhangi bir içerik üretmedi. Lütfen modeli veya sağlayıcıyı değiştirip tekrar deneyin.");
+        }
 
     } else if (config.provider === "GEMINI" && config.apiKey) {
         const genAI = new GoogleGenerativeAI(config.apiKey);
@@ -122,8 +140,12 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Seçilen sağlayıcı için API anahtarı eksik." }, { status: 400 });
     }
 
-    // Clean markdown code blocks if AI returns them (case-insensitive and handles various tags)
+    // 1. Clean markdown code blocks if AI returns them (case-insensitive)
     generatedHtml = generatedHtml.replace(/```(?:html|HTML|xml|json)?/gi, "").replace(/```/g, "").trim();
+
+    // 2. ABSOLUTE FILTER: Remove any Chinese, Japanese, or Korean characters (CJK) 
+    // This is a safety layer for models like Qwen.
+    generatedHtml = generatedHtml.replace(/[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uff00-\uffef]/g, "").trim();
 
     return NextResponse.json({ 
         success: true, 
