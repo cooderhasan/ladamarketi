@@ -63,9 +63,10 @@ export async function POST(req: NextRequest) {
       Kurallar:
       1. Dil: Türkçe.
       2. Orijinal metni asla kelimesi kelimesine kopyalama, anlamı koruyarak sitemizin profesyonel diline göre yeniden yorumla.
-      3. Çıktıyı sadece temiz HTML formatında ver (<p> paragraf ve <ul><li> liste etiketleri kullan).
-      4. Başlık (h1, h2) ekleme, sadece içerik metnini ver.
-      5. Teknik özellikleri anlaşılır bir liste halinde sun.
+      3. Çıktıyı sadece temiz HTML formatında ver (<p>, <ul>, <li> ve <strong> etiketleri kullan).
+      4. Önemli teknik terimleri, ürün isimlerini, araç modellerini ve kritik avantajları <strong> etiketleri arasına alarak vurgula.
+      5. Başlık (h1, h2) ekleme, sadece içerik metnini ver.
+      6. Teknik özellikleri anlaşılır bir liste halinde sun.
     `;
 
     let generatedHtml = "";
