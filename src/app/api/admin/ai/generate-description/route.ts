@@ -53,22 +53,21 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Sayfadan ürün bilgisi ayıklanamadı." }, { status: 400 });
     }
 
-    const prompt = `
-      Sen uzman bir e-ticaret içerik yazarı ve SEO uzmanısın. 
-      Sana verilen ürün ismini ve ham açıklama metnini kullanarak, otomobil yedek parça sitemiz için tamamen ÖZGÜN, ikna edici ve SEO uyumlu bir ürün açıklaması yaz.
-      
-      Ürün İsmi: ${productName}
-      Orijinal Açıklama: ${productDescription}
+    const systemPrompt = `Sen uzman bir e-ticaret içerik yazarı ve profesyonel bir otomotiv editörüsün. 
+      GÖREVİN: Sana verilen ürün bilgilerini kullanarak, kaynak metinden TEK BİR CÜMLE BİLE KOPYALAMADAN tamamen özgün, ikna edici ve SEO uyumlu ürün açıklamaları yazmaktır. 
 
       Kurallar:
-      1. Dil: Türkçe.
-      2. Orijinal metni asla kopyalama. Daha yaratıcı, akıcı ve etkileyici bir satış dili kullan. Sadece teknik bilgi verme; bu parçanın araç için neden hayati olduğunu ve kullanıcıya sağladığı güveni/konforu vurgula.
+      1. Dil: %100 Türkçe. Metni SIFIRDAN ve KENDİ CÜMLELERİNLE yaz. ASLA Çince karakter veya farklı dillerden terimler kullanma. Sadece standart Latin alfabesi kullan. 
+      2. Asla kopyala-yapıştır yapma. Daha yaratıcı, akıcı ve etkileyici bir satış dili kullan. Sadece teknik bilgi verme; bu parçanın araç için neden hayati olduğunu ve kullanıcıya sağladığı güveni/konforu vurgula.
       3. Metni en az 3 paragraf halinde kurgula: 1. Paragraf (Etkileyici Giriş), 2. Paragraf (Teknik Bilgiler), 3. Paragraf (Güven ve Satın Alma Çağrısı).
       4. Çıktıyı sadece temiz HTML formatında ver (<p>, <ul>, <li> ve <strong> etiketleri kullan).
       5. Önemli teknik terimleri, ürün isimlerini, araç modellerini ve kritik avantajları <strong> etiketleri arasına alarak vurgula.
       6. Başlık (h1, h2) ekleme, sadece içerik metnini ver.
-      7. Teknik özellikleri anlaşılır bir liste halinde sun.
-    `;
+      7. Teknik özellikleri anlaşılır bir liste (ul/li) halinde sun.`;
+
+    const userPrompt = `Aşağıdaki ürün bilgilerini kullanarak yukarıdaki kurallar çerçevesinde SIFIRDAN ÖZGÜN bir metin oluştur:
+      Ürün Adı: ${productName}
+      Kaynak Metin: ${productDescription}`;
 
     let generatedHtml = "";
 
@@ -91,11 +90,9 @@ export async function POST(req: NextRequest) {
                 messages: [
                     { 
                         role: "system", 
-                        content: `Sen uzman bir e-ticaret içerik yazarı ve profesyonel bir otomotiv editörüsün. 
-                        GÖREVİN: Sana verilen ürün bilgilerini kullanarak, kaynak metinden TEK BİR CÜMLE BİLE KOPYALAMADAN tamamen özgün, ikna edici ve SEO uyumlu ürün açıklamaları yazmaktır. 
-                        Kopyala-yapıştır yapman kesinlikle yasaktır; her zaman kendi profesyonel üslubunla ve otomobil parçası uzmanlığınla yeniden kurgula.` 
+                        content: systemPrompt 
                     },
-                    { role: "user", content: prompt }
+                    { role: "user", content: userPrompt }
                 ]
             })
         });
@@ -106,8 +103,11 @@ export async function POST(req: NextRequest) {
 
     } else if (config.provider === "GEMINI" && config.apiKey) {
         const genAI = new GoogleGenerativeAI(config.apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-        const result = await model.generateContent(prompt);
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash-latest",
+            systemInstruction: systemPrompt 
+        });
+        const result = await model.generateContent(userPrompt);
         const aiResponse = await result.response;
         generatedHtml = aiResponse.text();
     } else {
