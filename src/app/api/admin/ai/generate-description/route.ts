@@ -114,8 +114,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Seçilen sağlayıcı için API anahtarı eksik." }, { status: 400 });
     }
 
-    // Clean markdown code blocks if AI returns them
-    generatedHtml = generatedHtml.replace(/```html/g, "").replace(/```/g, "").trim();
+    // Clean markdown code blocks if AI returns them (case-insensitive and handles various tags)
+    generatedHtml = generatedHtml.replace(/```(?:html|HTML|xml|json)?/gi, "").replace(/```/g, "").trim();
 
     return NextResponse.json({ 
         success: true, 
