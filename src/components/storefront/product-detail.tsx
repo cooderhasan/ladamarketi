@@ -657,7 +657,7 @@ export function ProductDetail({
                             <div className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-800 shadow-sm">
                                 {product.description ? (
                                     <div
-                                        className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-[#009AD0] prose-img:rounded-xl prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-li:text-gray-600 dark:prose-li:text-gray-400 prose-strong:text-gray-800 dark:prose-strong:text-gray-200"
+                                        className="prose prose-sm sm:prose-base dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-[#009AD0] prose-img:rounded-xl prose-p:text-gray-600 dark:prose-p:text-gray-400 prose-li:text-gray-600 dark:prose-li:text-gray-400 prose-strong:text-gray-800 dark:prose-strong:text-gray-200 product-description-content"
                                         dangerouslySetInnerHTML={{ __html: product.description }}
                                     />
                                 ) : (
