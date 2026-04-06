@@ -53,22 +53,20 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Sayfadan ürün bilgisi ayıklanamadı." }, { status: 400 });
     }
 
-    const systemPrompt = `Sen 30 yıllık tecrübeli bir LADA USTASI ve otomotiv içerik yazarı ufuksun. 
-      GÖREVİN: Ürünü teknik bir katalog gibi değil, bu parçayı yıllardır takan bir usta samimiyetiyle ve uzmanlığıyla anlatmak.
+    const systemPrompt = `Sen 30 yıllık tecrübeli bir LADA USTASI ve agresif bir satış pazarlama uzmanısın. 
 
-      KESİN KURALLAR:
-      1. Üslup: "Bu parça aracınızın can damarıdır..." gibi samimi, güven veren ve uzman bir "Usta" dili kullan. Rakip sitelerdeki o resmi ve soğuk cümle yapılarını ASLA kullanma.
-      2. Yasak: Kaynak metindeki hiçbir cümleyi, hatta 3 kelimelik öbeği bile kopyalama. Cümle yapılarını devrik yap, eş anlamlı kelimeler kullan. Metin sonunda kaynak metinden eser kalmasın.
-      3. Hedef: Müşteri okuduğunda "Bunu gerçekten bilen biri yazmış" demeli.
+      KESİN VE DEĞİŞMEZ KURALLAR:
+      1. ASLA "Aracın gösterge panelinde..." veya "Kritik bir role sahiptir" gibi kaynak metinde geçen giriş kalıplarını kullanma. Bu cümlelerle başlarsan görev başarısızdır.
+      2. Yıkıcı Yazım: Kaynak metindeki cümle yapılarını tamamen boz. Cümlelerin yarısını DEVRİK (yüklemi ortada) yap. Eş anlamlı kelimeleri zorunlu tut.
+      3. Problem-Çözüm Kurgusu:
+         - Giriş (Korku/İhtiyaç): "Hız göstergeniz bir an dursa başınıza ne işler açılır biliyor musunuz?" veya "Yolda giderken saatiniz mi durdu?" gibi bir problemle başla.
+         - Gelişme (Çözüm): Bu parçanın neden en sağlam çözüm olduğunu, uyumluluğunu (Lada Vega vb.) bir usta ağzıyla anlat.
+         - Sonuç (Güven): "Arabanızın sağlığı bizim işimiz" tonunda bitir.
+      4. Teknik Veri: Teknik detayları (Ürün kodu, Barkod vb.) KESİNLİKLE metnin en altına "Teknik Detay Tablosu" gibi şık bir liste (ul/li) olarak koy, paragraf içine yedirme.
 
-      Yazım Planı:
-      - 1. Paragraf: Parçanın sürüş keyfine ve konforuna etkisini usta ağzıyla anlat.
-      - 2. Paragraf: Teknik detayları (saat, mesafe, dijital ekran vb.) bir öneri şeklinde metne yedir.
-      - 3. Paragraf: Montajın önemini ve parça kalitesini vurgula.
+      Biçimlendirme: Sadece temiz HTML (<p>, <ul>, <li>, <strong>). Dil %100 Türkçe.`;
 
-      Format: Sadece temiz HTML (<p>, <ul>, <li>, <strong>). Başlık kullanma. Dil %100 Türkçe.`;
-
-    const userPrompt = `USTA, bu parçayı bizim için sıfırdan, kendi cümlelerinle anlatır mısın? Rakip metinden tek bir kelime bile kopyalama.
+    const userPrompt = `USTA, bu parçayı bizim için SIFIRDAN, bambaşka bir üslupla anlat. Rakip metnin gölgesi bile kalmasın. 
       
       ÜRÜN ADI: ${productName}
       KAYNAK METİN: ${productDescription}`;
@@ -77,9 +75,8 @@ export async function POST(req: NextRequest) {
 
     // 4. Generate Content based on Provider
     if (config.provider === "OPENROUTER" && config.openRouterApiKey) {
-        let modelId = config.openRouterModel || "qwen/qwen3.6-plus:free";
-        if (modelId === "qwen/qwen-3.6-plus") modelId = "qwen/qwen3.6-plus:free";
-
+        let modelId = config.openRouterModel || "openai/gpt-4o-mini";
+        
         const orRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -90,7 +87,7 @@ export async function POST(req: NextRequest) {
             },
             body: JSON.stringify({
                 model: modelId,
-                temperature: 0.8,
+                temperature: 1.0, // Maksimum yaratıcılık
                 messages: [
                     { role: "system", content: systemPrompt },
                     { role: "user", content: userPrompt }
@@ -104,14 +101,20 @@ export async function POST(req: NextRequest) {
 
     } else if (config.provider === "GEMINI" && config.apiKey) {
         const genAI = new GoogleGenerativeAI(config.apiKey);
-        // Correctly handle model ID from config for Gemini provider (strip prefix like google/)
-        const modelIdFromConfig = config.openRouterModel?.split("/").pop() || "gemini-1.5-flash";
+        // Clean model ID for native SDK
+        const modelIdFromConfig = config.openRouterModel?.split("/").pop()?.replace(":free", "") || "gemini-1.5-flash";
         
         const model = genAI.getGenerativeModel({ 
             model: modelIdFromConfig,
             systemInstruction: systemPrompt 
         });
-        const result = await model.generateContent(userPrompt);
+
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+            generationConfig: {
+                temperature: 1.0, // Maksimum yaratıcılık
+            }
+        });
         const aiResponse = await result.response;
         generatedHtml = aiResponse.text();
     }
