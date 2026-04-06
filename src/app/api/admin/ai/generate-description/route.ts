@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
                 "X-Title": "B2B Ecommerce"
             },
             body: JSON.stringify({
-                model: config.openRouterModel || "qwen/qwen-3.6-plus",
+                model: config.openRouterModel || "qwen/qwen3.6-plus:free",
                 messages: [
                     { role: "system", content: "Sen profesyonel bir içerik yazarı ve e-ticaret uzmanısın." },
                     { role: "user", content: prompt }

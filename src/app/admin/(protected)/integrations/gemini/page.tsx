@@ -159,8 +159,8 @@ export default function GeminiIntegrationPage() {
                                             id="openRouterModel"
                                             name="openRouterModel"
                                             type="text"
-                                            defaultValue={config?.openRouterModel || "qwen/qwen-3.6-plus"}
-                                            placeholder="örn: meta-llama/llama-3-8b-instruct"
+                                            defaultValue={config?.openRouterModel || "qwen/qwen3.6-plus:free"}
+                                            placeholder="örn: qwen/qwen3.6-plus:free"
                                         />
                                         <p className="text-[10px] text-gray-500 italic">
                                             * Ücretsiz modeller için "free" etiketli olanları kullanabilirsiniz.

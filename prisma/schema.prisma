@@ -707,7 +707,7 @@ model GeminiConfig {
   provider        String   @default("GEMINI") // "GEMINI" veya "OPENROUTER"
   apiKey          String?
   openRouterApiKey String?
-  openRouterModel  String   @default("qwen/qwen-3.6-plus") // Varsayılan model
+  openRouterModel  String   @default("qwen/qwen3.6-plus:free") // Varsayılan model (ücretsiz)
   isActive        Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
