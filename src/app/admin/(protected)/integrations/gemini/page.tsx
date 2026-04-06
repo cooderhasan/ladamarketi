@@ -15,7 +15,7 @@ import { Brain, Save, ExternalLink, Zap, Globe, Edit3 } from "lucide-react";
 const RECOMMENDED_MODELS = [
     { value: "qwen/qwen3.6-plus:free", label: "Qwen 3.6 Plus (Ücretsiz - En İyi Teknik)", category: "Ücretsiz" },
     { value: "openai/gpt-4o-mini", label: "GPT-4o Mini (Hızlı & Çok Ucuz - Tavsiye Edilen)", category: "Ekonomik" },
-    { value: "anthropic/claude-3-5-sonnet", label: "Claude 3.5 Sonnet (En Kaliteli Yazım - Ücretli)", category: "Premium" },
+    { value: "anthropic/claude-3.5-sonnet", label: "Claude 3.5 Sonnet (En Kaliteli Yazım - Ücretli)", category: "Premium" },
     { value: "google/gemini-flash-1.5-8b", label: "Gemini 1.5 Flash (Google - Çok Hızlı)", category: "Google" },
     { value: "google/gemini-pro-1.5", label: "Gemini 1.5 Pro (Google - En Zeki)", category: "Google" },
     { value: "qwen/qwen-2.5-72b-instruct", label: "Qwen 2.5 72B (Hızlı & Teknik - Ücretli)", category: "Teknik" },
