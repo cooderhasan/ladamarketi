@@ -53,21 +53,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Sayfadan ürün bilgisi ayıklanamadı." }, { status: 400 });
     }
 
-    const systemPrompt = `Sen uzman bir e-ticaret içerik yazarı ve profesyonel bir otomotiv editörüsün. 
-      GÖREVİN: Sana verilen ürün bilgilerini kullanarak, kaynak metinden TEK BİR CÜMLE BİLE KOPYALAMADAN tamamen özgün, ikna edici ve SEO uyumlu ürün açıklamaları yazmaktır. 
+    const systemPrompt = `Sen profesyonel bir otomotiv editörü ve dijital pazarlama uzmanısın. 
+      KESİN KURAL: Kaynak metinden ASLA art arda 4-5 kelime dahi olsa kopyalama yapma. Cümle yapılarını, kelime seçimlerini ve anlatım sırasını tamamen değiştir.
 
-      Kurallar:
-      1. Dil: %100 Türkçe. Metni SIFIRDAN ve KENDİ CÜMLELERİNLE yaz. ASLA Çince karakter veya farklı dillerden terimler kullanma. Sadece standart Latin alfabesi kullan. 
-      2. Asla kopyala-yapıştır yapma. Daha yaratıcı, akıcı ve etkileyici bir satış dili kullan. Sadece teknik bilgi verme; bu parçanın araç için neden hayati olduğunu ve kullanıcıya sağladığı güveni/konforu vurgula.
-      3. Metni en az 3 paragraf halinde kurgula: 1. Paragraf (Etkileyici Giriş), 2. Paragraf (Teknik Bilgiler), 3. Paragraf (Güven ve Satın Alma Çağrısı).
-      4. Çıktıyı sadece temiz HTML formatında ver (<p>, <ul>, <li> ve <strong> etiketleri kullan).
-      5. Önemli teknik terimleri, ürün isimlerini, araç modellerini ve kritik avantajları <strong> etiketleri arasına alarak vurgula.
-      6. Başlık (h1, h2) ekleme, sadece içerik metnini ver.
-      7. Teknik özellikleri anlaşılır bir liste (ul/li) halinde sun.`;
+      Yazım Stratejisi:
+      1. Paragraf (Heyecan Verici Giriş): Ürünün aracın performansına ve sürücü güvenliğine olan hayati etkisini etkileyici bir dille anlat. "Bu parça sadece bir bileşen değil..." gibi bir yaklaşımla başla.
+      2. Paragraf (Benzersiz Teknik Anlatım): Teknik özellikleri kuru bir liste olarak değil, bir uzmanın tavsiyesi gibi metnin içine ya da modern bir listeye yayarak anlat.
+      3. Paragraf (Satış ve Güven): Müşterinin neden bu ürünü seçmesi gerektiğini (kalite, uyumluluk, uzun ömür) vurgula ve harekete geçirici bir mesajla bitir.
 
-    const userPrompt = `Aşağıdaki ürün bilgilerini kullanarak yukarıdaki kurallar çerçevesinde SIFIRDAN ÖZGÜN bir metin oluştur:
-      Ürün Adı: ${productName}
-      Kaynak Metin: ${productDescription}`;
+      Biçimlendirme:
+      - Sadece temiz HTML (<p>, <ul>, <li>, <strong>). 
+      - Önemli kısımları (Araba modellerini, kritik avantajları) <strong> içine al.
+      - Başlık kullanma. 
+      - Dil %100 Türkçe ve sadece standart Latin alfabesi.`;
+
+    const userPrompt = `DİKKAT: Kaynak metindeki cümle kalıplarını asla kullanma. Kendi profesyonel üslubunla SIFIRDAN bir anlatım oluştur.
+      
+      ÜRÜN ADI: ${productName}
+      KAYNAK METİN: ${productDescription}`;
 
     let generatedHtml = "";
 
@@ -87,6 +90,7 @@ export async function POST(req: NextRequest) {
             },
             body: JSON.stringify({
                 model: modelId,
+                temperature: 0.8, // Daha özgün ve yaratıcı sonuçlar için
                 messages: [
                     { 
                         role: "system", 
