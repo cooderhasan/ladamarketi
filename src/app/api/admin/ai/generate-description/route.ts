@@ -89,7 +89,12 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify({
                 model: modelId,
                 messages: [
-                    { role: "system", content: "Sen profesyonel bir içerik yazarı ve e-ticaret uzmanısın." },
+                    { 
+                        role: "system", 
+                        content: `Sen uzman bir e-ticaret içerik yazarı ve profesyonel bir otomotiv editörüsün. 
+                        GÖREVİN: Sana verilen ürün bilgilerini kullanarak, kaynak metinden TEK BİR CÜMLE BİLE KOPYALAMADAN tamamen özgün, ikna edici ve SEO uyumlu ürün açıklamaları yazmaktır. 
+                        Kopyala-yapıştır yapman kesinlikle yasaktır; her zaman kendi profesyonel üslubunla ve otomobil parçası uzmanlığınla yeniden kurgula.` 
+                    },
                     { role: "user", content: prompt }
                 ]
             })
