@@ -62,11 +62,12 @@ export async function POST(req: NextRequest) {
 
       Kurallar:
       1. Dil: Türkçe.
-      2. Orijinal metni asla kelimesi kelimesine kopyalama, anlamı koruyarak sitemizin profesyonel diline göre yeniden yorumla.
-      3. Çıktıyı sadece temiz HTML formatında ver (<p>, <ul>, <li> ve <strong> etiketleri kullan).
-      4. Önemli teknik terimleri, ürün isimlerini, araç modellerini ve kritik avantajları <strong> etiketleri arasına alarak vurgula.
-      5. Başlık (h1, h2) ekleme, sadece içerik metnini ver.
-      6. Teknik özellikleri anlaşılır bir liste halinde sun.
+      2. Orijinal metni asla kopyalama. Daha yaratıcı, akıcı ve etkileyici bir satış dili kullan. Sadece teknik bilgi verme; bu parçanın araç için neden hayati olduğunu ve kullanıcıya sağladığı güveni/konforu vurgula.
+      3. Metni en az 3 paragraf halinde kurgula: 1. Paragraf (Etkileyici Giriş), 2. Paragraf (Teknik Bilgiler), 3. Paragraf (Güven ve Satın Alma Çağrısı).
+      4. Çıktıyı sadece temiz HTML formatında ver (<p>, <ul>, <li> ve <strong> etiketleri kullan).
+      5. Önemli teknik terimleri, ürün isimlerini, araç modellerini ve kritik avantajları <strong> etiketleri arasına alarak vurgula.
+      6. Başlık (h1, h2) ekleme, sadece içerik metnini ver.
+      7. Teknik özellikleri anlaşılır bir liste halinde sun.
     `;
 
     let generatedHtml = "";
