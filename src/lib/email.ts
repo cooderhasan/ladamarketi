@@ -91,6 +91,7 @@ export async function sendAdminNewOrderEmail(props: SendAdminNewOrderProps) {
             subject: `Yeni Sipariş: #${props.orderNumber} - ${props.companyName}`,
             react: AdminNewOrderEmail({
                 orderNumber: props.orderNumber,
+                orderId: props.orderId,
                 customerName: props.customerName,
                 companyName: props.companyName,
                 totalAmount: props.totalAmount,

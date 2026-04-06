@@ -18,6 +18,7 @@ import * as React from "react";
 
 interface AdminNewOrderEmailProps {
     orderNumber: string;
+    orderId: string;
     customerName: string;
     companyName: string;
     totalAmount: number;
@@ -25,6 +26,7 @@ interface AdminNewOrderEmailProps {
 
 export const AdminNewOrderEmail = ({
     orderNumber,
+    orderId,
     customerName,
     companyName,
     totalAmount,
@@ -62,7 +64,7 @@ export const AdminNewOrderEmail = ({
 
                         <Section className="text-center mt-8">
                             <Link
-                                href={`https://bagajlastigi.com/admin/orders/${orderNumber}`} // Adjust domain if dynamic needed
+                                href={`https://www.ladamarketi.com/admin/orders/${orderId}`}
                                 className="bg-[#000000] rounded text-white text-[12px] font-semibold no-underline text-center px-5 py-3"
                             >
                                 Siparişi Görüntüle

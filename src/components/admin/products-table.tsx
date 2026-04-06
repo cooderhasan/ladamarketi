@@ -27,7 +27,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash, Star, Sparkles, TrendingUp, Search, Upload, Download } from "lucide-react";
+import { Edit, MoreHorizontal, Trash, Star, Sparkles, TrendingUp, Search, Upload, Download, ExternalLink } from "lucide-react";
 import { formatPrice } from "@/lib/helpers";
 import { deleteProduct, toggleProductStatus } from "@/app/admin/(protected)/products/actions";
 import { toast } from "sonner";
@@ -298,7 +298,14 @@ export function ProductsTable({ products: initialProducts, brands, pagination }:
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <div>
-                                                    <p className="font-medium">{product.name}</p>
+                                                    <Link 
+                                                        href={`/products/${product.slug}`} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="font-medium hover:text-blue-600 transition-colors"
+                                                    >
+                                                        {product.name}
+                                                    </Link>
                                                     <div className="flex gap-1 mt-1">
                                                         {product.isFeatured && (
                                                             <Star className="h-3 w-3 text-yellow-500" />
@@ -365,6 +372,16 @@ export function ProductsTable({ products: initialProducts, brands, pagination }:
                                                         <Link href={`/admin/products/${product.id}/edit`}>
                                                             <Edit className="h-4 w-4 mr-2" />
                                                             Düzenle
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link 
+                                                            href={`/products/${product.slug}`} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            <ExternalLink className="h-4 w-4 mr-2" />
+                                                            Görüntüle
                                                         </Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
