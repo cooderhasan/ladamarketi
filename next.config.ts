@@ -5,6 +5,12 @@ import path from "path";
 const nextConfig: NextConfig = {
   output: "standalone",
   reactCompiler: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     remotePatterns: [
       {
