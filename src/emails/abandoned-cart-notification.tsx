@@ -58,32 +58,38 @@ export const AbandonedCartNotificationEmail = ({
                         </Text>
 
                         <Section className="mt-[32px] mb-[32px] bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            {items.map((item, index) => (
-                                <Section key={index} className="border-b border-gray-200 pb-4 mb-4">
-                                    <table width="100%" cellPadding="0" cellSpacing="0" border={0}>
-                                        <tr>
-                                            <td width="80" align="left" valign="top">
+                            {items && items.length > 0 ? (
+                                items.map((item, index) => (
+                                    <Row key={index} className="border-b border-gray-200 pb-4 mb-4 last:border-b-0 last:pb-0 last:mb-0">
+                                        <Column style={{ width: "80px" }}>
+                                            {item.imageUrl ? (
                                                 <Img 
-                                                    src={item.imageUrl || "https://placehold.co/80x80?text=Urun"}
+                                                    src={item.imageUrl}
                                                     width="64"
                                                     height="64"
-                                                    alt={item.productName}
-                                                    className="rounded-md object-cover border border-gray-200"
+                                                    alt={item.productName || "Ürün"}
+                                                    style={{ borderRadius: "8px", objectFit: "cover", display: "block" }}
                                                 />
-                                            </td>
-                                            <td align="left" valign="top" style={{ paddingLeft: "12px" }}>
-                                                <Text className="m-0 text-[14px] font-semibold text-gray-800">{item.productName}</Text>
-                                                <Text className="m-0 text-[12px] text-gray-500 mt-1">Adet: {item.quantity}</Text>
-                                            </td>
-                                            <td align="right" valign="top">
-                                                <Text className="m-0 text-[14px] font-semibold text-gray-800">
-                                                    {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(item.lineTotal)}
-                                                </Text>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </Section>
-                            ))}
+                                            ) : (
+                                                <div style={{ width: "64px", height: "64px", backgroundColor: "#f3f4f6", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "#9ca3af" }}>
+                                                    Ürün
+                                                </div>
+                                            )}
+                                        </Column>
+                                        <Column style={{ paddingLeft: "12px", verticalAlign: "top" }}>
+                                            <Text className="m-0 text-[14px] font-semibold text-gray-800">{item.productName}</Text>
+                                            <Text className="m-0 text-[12px] text-gray-500 mt-1">Adet: {item.quantity}</Text>
+                                        </Column>
+                                        <Column align="right" style={{ verticalAlign: "top" }}>
+                                            <Text className="m-0 text-[14px] font-semibold text-gray-800">
+                                                {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(item.lineTotal || 0)}
+                                            </Text>
+                                        </Column>
+                                    </Row>
+                                ))
+                            ) : (
+                                <Text className="text-gray-500 text-center py-4">Ürün bilgileri yüklenemedi.</Text>
+                            )}
                         </Section>
 
                         <Section>
