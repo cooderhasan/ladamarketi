@@ -60,7 +60,7 @@ export const AbandonedCartNotificationEmail = ({
                         <Section className="mt-[32px] mb-[32px] bg-gray-50 p-4 rounded-xl border border-gray-100">
                             {items && items.length > 0 ? (
                                 items.map((item, index) => (
-                                    <Row key={index} className="border-b border-gray-200 pb-4 mb-4 last:border-b-0 last:pb-0 last:mb-0">
+                                    <Row key={index} className="border-b border-gray-200 pb-4 mb-4">
                                         <Column style={{ width: "80px" }}>
                                             {item.imageUrl ? (
                                                 <Img 
@@ -107,7 +107,7 @@ export const AbandonedCartNotificationEmail = ({
 
                         <Section className="text-center mt-[32px] mb-[32px]">
                             <Button
-                                className="bg-blue-600 rounded-xl text-white text-[15px] font-semibold no-underline text-center px-6 py-4 block hover:bg-blue-700 transition-colors shadow-sm"
+                                className="bg-blue-600 rounded-xl text-white text-[15px] font-semibold no-underline text-center px-6 py-4 block transition-colors shadow-sm"
                                 href={continueShoppingUrl}
                             >
                                 Sepetime Git ve Alışverişi Tamamla
