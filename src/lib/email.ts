@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { OrderConfirmationEmail } from '@/emails/order-confirmation';
 import { AdminNewOrderEmail } from '@/emails/admin-new-order';
 import { ShippingNotificationEmail } from '@/emails/shipping-notification';
+import { AbandonedCartNotificationEmail } from '@/emails/abandoned-cart-notification';
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789");
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "ladamarketi@gmail.com";
@@ -147,6 +148,51 @@ export async function sendShippingNotificationEmail(props: SendShippingNotificat
         return { success: true, data };
     } catch (error) {
         console.error('Shipping notification email sending failed:', error);
+        return { success: false, error };
+    }
+}
+
+interface SendAbandonedCartNotificationProps {
+    to: string;
+    customerName: string;
+    items: {
+        productName: string;
+        quantity: number;
+        unitPrice: number;
+        lineTotal: number;
+        imageUrl?: string;
+    }[];
+    totalAmount: number;
+    continueShoppingUrl: string;
+}
+
+export async function sendAbandonedCartEmail(props: SendAbandonedCartNotificationProps) {
+    if (!process.env.RESEND_API_KEY) {
+        console.warn('RESEND_API_KEY is not set. Email sending skipped.');
+        return { success: false, error: 'API key missing' };
+    }
+
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'Lada Marketi <satis@ladamarketi.com>',
+            to: [props.to],
+            subject: 'Sepetinizde Ürünler Sizi Bekliyor!',
+            react: AbandonedCartNotificationEmail({
+                customerName: props.customerName,
+                items: props.items,
+                totalAmount: props.totalAmount,
+                continueShoppingUrl: props.continueShoppingUrl,
+            }),
+        });
+
+        if (error) {
+            console.error('Abandoned cart email sending error:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('Abandoned cart email sending failed:', error);
         return { success: false, error };
     }
 }

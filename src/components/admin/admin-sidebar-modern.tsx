@@ -65,6 +65,7 @@ const menuGroups: MenuGroup[] = [
         title: "Satış & Müşteri",
         items: [
             { title: "Siparişler", href: "/admin/orders", icon: ShoppingCart },
+            { title: "Sepette Bekleyenler", href: "/admin/reports/abandoned-carts", icon: ShoppingCart },
             { title: "Müşteriler", href: "/admin/customers", icon: Users },
             { title: "Havale Bildirimleri", href: "/admin/bank-transfers", icon: FileText },
             { title: "İade Talepleri", href: "/admin/returns", icon: RefreshCcw },
