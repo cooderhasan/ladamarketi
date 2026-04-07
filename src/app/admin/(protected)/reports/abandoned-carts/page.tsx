@@ -11,6 +11,13 @@ import {
     TableHeader, 
     TableRow 
 } from "@/components/ui/table";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -20,7 +27,7 @@ import {
     CardHeader, 
     CardTitle 
 } from "@/components/ui/card";
-import { Mail, ShoppingCart, Loader2, AlertCircle } from "lucide-react";
+import { Mail, ShoppingCart, Loader2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { getAbandonedCartsAction, sendCartReminderAction } from "./actions";
 
@@ -130,7 +137,50 @@ export default function AbandonedCartsPage() {
                                                     {phone && <div className="text-xs text-gray-500">{phone}</div>}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    <Badge variant="secondary">{totalItems} Ürün</Badge>
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="outline" size="sm" className="gap-2 h-8">
+                                                                <Eye className="h-4 w-4 text-gray-500" />
+                                                                <Badge variant="secondary">{totalItems} Ürün</Badge>
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="max-w-2xl">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Sepet İçeriği - {customerName}</DialogTitle>
+                                                            </DialogHeader>
+                                                            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                                                                {cart.items.map((item: any) => (
+                                                                    <div key={item.id} className="flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0">
+                                                                        {item.product.images?.[0] ? (
+                                                                            <img 
+                                                                                src={item.product.images[0]} 
+                                                                                alt={item.product.name} 
+                                                                                className="w-16 h-16 object-cover rounded-md border"
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="w-16 h-16 bg-gray-100 rounded-md border flex items-center justify-center text-xs text-gray-400">Görsel Yok</div>
+                                                                        )}
+                                                                        <div className="flex-1">
+                                                                            <h4 className="font-semibold text-sm">{item.product.name}</h4>
+                                                                            {item.variant && <p className="text-xs text-gray-500">{item.variant.size} - {item.variant.color}</p>}
+                                                                        </div>
+                                                                        <div className="text-right">
+                                                                            <p className="font-medium text-sm">
+                                                                                {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Number(item.product.salePrice || item.product.listPrice))}
+                                                                            </p>
+                                                                            <p className="text-xs text-gray-500">Adet: {item.quantity}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                            <div className="flex justify-between items-center pt-4 border-t">
+                                                                <span className="font-bold">Toplam Tutar:</span>
+                                                                <span className="font-bold text-lg text-blue-600">
+                                                                    {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(totalAmount)}
+                                                                </span>
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 </TableCell>
                                                 <TableCell className="text-right font-semibold text-blue-600">
                                                     {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(totalAmount)}

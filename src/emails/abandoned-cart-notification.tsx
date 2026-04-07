@@ -59,26 +59,30 @@ export const AbandonedCartNotificationEmail = ({
 
                         <Section className="mt-[32px] mb-[32px] bg-gray-50 p-4 rounded-xl border border-gray-100">
                             {items.map((item, index) => (
-                                <Row key={index} className="border-b border-gray-200 pb-4 mb-4 last:border-b-0 last:pb-0 last:mb-0">
-                                    <Column className="w-20 pl-2">
-                                        <Img 
-                                            src={item.imageUrl || "https://placehold.co/80x80?text=Urun"}
-                                            width="64"
-                                            height="64"
-                                            alt={item.productName}
-                                            className="rounded-md object-cover border border-gray-200"
-                                        />
-                                    </Column>
-                                    <Column className="pl-4">
-                                        <Text className="m-0 text-sm font-semibold text-gray-800">{item.productName}</Text>
-                                        <Text className="m-0 text-xs text-gray-500 mt-1">Adet: {item.quantity}</Text>
-                                    </Column>
-                                    <Column align="right" className="pr-2">
-                                        <Text className="m-0 text-sm font-semibold text-gray-800">
-                                            {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(item.lineTotal)}
-                                        </Text>
-                                    </Column>
-                                </Row>
+                                <Section key={index} className="border-b border-gray-200 pb-4 mb-4">
+                                    <table width="100%" cellPadding="0" cellSpacing="0" border={0}>
+                                        <tr>
+                                            <td width="80" align="left" valign="top">
+                                                <Img 
+                                                    src={item.imageUrl || "https://placehold.co/80x80?text=Urun"}
+                                                    width="64"
+                                                    height="64"
+                                                    alt={item.productName}
+                                                    className="rounded-md object-cover border border-gray-200"
+                                                />
+                                            </td>
+                                            <td align="left" valign="top" style={{ paddingLeft: "12px" }}>
+                                                <Text className="m-0 text-[14px] font-semibold text-gray-800">{item.productName}</Text>
+                                                <Text className="m-0 text-[12px] text-gray-500 mt-1">Adet: {item.quantity}</Text>
+                                            </td>
+                                            <td align="right" valign="top">
+                                                <Text className="m-0 text-[14px] font-semibold text-gray-800">
+                                                    {new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(item.lineTotal)}
+                                                </Text>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </Section>
                             ))}
                         </Section>
 
