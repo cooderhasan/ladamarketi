@@ -67,6 +67,7 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                     <TabsTrigger value="content" className="px-4 py-2">Sayfa İçerikleri</TabsTrigger>
                     <TabsTrigger value="payment" className="px-4 py-2">Ödeme Bilgileri</TabsTrigger>
                     <TabsTrigger value="social" className="px-4 py-2">Sosyal Medya</TabsTrigger>
+                    <TabsTrigger value="scripts" className="px-4 py-2">Script & Analitik</TabsTrigger>
                     <TabsTrigger value="cargo" className="px-4 py-2">Kargo & Teslimat</TabsTrigger>
                     <TabsTrigger value="xml" className="px-4 py-2">Entegrasyonlar (XML)</TabsTrigger>
                 </TabsList>
@@ -427,6 +428,53 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                                             placeholder="https://linkedin.com/in/..."
                                         />
                                     </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="scripts" className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Google Analytics & Özel Scriptler</CardTitle>
+                                <CardDescription>
+                                    Google Analytics, Meta Pixel vb. izleme kodlarını buraya ekleyebilirsiniz.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="googleAnalyticsId">Google Analytics ID (G-XXXXXXX)</Label>
+                                    <Input
+                                        id="googleAnalyticsId"
+                                        value={settings.googleAnalyticsId || ""}
+                                        onChange={(e) => updateField("googleAnalyticsId", e.target.value)}
+                                        placeholder="G-1234567890"
+                                        className="font-mono text-sm max-w-sm"
+                                    />
+                                    <p className="text-xs text-gray-500">GA4 ölçüm kimliği (Measurement ID). Örn: G-N23XYZ.. Sadece ID kısmını yazın.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="metaPixelId">Meta (Facebook) Pixel ID</Label>
+                                    <Input
+                                        id="metaPixelId"
+                                        value={settings.metaPixelId || ""}
+                                        onChange={(e) => updateField("metaPixelId", e.target.value)}
+                                        placeholder="123456789012345"
+                                        className="font-mono text-sm max-w-sm"
+                                    />
+                                    <p className="text-xs text-gray-500">Facebook Business Manager'dan aldığınız sadece rakamlardan oluşan Pixel ID.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="customBodyScripts">Body Script Alanı (&lt;body&gt; sonuna eklenir)</Label>
+                                    <Textarea
+                                        id="customBodyScripts"
+                                        value={settings.customBodyScripts || ""}
+                                        onChange={(e) => updateField("customBodyScripts", e.target.value)}
+                                        placeholder="<!-- Body sonuna eklenecek kodlar -->"
+                                        rows={4}
+                                        className="font-mono text-sm"
+                                    />
+                                    <p className="text-xs text-gray-500">Facebook Pixel &lt;noscript&gt; etiketi veya sayfa sonunda çalışması gereken scriptler için kullanılır.</p>
                                 </div>
                             </CardContent>
                         </Card>

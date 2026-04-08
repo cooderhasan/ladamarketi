@@ -44,6 +44,10 @@ export default async function SettingsPage() {
         bankAccountName: "",
         bankIban1: "",
         bankIban2: "",
+        // Analytics & Tracking
+        googleAnalyticsId: "",
+        metaPixelId: "",
+        customBodyScripts: "",
     };
 
     const settings = { ...defaults, ...((generalSettings?.value as Record<string, string>) || {}) };
