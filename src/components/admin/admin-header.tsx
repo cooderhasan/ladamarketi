@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2, Menu } from "lucide-react";
+import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2, Menu, Landmark } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart-store";
 import type { UserRole, UserStatus } from "@prisma/client";
@@ -41,6 +41,7 @@ const notificationIcons: Record<string, React.ReactNode> = {
     user: <Users className="h-4 w-4 text-purple-600" />,
     stock: <Package className="h-4 w-4 text-orange-600" />,
     order: <ShoppingCart className="h-4 w-4 text-green-600" />,
+    "bank-transfer": <Landmark className="h-4 w-4 text-amber-600" />,
 };
 
 export function AdminHeader({ user }: AdminHeaderProps) {

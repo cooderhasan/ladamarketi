@@ -40,6 +40,11 @@ export async function GET() {
             }
         });
 
+        // Bekleyen havale bildirimleri
+        const pendingTransfers = await prisma.bankTransferNotification.count({
+            where: { status: "PENDING" }
+        });
+
         const notifications = [];
 
         if (pendingQuotes > 0) {
@@ -50,6 +55,17 @@ export async function GET() {
                 link: "/admin/quotes",
                 type: "quote",
                 count: pendingQuotes
+            });
+        }
+
+        if (pendingTransfers > 0) {
+            notifications.push({
+                id: "bank-transfers",
+                title: "Havale Bildirimi",
+                description: `${pendingTransfers} adet yeni havale bildirimi var`,
+                link: "/admin/bank-transfers",
+                type: "bank-transfer",
+                count: pendingTransfers
             });
         }
 
@@ -86,7 +102,7 @@ export async function GET() {
             });
         }
 
-        const totalCount = pendingQuotes + pendingDealers + lowStock + newOrders;
+        const totalCount = pendingQuotes + pendingDealers + lowStock + newOrders + pendingTransfers;
 
         return NextResponse.json({
             notifications,
