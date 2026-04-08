@@ -74,7 +74,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             id: { not: product.id },
         },
         include: { category: true, brand: true },
-        take: 4,
+        take: 6,
     });
 
     const reviews = await getProductReviews(product.id);

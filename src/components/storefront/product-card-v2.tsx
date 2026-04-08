@@ -129,7 +129,7 @@ export function ProductCardV2({
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col relative group/card">
 
                 {/* Image Section - Cleaner Aspect Ratio */}
-                <div className="relative aspect-square bg-white p-6 flex items-center justify-center">
+                <div className="relative aspect-square bg-white p-4 flex items-center justify-center">
                     {/* Discount Badge (Dealer or Sale) */}
                     {(isDealer && discountRate > 0 || hasSalePrice) && (
                         <div className="absolute top-3 left-3 z-10 bg-[#E31E24] text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
@@ -155,7 +155,7 @@ export function ProductCardV2({
                             alt={product.name}
                             fill
                             className={cn(
-                                "object-contain p-4 transition-transform duration-500 group-hover:scale-110",
+                                "object-contain p-3 transition-transform duration-500 group-hover:scale-110",
                                 product.stock === 0 && "opacity-50 grayscale"
                             )}
                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
@@ -168,7 +168,7 @@ export function ProductCardV2({
                 </div>
 
                 {/* Content Section */}
-                <div className="p-5 flex-1 flex flex-col bg-gray-50/50 dark:bg-gray-800/50">
+                <div className="p-4 flex-1 flex flex-col bg-gray-50/50 dark:bg-gray-800/50">
                     {/* Brand */}
                     {product.brand && (
                         <p className="text-[#009AD0] font-bold text-xs uppercase tracking-wider mb-1">

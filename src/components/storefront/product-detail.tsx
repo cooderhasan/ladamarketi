@@ -753,7 +753,7 @@ export function ProductDetail({
                             </Link>
                         </div>
 
-                        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                        <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
                             {relatedProducts.map((p) => (
                                 <ProductCardV2
                                     key={p.id}
