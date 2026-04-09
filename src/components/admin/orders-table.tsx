@@ -701,6 +701,65 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                 </div>
                             </div>
 
+                            {/* Kredi Kartı İşlemleri */}
+                            {selectedOrder.payment?.method === "CREDIT_CARD" && selectedOrder.payment?.providerData && (
+                                <div className="border border-purple-100 dark:border-purple-800 rounded-lg overflow-hidden">
+                                    <div className="bg-purple-50 dark:bg-purple-900/20 px-4 py-2.5 border-b border-purple-100 dark:border-purple-800">
+                                        <h4 className="font-semibold text-sm flex items-center gap-2 text-purple-900 dark:text-purple-200">
+                                            <span className="bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300 p-1 rounded">💳</span>
+                                            Kredi Kartı İşlemleri
+                                        </h4>
+                                    </div>
+                                    <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                        <div>
+                                            <span className="text-xs text-gray-500 block">İşlem Durumu</span>
+                                            <span className={`font-medium ${selectedOrder.payment.providerData.status === "success" ? "text-green-600" : "text-red-600"}`}>
+                                                {selectedOrder.payment.providerData.status === "success" ? "✅ Başarılı" : "❌ Başarısız"}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span className="text-xs text-gray-500 block">Sanal Pos</span>
+                                            <span className="font-medium">PayTR</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-xs text-gray-500 block">Ödenen Tutar</span>
+                                            <span className="font-medium">{formatPrice(selectedOrder.payment.amount)}</span>
+                                        </div>
+                                        {selectedOrder.payment.providerData.installment_count && (
+                                            <div>
+                                                <span className="text-xs text-gray-500 block">Taksit</span>
+                                                <span className="font-medium">
+                                                    {Number(selectedOrder.payment.providerData.installment_count) > 1
+                                                        ? `${selectedOrder.payment.providerData.installment_count} Taksit`
+                                                        : "Tek Çekim"}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {selectedOrder.payment.providerData.payment_type && (
+                                            <div>
+                                                <span className="text-xs text-gray-500 block">Kart Tipi</span>
+                                                <span className="font-medium">{selectedOrder.payment.providerData.payment_type}</span>
+                                            </div>
+                                        )}
+                                        {selectedOrder.payment.providerRef && (
+                                            <div>
+                                                <span className="text-xs text-gray-500 block">İşlem Referansı</span>
+                                                <span className="font-mono text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded select-all">
+                                                    {selectedOrder.payment.providerRef}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {selectedOrder.payment.providerData.hash && (
+                                            <div className="col-span-2 md:col-span-3">
+                                                <span className="text-xs text-gray-500 block">Hash</span>
+                                                <span className="font-mono text-xs text-gray-400 break-all select-all">
+                                                    {selectedOrder.payment.providerData.hash}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                             {/* Yurtiçi Kargo Entegrasyon Bölümü */}
                             <YurticiKargoPanel
                                 order={selectedOrder}
