@@ -27,7 +27,7 @@ import {
     CardHeader, 
     CardTitle 
 } from "@/components/ui/card";
-import { Mail, ShoppingCart, Loader2, Eye } from "lucide-react";
+import { Mail, ShoppingCart, Loader2, Eye, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { getAbandonedCartsAction, sendCartReminderAction } from "./actions";
 
@@ -59,6 +59,7 @@ export default function AbandonedCartsPage() {
         
         if (result.success) {
             toast.success(result.message);
+            await loadCarts(); // Listeyi güncelle
         } else {
             toast.error(result.error || "Mail gönderilemedi.");
         }
@@ -112,6 +113,7 @@ export default function AbandonedCartsPage() {
                                         <TableHead className="text-center">Sepetteki Ürün</TableHead>
                                         <TableHead className="text-right">Tutar</TableHead>
                                         <TableHead>Son İşlem</TableHead>
+                                        <TableHead className="text-center">Hatırlatma</TableHead>
                                         <TableHead className="text-right">İşlem</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -188,9 +190,24 @@ export default function AbandonedCartsPage() {
                                                 <TableCell className="text-sm text-gray-500">
                                                     {formatDistanceToNow(new Date(cart.updatedAt), { addSuffix: true, locale: tr })}
                                                 </TableCell>
+                                                <TableCell className="text-center">
+                                                    {cart.reminderSentAt ? (
+                                                        <div className="flex flex-col items-center gap-1">
+                                                            <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                                                <CheckCircle2 className="h-3 w-3" />
+                                                                {cart.reminderCount}x Gönderildi
+                                                            </Badge>
+                                                            <span className="text-xs text-gray-400">
+                                                                {formatDistanceToNow(new Date(cart.reminderSentAt), { addSuffix: true, locale: tr })}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <Badge variant="outline" className="text-gray-400">Gönderilmedi</Badge>
+                                                    )}
+                                                </TableCell>
                                                 <TableCell className="text-right">
                                                     <Button 
-                                                        variant="default" 
+                                                        variant={cart.reminderSentAt ? "outline" : "default"}
                                                         size="sm"
                                                         onClick={() => handleSendReminder(cart.id)}
                                                         disabled={sendingId === cart.id || !email}
@@ -201,7 +218,7 @@ export default function AbandonedCartsPage() {
                                                         ) : (
                                                             <Mail className="mr-2 h-4 w-4" />
                                                         )}
-                                                        Hatırlat
+                                                        {cart.reminderSentAt ? "Tekrar Gönder" : "Hatırlat"}
                                                     </Button>
                                                 </TableCell>
                                             </TableRow>

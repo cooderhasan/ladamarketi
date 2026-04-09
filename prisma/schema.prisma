@@ -570,11 +570,13 @@ model HepsiburadaProduct {
 }
 
 model Cart {
-  id        String     @id @default(cuid())
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
-  updatedAt DateTime   @updatedAt
+  id              String     @id @default(cuid())
+  userId          String     @unique
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           CartItem[]
+  updatedAt       DateTime   @updatedAt
+  reminderSentAt  DateTime?  // Son hatırlatma e-postası gönderim zamanı
+  reminderCount   Int        @default(0) // Toplam gönderilen hatırlatma sayısı
 
   @@map("carts")
 }

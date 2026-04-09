@@ -24,7 +24,11 @@ export async function getAbandonedCartsAction() {
                     lte: twoHoursAgo // En son 2 saat önce güncellenmiş (yani bırakılmış)
                 }
             },
-            include: {
+            select: {
+                id: true,
+                updatedAt: true,
+                reminderSentAt: true,
+                reminderCount: true,
                 user: {
                     select: {
                         id: true,
@@ -97,6 +101,14 @@ export async function sendCartReminderAction(cartId: string) {
             return { success: false, error: "Geçerli bir sepet bulunamadı veya e-posta adresi eksik." };
         }
 
+        // Son 24 saat içinde zaten hatırlatma gönderildi mi kontrol et
+        if (cart.reminderSentAt) {
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            if (new Date(cart.reminderSentAt) > twentyFourHoursAgo) {
+                return { success: false, error: "Bu müşteriye son 24 saat içinde zaten hatırlatma gönderildi." };
+            }
+        }
+
         const domain = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
         let totalAmount = 0;
 
@@ -131,6 +143,15 @@ export async function sendCartReminderAction(cartId: string) {
         if (!result.success) {
             return { success: false, error: "E-postayı gönderirken bir hata oluştu." };
         }
+
+        // Başarılı gönderim sonrası Cart kaydını güncelle
+        await prisma.cart.update({
+            where: { id: cartId },
+            data: {
+                reminderSentAt: new Date(),
+                reminderCount: { increment: 1 },
+            },
+        });
 
         return { success: true, message: "Hatırlatma maili başarıyla gönderildi." };
     } catch (error) {
