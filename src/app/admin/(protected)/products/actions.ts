@@ -16,9 +16,20 @@ export async function createProduct(formData: FormData) {
         throw new Error("Unauthorized");
     }
 
+    // Generate a unique slug: if the slug already exists in DB, append -1, -2, etc.
+    const baseSlug = (formData.get("slug") as string) || generateSlug(formData.get("name") as string);
+    let uniqueSlug = baseSlug;
+    let slugCounter = 0;
+    while (true) {
+        const existing = await prisma.product.findFirst({ where: { slug: uniqueSlug } });
+        if (!existing) break;
+        slugCounter++;
+        uniqueSlug = `${baseSlug}-${slugCounter}`;
+    }
+
     const rawData = {
         name: formData.get("name") as string,
-        slug: formData.get("slug") as string || generateSlug(formData.get("name") as string),
+        slug: uniqueSlug,
         sku: (formData.get("sku") as string) || undefined,
         barcode: (formData.get("barcode") as string) || undefined,
         brandId: (formData.get("brandId") as string) === "none" ? undefined : (formData.get("brandId") as string) || undefined,
