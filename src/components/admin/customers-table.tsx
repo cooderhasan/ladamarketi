@@ -405,6 +405,7 @@ export function CustomersTable({
                         </form>
                     </DialogContent>
                 </Dialog>
+                </div>
             </div>
 
             <div className="rounded-lg border bg-white dark:bg-gray-800">
