@@ -96,6 +96,15 @@ export async function getDBCart(providedUserId?: string, userDiscountRate?: numb
                                 minQuantity: true,
                                 images: true,
                                 desi: true,
+                                isBundle: true,
+                                bundleItems: {
+                                    select: {
+                                        quantity: true,
+                                        childProduct: {
+                                            select: { stock: true },
+                                        },
+                                    },
+                                },
                             }
                         },
                         variant: {
@@ -117,6 +126,17 @@ export async function getDBCart(providedUserId?: string, userDiscountRate?: numb
         return cart.items.map((item) => {
             const listPrice = Number(item.product.listPrice) + Number(item.variant?.priceAdjustment || 0);
 
+            // Calculate stock: for bundles use dynamic calculation
+            let stock = item.variant ? item.variant.stock : item.product.stock;
+            if (item.product.isBundle && item.product.bundleItems.length > 0) {
+                stock = Math.min(
+                    ...item.product.bundleItems.map((bi: any) =>
+                        Math.floor(bi.childProduct.stock / bi.quantity)
+                    )
+                );
+                stock = Math.max(0, stock);
+            }
+
             return {
                 productId: item.productId,
                 name: item.product.name,
@@ -128,7 +148,7 @@ export async function getDBCart(providedUserId?: string, userDiscountRate?: numb
                 discountRate: userDiscountRate ?? 0,
                 vatRate: item.product.vatRate,
                 minQuantity: item.product.minQuantity,
-                stock: item.variant ? item.variant.stock : item.product.stock,
+                stock: stock,
                 variantId: item.variantId || undefined,
                 variantInfo: item.variant ? `${item.variant.color || ""} ${item.variant.size || ""}`.trim() : undefined,
                 desi: item.product.desi ? Number(item.product.desi) : null,

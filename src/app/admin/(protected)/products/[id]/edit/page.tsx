@@ -15,6 +15,21 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
             include: {
                 variants: true,
                 categories: true,
+                bundleItems: {
+                    include: {
+                        childProduct: {
+                            select: {
+                                id: true,
+                                name: true,
+                                sku: true,
+                                stock: true,
+                                listPrice: true,
+                                salePrice: true,
+                                images: true,
+                            },
+                        },
+                    },
+                },
             },
         }),
         prisma.category.findMany({
@@ -63,6 +78,20 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
             priceAdjustment: v.priceAdjustment.toNumber(),
         })),
         categories: product.categories.map(c => ({ id: c.id })),
+        isBundle: anyProduct.isBundle || false,
+        bundleItems: (product as any).bundleItems?.map((bi: any) => ({
+            childProductId: bi.childProductId,
+            quantity: bi.quantity,
+            childProduct: {
+                id: bi.childProduct.id,
+                name: bi.childProduct.name,
+                sku: bi.childProduct.sku,
+                stock: bi.childProduct.stock,
+                listPrice: Number(bi.childProduct.listPrice),
+                salePrice: bi.childProduct.salePrice ? Number(bi.childProduct.salePrice) : null,
+                image: bi.childProduct.images[0] || null,
+            },
+        })) || [],
     };
 
     return (

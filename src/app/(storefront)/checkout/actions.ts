@@ -81,6 +81,20 @@ export async function createOrder(data: CreateOrderData) {
                 let stockToCheck = product.stock;
                 let productName = product.name;
 
+                // Handle bundle stock check
+                if ((product as any).isBundle) {
+                    const bundleItems = await prisma.bundleItem.findMany({
+                        where: { bundleProductId: product.id },
+                        include: { childProduct: { select: { stock: true, name: true } } },
+                    });
+                    if (bundleItems.length > 0) {
+                        // Bundle stock = min(childStock / childQty)
+                        stockToCheck = Math.min(
+                            ...bundleItems.map(bi => Math.floor(bi.childProduct.stock / bi.quantity))
+                        );
+                    }
+                }
+
                 // Handle variant if exists
                 if (item.variantId) {
                     const variant = await prisma.productVariant.findUnique({
@@ -253,7 +267,33 @@ export async function createOrder(data: CreateOrderData) {
 
             // Update stock
             for (const item of data.items) {
-                if (item.variantId) {
+                // Check if this product is a bundle
+                const productWithBundle = await tx.product.findUnique({
+                    where: { id: item.productId },
+                    select: {
+                        isBundle: true,
+                        bundleItems: {
+                            select: {
+                                childProductId: true,
+                                quantity: true,
+                            },
+                        },
+                    },
+                });
+
+                if (productWithBundle?.isBundle && productWithBundle.bundleItems.length > 0) {
+                    // Bundle product: decrement stock from each child product
+                    for (const bundleItem of productWithBundle.bundleItems) {
+                        await tx.product.update({
+                            where: { id: bundleItem.childProductId },
+                            data: {
+                                stock: {
+                                    decrement: bundleItem.quantity * item.quantity,
+                                },
+                            },
+                        });
+                    }
+                } else if (item.variantId) {
                     await tx.productVariant.update({
                         where: { id: item.variantId },
                         data: {

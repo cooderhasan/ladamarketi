@@ -213,6 +213,9 @@ model Product {
   length      Decimal?    @db.Decimal(8, 2)  // Uzunluk (cm)
   desi        Decimal?    @db.Decimal(8, 2)  // Hesaplanmış veya manuel desi
 
+  // Bundle (Paket Ürün)
+  isBundle    Boolean     @default(false)  // Paket ürün mü?
+
   isFeatured  Boolean     @default(false)
   isNew       Boolean     @default(false)
   isBestSeller Boolean    @default(false)
@@ -245,8 +248,26 @@ model Product {
   hepsiburadaProduct HepsiburadaProduct?
   reviews         Review[]
   wishlistItems   Wishlist[]
+  bundleItems     BundleItem[] @relation("BundleParent")  // Bu paketin içindeki ürünler
+  bundleOf        BundleItem[] @relation("BundleChild")   // Bu ürünün dahil olduğu paketler
 
   @@map("products")
+}
+
+// ==================== BUNDLE (PAKET ÜRÜN) ====================
+
+model BundleItem {
+  id              String   @id @default(cuid())
+  bundleProductId String   // Paket ürünün ID'si
+  bundleProduct   Product  @relation("BundleParent", fields: [bundleProductId], references: [id], onDelete: Cascade)
+  childProductId  String   // Pakete dahil edilen ürünün ID'si
+  childProduct    Product  @relation("BundleChild", fields: [childProductId], references: [id], onDelete: Cascade)
+  quantity        Int      @default(1) // Bu üründen pakette kaç adet var
+
+  @@unique([bundleProductId, childProductId])
+  @@index([bundleProductId])
+  @@index([childProductId])
+  @@map("bundle_items")
 }
 
 model ProductVariant {

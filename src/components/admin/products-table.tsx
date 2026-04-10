@@ -27,7 +27,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash, Star, Sparkles, TrendingUp, Search, Upload, Download, ExternalLink } from "lucide-react";
+import { Edit, MoreHorizontal, Trash, Star, Sparkles, TrendingUp, Search, Upload, Download, ExternalLink, Package } from "lucide-react";
 import { formatPrice } from "@/lib/helpers";
 import { deleteProduct, toggleProductStatus } from "@/app/admin/(protected)/products/actions";
 import { toast } from "sonner";
@@ -46,6 +46,7 @@ interface Product {
     isNew: boolean;
     isBestSeller: boolean;
     isActive: boolean;
+    isBundle?: boolean;
     category: {
         id: string;
         name: string;
@@ -298,14 +299,22 @@ export function ProductsTable({ products: initialProducts, brands, pagination }:
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <div>
-                                                    <Link 
-                                                        href={`/products/${product.slug}`} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
-                                                        className="font-medium hover:text-blue-600 transition-colors"
-                                                    >
-                                                        {product.name}
-                                                    </Link>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Link 
+                                                            href={`/products/${product.slug}`} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="font-medium hover:text-blue-600 transition-colors"
+                                                        >
+                                                            {product.name}
+                                                        </Link>
+                                                        {(product as any).isBundle && (
+                                                            <span className="inline-flex items-center gap-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                                                <Package className="h-3 w-3" />
+                                                                Paket
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <div className="flex gap-1 mt-1">
                                                         {product.isFeatured && (
                                                             <Star className="h-3 w-3 text-yellow-500" />

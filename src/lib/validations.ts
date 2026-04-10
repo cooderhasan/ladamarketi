@@ -46,6 +46,7 @@ export const productSchema = z.object({
     isNew: z.boolean().default(false),
     isBestSeller: z.boolean().default(false),
     isActive: z.boolean().default(true),
+    isBundle: z.boolean().default(false),
     // Kargo & Desi
     weight: z.number().min(0, "Ağırlık negatif olamaz").nullable().optional(),
     width: z.number().min(0, "Genişlik negatif olamaz").nullable().optional(),

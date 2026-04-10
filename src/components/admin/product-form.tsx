@@ -13,16 +13,17 @@ import {
 } from "@/components/ui/select";
 import { CategoryTreeSelect } from "@/components/ui/category-tree-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createProduct, updateProduct, syncProductToMarketplaces } from "@/app/admin/(protected)/products/actions";
+import { createProduct, updateProduct, syncProductToMarketplaces, searchProductsForBundle } from "@/app/admin/(protected)/products/actions";
 import { generateSlug, generateSKU, generateBarcode } from "@/lib/helpers";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
-import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package, RefreshCw, Brain } from "lucide-react";
+import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package, RefreshCw, Brain, Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { calculateDesi } from "@/lib/shipping";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { calculateBundleStock } from "@/lib/bundle-utils";
 
 
 interface Brand {
@@ -45,6 +46,20 @@ interface ProductVariant {
     stock: number;
     priceAdjustment: number;
     isActive: boolean;
+}
+
+interface BundleItemData {
+    childProductId: string;
+    quantity: number;
+    childProduct: {
+        id: string;
+        name: string;
+        sku: string | null;
+        stock: number;
+        listPrice: number;
+        salePrice: number | null;
+        image: string | null;
+    };
 }
 
 interface Product {
@@ -71,6 +86,7 @@ interface Product {
     isNew: boolean;
     isBestSeller: boolean;
     isActive: boolean;
+    isBundle?: boolean;
     isTrendyolActive?: boolean;
     isN11Active?: boolean;
     isHepsiburadaActive?: boolean;
@@ -84,6 +100,7 @@ interface Product {
     variants?: ProductVariant[];
     categories?: { id: string }[];
     referenceUrl?: string | null;
+    bundleItems?: BundleItemData[];
 }
 
 interface ProductFormProps {
@@ -133,7 +150,14 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         length: product?.length ?? "",
         desi: product?.desi ?? "",
         referenceUrl: product?.referenceUrl || "",
+        isBundle: product?.isBundle || false,
     });
+
+    // Bundle state
+    const [bundleItems, setBundleItems] = useState<BundleItemData[]>(product?.bundleItems || []);
+    const [bundleSearchQuery, setBundleSearchQuery] = useState("");
+    const [bundleSearchResults, setBundleSearchResults] = useState<any[]>([]);
+    const [bundleSearching, setBundleSearching] = useState(false);
 
     // Otomatik desi hesaplama
     const autoDesi = formData.width && formData.height && formData.length
@@ -172,6 +196,61 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         const updated = [...formData.variants];
         updated[index] = { ...updated[index], [field]: value };
         handleChange("variants", updated);
+    };
+
+    // Bundle functions
+    const bundleStock = formData.isBundle ? calculateBundleStock(bundleItems) : 0;
+
+    const handleBundleSearch = useCallback(async (query: string) => {
+        setBundleSearchQuery(query);
+        if (query.length < 2) {
+            setBundleSearchResults([]);
+            return;
+        }
+        setBundleSearching(true);
+        try {
+            const results = await searchProductsForBundle(query, product?.id);
+            setBundleSearchResults(results);
+        } catch {
+            toast.error("Ürün arama başarısız.");
+        } finally {
+            setBundleSearching(false);
+        }
+    }, [product?.id]);
+
+    const addBundleItem = (item: any) => {
+        if (bundleItems.find(bi => bi.childProductId === item.id)) {
+            toast.warning("Bu ürün zaten pakette mevcut.");
+            return;
+        }
+        setBundleItems(prev => [...prev, {
+            childProductId: item.id,
+            quantity: 1,
+            childProduct: {
+                id: item.id,
+                name: item.name,
+                sku: item.sku,
+                stock: item.stock,
+                listPrice: item.listPrice,
+                salePrice: item.salePrice,
+                image: item.image,
+            },
+        }]);
+        setBundleSearchQuery("");
+        setBundleSearchResults([]);
+    };
+
+    const removeBundleItem = (childProductId: string) => {
+        setBundleItems(prev => prev.filter(bi => bi.childProductId !== childProductId));
+    };
+
+    const updateBundleItemQuantity = (childProductId: string, quantity: number) => {
+        if (quantity < 1) return;
+        setBundleItems(prev => prev.map(bi =>
+            bi.childProductId === childProductId
+                ? { ...bi, quantity }
+                : bi
+        ));
     };
 
     const handleMarketplaceSync = async () => {
@@ -249,6 +328,14 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
             }
         });
 
+        // Append bundle items if this is a bundle product
+        if (formData.isBundle) {
+            data.append('bundleItems', JSON.stringify(bundleItems.map(bi => ({
+                childProductId: bi.childProductId,
+                quantity: bi.quantity,
+            }))));
+        }
+
         try {
             let result;
             if (product) {
@@ -285,6 +372,13 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                     <TabsTrigger value="general" className="px-4 py-2">Genel Bilgiler</TabsTrigger>
                     <TabsTrigger value="price" className="px-4 py-2">Fiyat & Stok</TabsTrigger>
                     <TabsTrigger value="variants" className="px-4 py-2">Varyantlar</TabsTrigger>
+                    <TabsTrigger value="bundle" className="px-4 py-2">
+                        <Package className="h-4 w-4 mr-1" />
+                        Paket İçeriği
+                        {formData.isBundle && bundleItems.length > 0 && (
+                            <span className="ml-1.5 bg-emerald-100 text-emerald-700 text-xs font-bold px-1.5 py-0.5 rounded-full">{bundleItems.length}</span>
+                        )}
+                    </TabsTrigger>
                     <TabsTrigger value="media" className="px-4 py-2">Görseller</TabsTrigger>
                     <TabsTrigger value="settings" className="px-4 py-2">Ayarlar</TabsTrigger>
                 </TabsList>
@@ -808,6 +902,180 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                         </CardContent>
                     </Card>
                 </TabsContent >
+
+                <TabsContent value="bundle" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Package className="h-5 w-5 text-emerald-600" />
+                                Paket Ürün Ayarları
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            {/* İsBundle Toggle */}
+                            <div className="flex items-center justify-between p-4 border rounded-lg bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base text-emerald-700 dark:text-emerald-300 font-semibold">📦 Paket Ürün</Label>
+                                    <p className="text-sm text-gray-500">Bu ürünü birden fazla ürün içeren bir paket olarak tanımla</p>
+                                </div>
+                                <Checkbox
+                                    checked={formData.isBundle}
+                                    onCheckedChange={(c) => handleChange("isBundle", c)}
+                                />
+                            </div>
+
+                            {formData.isBundle && (
+                                <>
+                                    {/* Bundle Stock Info */}
+                                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">Hesaplanan Paket Stoku</p>
+                                                <p className="text-xs text-gray-500 mt-1">Paket içindeki en az stoklu ürüne göre otomatik hesaplanır</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className={`text-3xl font-bold ${bundleStock > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                                                    {bundleItems.length > 0 ? bundleStock : '-'}
+                                                </span>
+                                                <p className="text-xs text-gray-500">adet paket</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Search Products */}
+                                    <div className="space-y-2">
+                                        <Label className="font-semibold">Pakete Ürün Ekle</Label>
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                            <Input
+                                                value={bundleSearchQuery}
+                                                onChange={(e) => handleBundleSearch(e.target.value)}
+                                                placeholder="Ürün adı, SKU veya barkod ile arayın..."
+                                                className="pl-10"
+                                            />
+                                            {bundleSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />}
+                                        </div>
+
+                                        {/* Search Results */}
+                                        {bundleSearchResults.length > 0 && (
+                                            <div className="border rounded-lg divide-y max-h-60 overflow-y-auto bg-white dark:bg-gray-800 shadow-lg">
+                                                {bundleSearchResults.map((item) => (
+                                                    <button
+                                                        key={item.id}
+                                                        type="button"
+                                                        onClick={() => addBundleItem(item)}
+                                                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
+                                                    >
+                                                        {item.image ? (
+                                                            <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded border" />
+                                                        ) : (
+                                                            <div className="w-10 h-10 bg-gray-100 rounded border flex items-center justify-center">
+                                                                <Package className="h-5 w-5 text-gray-400" />
+                                                            </div>
+                                                        )}
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-medium truncate">{item.name}</p>
+                                                            <p className="text-xs text-gray-500">{item.sku || '-'} · Stok: {item.stock}</p>
+                                                        </div>
+                                                        <span className="text-sm font-semibold text-emerald-600 shrink-0">
+                                                            {item.salePrice ? item.salePrice.toLocaleString('tr-TR') : item.listPrice.toLocaleString('tr-TR')} ₺
+                                                        </span>
+                                                        <Plus className="h-4 w-4 text-emerald-600 shrink-0" />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Bundle Items List */}
+                                    {bundleItems.length === 0 ? (
+                                        <div className="text-center py-10 text-gray-500 border-2 border-dashed rounded-lg">
+                                            <Package className="h-10 w-10 mx-auto mb-2 text-gray-300" />
+                                            <p className="font-medium">Henüz ürün eklenmedi</p>
+                                            <p className="text-sm">Yukarıdaki arama alanını kullanarak pakete ürün ekleyebilirsiniz</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <Label className="font-semibold">Paket İçeriği ({bundleItems.length} ürün)</Label>
+                                            </div>
+                                            <div className="border rounded-lg overflow-hidden">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-gray-50 dark:bg-gray-800">
+                                                        <tr>
+                                                            <th className="text-left p-3 font-medium">Ürün</th>
+                                                            <th className="text-center p-3 font-medium w-28">Adet</th>
+                                                            <th className="text-center p-3 font-medium w-24">Stok</th>
+                                                            <th className="text-right p-3 font-medium w-28">Fiyat</th>
+                                                            <th className="p-3 w-12"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y">
+                                                        {bundleItems.map((bi) => (
+                                                            <tr key={bi.childProductId} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50">
+                                                                <td className="p-3">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {bi.childProduct.image ? (
+                                                                            <img src={bi.childProduct.image} alt="" className="w-8 h-8 object-cover rounded border" />
+                                                                        ) : (
+                                                                            <div className="w-8 h-8 bg-gray-100 rounded border flex items-center justify-center">
+                                                                                <Package className="h-4 w-4 text-gray-400" />
+                                                                            </div>
+                                                                        )}
+                                                                        <div>
+                                                                            <p className="font-medium text-sm">{bi.childProduct.name}</p>
+                                                                            <p className="text-xs text-gray-500">{bi.childProduct.sku || '-'}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="p-3 text-center">
+                                                                    <Input
+                                                                        type="number"
+                                                                        min="1"
+                                                                        value={bi.quantity}
+                                                                        onChange={(e) => updateBundleItemQuantity(bi.childProductId, parseInt(e.target.value) || 1)}
+                                                                        className="w-20 mx-auto text-center h-8"
+                                                                    />
+                                                                </td>
+                                                                <td className="p-3 text-center">
+                                                                    <span className={`font-medium ${bi.childProduct.stock < 5 ? 'text-red-600' : 'text-green-600'}`}>
+                                                                        {bi.childProduct.stock}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="p-3 text-right font-medium">
+                                                                    {(bi.childProduct.salePrice || bi.childProduct.listPrice).toLocaleString('tr-TR')} ₺
+                                                                </td>
+                                                                <td className="p-3">
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => removeBundleItem(bi.childProductId)}
+                                                                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            {/* Bundle Summary */}
+                                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 flex items-center justify-between">
+                                                <span className="text-sm text-gray-600">Paket İçerik Toplam Değeri</span>
+                                                <span className="text-lg font-bold">
+                                                    {bundleItems.reduce((sum, bi) => sum + ((bi.childProduct.salePrice || bi.childProduct.listPrice) * bi.quantity), 0).toLocaleString('tr-TR')} ₺
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
                 <TabsContent value="media" className="space-y-6">
                     <Card>

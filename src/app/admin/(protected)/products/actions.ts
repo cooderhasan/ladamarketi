@@ -44,6 +44,7 @@ export async function createProduct(formData: FormData) {
         minQuantity: Number(formData.get("minQuantity")) || 1,
         stock: Number(formData.get("stock")) || 0,
         criticalStock: Number(formData.get("criticalStock")) || 10,
+        isBundle: formData.get("isBundle") === "true",
 
         // categoryId: (formData.get("categoryId") as string) === "none" ? undefined : (formData.get("categoryId") as string) || undefined,
         isFeatured: formData.get("isFeatured") === "true",
@@ -111,6 +112,21 @@ export async function createProduct(formData: FormData) {
         });
     }
 
+    // Create bundle items if this is a bundle product
+    if (validatedData.isBundle) {
+        const bundleItemsJson = formData.get("bundleItems") as string;
+        const bundleItems: { childProductId: string; quantity: number }[] = bundleItemsJson ? JSON.parse(bundleItemsJson) : [];
+        if (bundleItems.length > 0) {
+            await prisma.bundleItem.createMany({
+                data: bundleItems.map((bi) => ({
+                    bundleProductId: product.id,
+                    childProductId: bi.childProductId,
+                    quantity: bi.quantity || 1,
+                })),
+            });
+        }
+    }
+
     await prisma.adminLog.create({
         data: {
             adminId: session.user.id,
@@ -160,6 +176,7 @@ export async function updateProduct(productId: string, formData: FormData) {
         minQuantity: Number(formData.get("minQuantity")) || 1,
         stock: Number(formData.get("stock")) || 0,
         criticalStock: Number(formData.get("criticalStock")) || 10,
+        isBundle: formData.get("isBundle") === "true",
 
         // categoryId: (formData.get("categoryId") as string) === "none" ? undefined : (formData.get("categoryId") as string) || undefined,
         isFeatured: formData.get("isFeatured") === "true",
@@ -244,6 +261,30 @@ export async function updateProduct(productId: string, formData: FormData) {
             newData: validatedData,
         },
     });
+
+    // Update bundle items if this is a bundle product
+    if (validatedData.isBundle) {
+        // Delete existing bundle items and recreate
+        await prisma.bundleItem.deleteMany({
+            where: { bundleProductId: productId },
+        });
+        const bundleItemsJson = formData.get("bundleItems") as string;
+        const bundleItems: { childProductId: string; quantity: number }[] = bundleItemsJson ? JSON.parse(bundleItemsJson) : [];
+        if (bundleItems.length > 0) {
+            await prisma.bundleItem.createMany({
+                data: bundleItems.map((bi) => ({
+                    bundleProductId: productId,
+                    childProductId: bi.childProductId,
+                    quantity: bi.quantity || 1,
+                })),
+            });
+        }
+    } else {
+        // If product was a bundle but is no longer, remove bundle items
+        await prisma.bundleItem.deleteMany({
+            where: { bundleProductId: productId },
+        });
+    }
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
@@ -395,4 +436,52 @@ export async function fixAllSlugs() {
         console.error("Fix slugs error:", e);
         return { success: false, message: e.message || "An error occurred" };
     }
+}
+
+// ==================== BUNDLE (PAKET ÜRÜN) ====================
+
+export async function searchProductsForBundle(query: string, excludeProductId?: string) {
+    const session = await auth();
+    if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+        throw new Error("Unauthorized");
+    }
+
+    if (!query || query.length < 2) return [];
+
+    const products = await prisma.product.findMany({
+        where: {
+            AND: [
+                {
+                    OR: [
+                        { name: { contains: query, mode: "insensitive" } },
+                        { sku: { contains: query, mode: "insensitive" } },
+                        { barcode: { contains: query, mode: "insensitive" } },
+                    ],
+                },
+                { isBundle: false }, // Paket içine paket eklenemez
+                { isActive: true },
+                ...(excludeProductId ? [{ id: { not: excludeProductId } }] : []),
+            ],
+        },
+        select: {
+            id: true,
+            name: true,
+            sku: true,
+            stock: true,
+            listPrice: true,
+            salePrice: true,
+            images: true,
+        },
+        take: 10,
+    });
+
+    return products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        sku: p.sku,
+        stock: p.stock,
+        listPrice: Number(p.listPrice),
+        salePrice: p.salePrice ? Number(p.salePrice) : null,
+        image: p.images[0] || null,
+    }));
 }
