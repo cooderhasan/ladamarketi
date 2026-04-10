@@ -97,6 +97,7 @@ export async function updateCustomerDiscountGroup(
 }
 
 export async function createCustomer(data: {
+    name: string;
     companyName: string;
     taxNumber: string;
     email: string;
@@ -109,7 +110,7 @@ export async function createCustomer(data: {
         throw new Error("Unauthorized");
     }
 
-    const { companyName, taxNumber, email, phone, password, discountGroupId } = data;
+    const { name, companyName, taxNumber, email, phone, password, discountGroupId } = data;
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
@@ -126,6 +127,7 @@ export async function createCustomer(data: {
         data: {
             email,
             passwordHash: hashedPassword,
+            name,
             companyName,
             taxNumber,
             phone,

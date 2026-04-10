@@ -428,7 +428,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                         <TableCell>
                                             <div className="flex flex-col">
                                                 <span className="font-medium">
-                                                    {(order.shippingAddress as any)?.name || order.user?.companyName || order.user?.email || order.guestEmail || "Misafir"}
+                                                    {(order.shippingAddress as any)?.name || order.user?.name || order.user?.companyName || order.user?.email || order.guestEmail || "Misafir"}
                                                 </span>
                                                 {(() => {
                                                     const phone = order.user?.phone || (order.shippingAddress as any)?.phone;

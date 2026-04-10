@@ -9,6 +9,7 @@ declare module "next-auth" {
     interface User {
         id: string;
         email: string;
+        name?: string | null;
         role: UserRole;
         status: UserStatus;
         companyName?: string | null;
@@ -24,6 +25,7 @@ declare module "next-auth" {
 declare module "@auth/core/jwt" {
     interface JWT {
         id: string;
+        name?: string | null;
         role: UserRole;
         status: UserStatus;
         companyName?: string | null;
@@ -69,6 +71,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 return {
                     id: user.id,
                     email: user.email,
+                    name: user.name,
                     role: user.role,
                     status: user.status,
                     companyName: user.companyName,
@@ -84,6 +87,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
+                token.name = user.name;
                 token.role = user.role;
                 token.status = user.status;
                 token.companyName = user.companyName;
@@ -95,6 +99,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async session({ session, token }) {
             if (token && session.user) {
                 session.user.id = token.id as string;
+                session.user.name = token.name as string | null;
                 session.user.role = token.role as UserRole;
                 session.user.status = token.status as UserStatus;
                 session.user.companyName = token.companyName as string | null;

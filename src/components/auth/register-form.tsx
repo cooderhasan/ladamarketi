@@ -133,6 +133,11 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
                             Kurumsal Üyelik Yapmak İstiyorum (Bayi)
                         </Label>
                     </div>
+                    
+                    <div className="space-y-2">
+                        <Label htmlFor="name">Ad Soyad *</Label>
+                        <Input id="name" name="name" type="text" placeholder="Örn: Ahmet Yılmaz" required />
+                    </div>
 
                     <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">

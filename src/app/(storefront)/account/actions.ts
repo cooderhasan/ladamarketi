@@ -14,7 +14,8 @@ const addressSchema = z.object({
 });
 
 const profileSchema = z.object({
-    name: z.string().min(2, "Ad soyad/Firma adı en az 2 karakter olmalıdır"),
+    name: z.string().min(2, "Ad soyad en az 2 karakter olmalıdır"),
+    companyName: z.string().optional(),
     phone: z.string().min(10, "Geçerli bir telefon numarası giriniz"),
     taxNumber: z.string().optional(),
 });
@@ -70,6 +71,7 @@ export async function updateProfile(formData: FormData) {
 
     const rawData = {
         name: formData.get("name"),
+        companyName: formData.get("companyName"),
         phone: formData.get("phone"),
         taxNumber: formData.get("taxNumber"),
     };
@@ -84,7 +86,8 @@ export async function updateProfile(formData: FormData) {
         await prisma.user.update({
             where: { id: session.user.id },
             data: {
-                companyName: validated.data.name,
+                name: validated.data.name,
+                companyName: validated.data.companyName || null,
                 phone: validated.data.phone,
                 taxNumber: validated.data.taxNumber,
             },

@@ -6,6 +6,7 @@ import { registerSchema } from "@/lib/validations";
 
 export async function registerUser(formData: FormData) {
     const rawData = {
+        name: formData.get("name") as string,
         email: formData.get("email") as string,
         password: formData.get("password") as string,
         confirmPassword: formData.get("confirmPassword") as string,
@@ -44,6 +45,7 @@ export async function registerUser(formData: FormData) {
         data: {
             email: validatedData.email,
             passwordHash,
+            name: validatedData.name,
             companyName: validatedData.companyName || null,
             taxNumber: validatedData.taxNumber || null,
             phone: validatedData.phone,

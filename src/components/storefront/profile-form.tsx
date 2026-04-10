@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 
 interface ProfileFormProps {
     user: {
+        name?: string | null;
         companyName?: string | null;
         email: string;
         phone?: string | null;
@@ -36,13 +37,22 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <form action={handleSubmit} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                    <Label htmlFor="name">Ad Soyad / Firma Adı</Label>
+                    <Label htmlFor="name">Ad Soyad</Label>
                     <Input
                         id="name"
                         name="name"
-                        defaultValue={user.companyName || ""}
-                        placeholder="Firma Adı / Ad Soyad"
+                        defaultValue={user.name || ""}
+                        placeholder="Ad Soyad"
                         required
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="companyName">Firma Adı</Label>
+                    <Input
+                        id="companyName"
+                        name="companyName"
+                        defaultValue={user.companyName || ""}
+                        placeholder="Firma Adı (Kurumsal üyeler için)"
                     />
                 </div>
                 <div className="space-y-2">

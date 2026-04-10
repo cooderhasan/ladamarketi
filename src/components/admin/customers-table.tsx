@@ -47,6 +47,7 @@ interface CustomersTableProps {
 interface Customer {
     id: string;
     email: string;
+    name: string | null;
     companyName: string | null;
     taxNumber: string | null;
     phone: string | null;
@@ -107,6 +108,7 @@ export function CustomersTable({
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [addLoading, setAddLoading] = useState(false);
     const [newCustomer, setNewCustomer] = useState({
+        name: "",
         companyName: "",
         taxNumber: "",
         email: "",
@@ -169,7 +171,7 @@ export function CustomersTable({
         e.preventDefault();
         setAddLoading(true);
 
-        if (!newCustomer.companyName || !newCustomer.email || !newCustomer.password) {
+        if (!newCustomer.name || !newCustomer.email || !newCustomer.password) {
             toast.error("Lütfen zorunlu alanları doldurun.");
             setAddLoading(false);
             return;
@@ -181,6 +183,7 @@ export function CustomersTable({
                 toast.success("Müşteri başarıyla oluşturuldu.");
                 setIsAddOpen(false);
                 setNewCustomer({
+                    name: "",
                     companyName: "",
                     taxNumber: "",
                     email: "",
@@ -240,15 +243,24 @@ export function CustomersTable({
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="add-name">Ad Soyad *</Label>
+                                    <Input
+                                        id="add-name"
+                                        value={newCustomer.name}
+                                        onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                                        placeholder="Ad Soyad"
+                                        required
+                                    />
+                                </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="companyName">Firma Adı *</Label>
+                                        <Label htmlFor="companyName">Firma Adı</Label>
                                         <Input
                                             id="companyName"
                                             value={newCustomer.companyName}
                                             onChange={(e) => setNewCustomer({ ...newCustomer, companyName: e.target.value })}
-                                            placeholder="Firma Adı"
-                                            required
+                                            placeholder="Firma Adı (Opsiyonel)"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -354,10 +366,10 @@ export function CustomersTable({
                                     <TableCell>
                                         <div>
                                             <p className="font-medium">
-                                                {customer.companyName || "-"}
+                                                {customer.name || "-"}
                                             </p>
-                                            <p className="text-sm text-gray-500">
-                                                VKN: {customer.taxNumber || "-"}
+                                            <p className="text-xs text-gray-500">
+                                                {customer.companyName || (customer.role === "DEALER" ? "Firma Bilgisi Yok" : "Bireysel")}
                                             </p>
                                         </div>
                                     </TableCell>
@@ -462,6 +474,12 @@ export function CustomersTable({
 
                                 <TabsContent value="info" className="space-y-4 pt-4">
                                     <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-sm text-gray-500">Ad Soyad</p>
+                                            <p className="font-medium">
+                                                {selectedCustomer.name || "-"}
+                                            </p>
+                                        </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Firma Adı</p>
                                             <p className="font-medium">
