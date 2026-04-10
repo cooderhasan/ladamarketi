@@ -14,8 +14,9 @@ import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2
 import { signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart-store";
 import type { UserRole, UserStatus } from "@prisma/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 interface AdminHeaderProps {
     user?: {
@@ -48,6 +49,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const prevCounts = useRef<{ orders: number; transfers: number }>({ orders: 0, transfers: 0 });
 
     useEffect(() => {
         async function fetchNotifications() {
@@ -70,6 +72,32 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
     }, []);
+
+    // Sesli bildirim kontrolü
+    useEffect(() => {
+        if (loading) return;
+
+        const orderNotification = notifications.find(n => n.id === "orders");
+        const transferNotification = notifications.find(n => n.id === "bank-transfers");
+
+        const currentOrderCount = orderNotification?.count || 0;
+        const currentTransferCount = transferNotification?.count || 0;
+
+        // Sayı arttıysa ses çal
+        if (
+            (currentOrderCount > prevCounts.current.orders) ||
+            (currentTransferCount > prevCounts.current.transfers)
+        ) {
+            const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
+            audio.play().catch(e => console.log("Ses çalma hatası (Tarayıcı izni gerekiyor olabilir):", e));
+        }
+
+        // Mevcut sayıları referans olarak kaydet
+        prevCounts.current = {
+            orders: currentOrderCount,
+            transfers: currentTransferCount
+        };
+    }, [notifications, loading]);
 
     const initials = user?.companyName
         ? user.companyName
@@ -97,6 +125,26 @@ export function AdminHeader({ user }: AdminHeaderProps) {
             </div>
 
             <div className="flex items-center gap-4">
+                {/* Hızlı Bildirim Rozetleri */}
+                <div className="hidden sm:flex items-center gap-2">
+                    {notifications.find(n => n.id === "orders") && (
+                        <Link href="/admin/orders?status=PENDING">
+                            <Badge className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 gap-2 animate-pulse cursor-pointer border-none shadow-lg">
+                                <ShoppingCart className="h-3.5 w-3.5" />
+                                <span className="font-bold">{notifications.find(n => n.id === "orders")?.count} Yeni Sipariş</span>
+                            </Badge>
+                        </Link>
+                    )}
+                    {notifications.find(n => n.id === "bank-transfers") && (
+                        <Link href="/admin/bank-transfers">
+                            <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 gap-2 cursor-pointer border-none shadow-lg">
+                                <Landmark className="h-3.5 w-3.5" />
+                                <span className="font-bold">{notifications.find(n => n.id === "bank-transfers")?.count} Yeni Havale</span>
+                            </Badge>
+                        </Link>
+                    )}
+                </div>
+
                 {/* Notifications */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
