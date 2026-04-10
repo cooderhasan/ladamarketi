@@ -481,7 +481,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                     onValueChange={(value) => handleStatusChange(order.id, value)}
                                                     disabled={loadingId === order.id}
                                                 >
-                                                    <SelectTrigger className={`h-8 border-transparent bg-transparent hover:bg-white/50 focus:ring-0 ${getOrderStatusColor(order.status)} border`}>
+                                                    <SelectTrigger className={`h-8 border-transparent bg-transparent hover:opacity-90 focus:ring-0 ${getOrderStatusColor(order.status)} border shadow-sm [&_svg]:text-white`}>
                                                         <SelectValue>
                                                             {getOrderStatusLabel(order.status, order.payment?.method)}
                                                         </SelectValue>

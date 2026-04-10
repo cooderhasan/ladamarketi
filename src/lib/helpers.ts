@@ -258,15 +258,15 @@ export function getOrderStatusLabel(status: string, paymentMethod?: string) {
  */
 export function getOrderStatusColor(status: string): string {
     const statusColors: Record<string, string> = {
-        PENDING: "bg-gray-100 text-gray-800",
-        WAITING_FOR_PAYMENT: "bg-yellow-100 text-yellow-800",
-        CONFIRMED: "bg-blue-100 text-blue-800",
-        PROCESSING: "bg-purple-100 text-purple-800",
-        SHIPPED: "bg-indigo-100 text-indigo-800",
-        DELIVERED: "bg-green-100 text-green-800",
-        CANCELLED: "bg-red-100 text-red-800",
+        PENDING: "bg-slate-500 text-white font-semibold",
+        WAITING_FOR_PAYMENT: "bg-amber-500 text-white font-semibold",
+        CONFIRMED: "bg-sky-500 text-white font-semibold",
+        PROCESSING: "bg-fuchsia-600 text-white font-semibold",
+        SHIPPED: "bg-indigo-600 text-white font-semibold",
+        DELIVERED: "bg-emerald-600 text-white font-semibold",
+        CANCELLED: "bg-rose-600 text-white font-semibold",
     };
-    return statusColors[status] || "bg-gray-100 text-gray-800";
+    return statusColors[status] || "bg-slate-500 text-white";
 }
 
 /**
@@ -287,10 +287,10 @@ export function getUserStatusLabel(status: string): string {
  */
 export function getUserStatusColor(status: string): string {
     const statusColors: Record<string, string> = {
-        PENDING: "bg-yellow-100 text-yellow-800",
-        APPROVED: "bg-green-100 text-green-800",
-        REJECTED: "bg-red-100 text-red-800",
-        SUSPENDED: "bg-gray-100 text-gray-800",
+        PENDING: "bg-amber-500 text-white font-semibold",
+        APPROVED: "bg-emerald-600 text-white font-semibold",
+        REJECTED: "bg-rose-600 text-white font-semibold",
+        SUSPENDED: "bg-slate-500 text-white font-semibold",
     };
-    return statusColors[status] || "bg-gray-100 text-gray-800";
+    return statusColors[status] || "bg-slate-500 text-white";
 }

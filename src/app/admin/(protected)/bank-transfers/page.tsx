@@ -50,12 +50,12 @@ export default function BankTransfersPage() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, { label: string; color: string }> = {
-      PENDING: { label: "Bekliyor", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-      CONFIRMED: { label: "Onaylandı", color: "bg-green-100 text-green-800 border-green-200" },
-      REJECTED: { label: "Reddedildi", color: "bg-red-100 text-red-800 border-red-200" },
+      PENDING: { label: "Bekliyor", color: "bg-amber-500 text-white border-transparent" },
+      CONFIRMED: { label: "Onaylandı", color: "bg-emerald-600 text-white border-transparent" },
+      REJECTED: { label: "Reddedildi", color: "bg-rose-600 text-white border-transparent" },
     };
     const s = map[status] || map.PENDING;
-    return <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${s.color}`}>{s.label}</span>;
+    return <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full border shadow-sm ${s.color}`}>{s.label}</span>;
   };
 
   return (
