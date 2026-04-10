@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -29,20 +30,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, X, Eye, UserCheck, UserPlus, Loader2 } from "lucide-react";
-import { getUserStatusLabel, getUserStatusColor, formatDate } from "@/lib/helpers";
+import { Check, X, Eye, UserCheck, UserPlus, Loader2, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { getUserStatusLabel, getUserStatusColor, formatDate, formatPrice } from "@/lib/helpers";
 import { toast } from "sonner";
-import { updateCustomerStatus, updateCustomerDiscountGroup, createCustomer, updateCustomerCreditLimit, getCustomerTransactions, addCustomerTransaction } from "@/app/admin/(protected)/customers/actions";
+import { 
+    updateCustomerStatus, 
+    updateCustomerDiscountGroup, 
+    createCustomer, 
+    updateCustomerCreditLimit, 
+    getCustomerTransactions, 
+    addCustomerTransaction 
+} from "@/app/admin/(protected)/customers/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatPrice } from "@/lib/helpers";
-import { useEffect } from "react";
-
-interface CustomersTableProps {
-    customers: any[];
-    discountGroups: any[];
-}
-
-// ... existing imports ...
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface Customer {
     id: string;
@@ -68,11 +68,29 @@ interface Customer {
     };
 }
 
+interface CustomersTableProps {
+    customers: Customer[];
+    discountGroups: any[];
+    pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalCount: number;
+    };
+}
+
 export function CustomersTable({
     customers,
     discountGroups,
+    pagination,
 }: CustomersTableProps) {
-    // ... (existing states)
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
+    const debouncedSearch = useDebounce(searchInput, 500);
+    const currentRole = searchParams.get("role") || "ALL";
+
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -85,6 +103,29 @@ export function CustomersTable({
     const [transactions, setTransactions] = useState<any[]>([]);
     const [transactionsLoading, setTransactionsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("info");
+
+    const createQueryString = useCallback(
+        (params: Record<string, string | null>) => {
+            const newParams = new URLSearchParams(searchParams.toString());
+            Object.entries(params).forEach(([key, value]) => {
+                if (value === null) {
+                    newParams.delete(key);
+                } else {
+                    newParams.set(key, value);
+                }
+            });
+            // Reset to page 1 on search or filter change
+            if (params.search !== undefined || params.role !== undefined) {
+                newParams.set("page", "1");
+            }
+            return newParams.toString();
+        },
+        [searchParams]
+    );
+
+    useEffect(() => {
+        router.push(`${pathname}?${createQueryString({ search: debouncedSearch || null })}`);
+    }, [debouncedSearch, pathname, router, createQueryString]);
 
     useEffect(() => {
         if (isOpen && activeTab === "finance" && selectedCustomer) {
@@ -103,6 +144,14 @@ export function CustomersTable({
             fetchTransactions();
         }
     }, [isOpen, activeTab, selectedCustomer]);
+
+    const handleRoleChange = (value: string) => {
+        router.push(`${pathname}?${createQueryString({ role: value === "ALL" ? null : value })}`);
+    };
+
+    const handlePageChange = (page: number) => {
+        router.push(`${pathname}?${createQueryString({ page: String(page) })}`);
+    };
 
     // Add Customer State
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -221,19 +270,37 @@ export function CustomersTable({
 
     return (
         <div className="space-y-4">
-            {/* ... (New Customer Dialog Trigger and Content - NO CHANGE NEEDED HERE) ... */}
-            {/* But to save tokens I will cut the middle part out using comments if tool allows, but replace_file_content replaces a block. 
-               I will just replace the render part of Detail Dialog primarily.
-           */}
-            <div className="flex justify-end">
-                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            Yeni Müşteri Ekle
-                        </Button>
-                    </DialogTrigger>
-                    {/* ... (rest of Add Customer Dialog) ... */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="flex flex-1 gap-4 w-full md:max-w-xl">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                            placeholder="Müşteri adı, mail veya telefon ile ara..."
+                            className="pl-9"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                        />
+                    </div>
+                    <Select value={currentRole} onValueChange={handleRoleChange}>
+                        <SelectTrigger className="w-[180px]">
+                            <Filter className="mr-2 h-4 w-4 text-gray-400" />
+                            <SelectValue placeholder="Üyelik Tipi" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">Tümü</SelectItem>
+                            <SelectItem value="CUSTOMER">Bireysel Müşteri</SelectItem>
+                            <SelectItem value="DEALER">Bayi</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="flex justify-end">
+                    <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Yeni Müşteri Ekle
+                            </Button>
+                        </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px]">
                         <form onSubmit={handleCreateCustomer}>
                             <DialogHeader>
@@ -452,6 +519,33 @@ export function CustomersTable({
                         )}
                     </TableBody>
                 </Table>
+            </div>
+
+            <div className="flex items-center justify-between px-2">
+                <div className="text-sm text-gray-500">
+                    Toplam <strong>{pagination.totalCount}</strong> müşteri bulundu.
+                </div>
+                <div className="flex items-center space-x-2">
+                    <div className="text-sm font-medium mr-4">
+                        Sayfa {pagination.currentPage} / {pagination.totalPages}
+                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.currentPage - 1)}
+                        disabled={pagination.currentPage <= 1}
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.currentPage + 1)}
+                        disabled={pagination.currentPage >= pagination.totalPages}
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
 
             {/* Customer Detail Dialog */}

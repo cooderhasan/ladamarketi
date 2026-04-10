@@ -1,25 +1,62 @@
 import { prisma } from "@/lib/db";
 import { CustomersTable } from "@/components/admin/customers-table";
 
-export default async function CustomersPage() {
-    const customers = await prisma.user.findMany({
-        where: {
-            role: { in: ["CUSTOMER", "DEALER"] },
-        },
-        include: {
-            discountGroup: true,
-            transactions: {
-                select: {
-                    type: true,
-                    amount: true,
-                }
+interface CustomersPageProps {
+    searchParams: Promise<{
+        page?: string;
+        search?: string;
+        role?: string;
+    }>;
+}
+
+export default async function CustomersPage({ searchParams }: CustomersPageProps) {
+    const params = await searchParams;
+    const page = Number(params.page) || 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    const search = params.search || "";
+    const role = params.role;
+
+    const where: any = {
+        role: { in: ["CUSTOMER", "DEALER"] },
+    };
+
+    if (search) {
+        where.OR = [
+            { name: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+            { companyName: { contains: search, mode: "insensitive" } },
+            { phone: { contains: search, mode: "insensitive" } },
+        ];
+    }
+
+    if (role && role !== "ALL") {
+        where.role = role;
+    }
+
+    const [customers, totalCount] = await Promise.all([
+        prisma.user.findMany({
+            where,
+            include: {
+                discountGroup: true,
+                transactions: {
+                    select: {
+                        type: true,
+                        amount: true,
+                    }
+                },
+                _count: {
+                    select: { orders: true },
+                },
             },
-            _count: {
-                select: { orders: true },
-            },
-        },
-        orderBy: { createdAt: "desc" },
-    });
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: limit,
+        }),
+        prisma.user.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
 
     const discountGroups = await prisma.discountGroup.findMany({
         where: { isActive: true },
@@ -69,7 +106,15 @@ export default async function CustomersPage() {
                 </p>
             </div>
 
-            <CustomersTable customers={serializedCustomers} discountGroups={serializedDiscountGroups} />
+            <CustomersTable 
+                customers={serializedCustomers} 
+                discountGroups={serializedDiscountGroups} 
+                pagination={{
+                    currentPage: page,
+                    totalPages,
+                    totalCount,
+                }}
+            />
         </div>
     );
 }
