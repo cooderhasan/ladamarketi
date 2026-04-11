@@ -176,6 +176,7 @@ export function SearchablePicker({
         align="start"
         side="bottom"
         sideOffset={4}
+        avoidCollisions={false}
         className="p-0 w-[var(--radix-popover-trigger-width)] overflow-hidden shadow-xl"
       >
         {PickerContent}
