@@ -174,9 +174,8 @@ export function SearchablePicker({
       </PopoverTrigger>
       <PopoverContent 
         align="start"
-        side="bottom"
+        side="top"
         sideOffset={4}
-        avoidCollisions={false}
         className="p-0 w-[var(--radix-popover-trigger-width)] overflow-hidden shadow-xl"
       >
         {PickerContent}
