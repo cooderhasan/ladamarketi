@@ -87,7 +87,7 @@ export function SearchablePicker({
             />
           </div>
         </div>
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1" type="always">
           <div className="p-2">
             {filteredOptions.length === 0 ? (
               <p className="py-6 text-center text-sm text-muted-foreground">
