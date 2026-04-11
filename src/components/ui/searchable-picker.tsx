@@ -110,20 +110,20 @@ export function SearchablePicker({
       
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
+          width: 12px;
           display: block !important;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
+          background: #f8f9fa;
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #c1c1c1;
+          background: #adb5bd;
           border-radius: 10px;
-          border: 2px solid #f1f1f1;
+          border: 3px solid #f8f9fa;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #a1a1a1;
+          background: #868e96;
         }
       `}</style>
     </div>
@@ -174,6 +174,8 @@ export function SearchablePicker({
       </PopoverTrigger>
       <PopoverContent 
         align="start"
+        side="bottom"
+        sideOffset={4}
         className="p-0 w-[var(--radix-popover-trigger-width)] overflow-hidden shadow-xl"
       >
         {PickerContent}
