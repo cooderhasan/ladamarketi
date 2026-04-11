@@ -266,6 +266,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                         />
                                     </div>
                                 </div>
+                                <div className="grid gap-4 md:grid-cols-2">
                                     <div className="space-y-2">
                                         <Label htmlFor="city">Şehir *</Label>
                                         <SearchablePicker
@@ -295,6 +296,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                         />
                                         <input type="hidden" name="district" value={selectedDistrict} required />
                                     </div>
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="address">Adres *</Label>
                                     <Textarea
