@@ -22,7 +22,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { getCities, getDistrictsOfCity } from "@/lib/cities";
+import { getCities, getDistrictsOfCity, getCityNames } from "@/lib/cities";
+import { SearchablePicker } from "@/components/ui/searchable-picker";
 
 interface CheckoutFormProps {
     initialData?: {
@@ -265,53 +266,35 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                         />
                                     </div>
                                 </div>
-                                <div className="grid gap-4 md:grid-cols-2">
                                     <div className="space-y-2">
                                         <Label htmlFor="city">Şehir *</Label>
-                                        <Select
-                                            name="city"
-                                            required
+                                        <SearchablePicker
+                                            options={getCityNames()}
                                             value={selectedCity}
                                             onValueChange={(val) => {
                                                 setSelectedCity(val);
                                                 setSelectedDistrict("");
                                             }}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Şehir seçiniz" />
-                                            </SelectTrigger>
-                                            <SelectContent className="max-h-60">
-                                                {cities.map((c) => (
-                                                    <SelectItem key={c.name} value={c.name}>
-                                                        {c.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                            placeholder="Şehir seçiniz"
+                                            searchPlaceholder="Şehir ara..."
+                                            title="Şehir Seçimi"
+                                        />
+                                        <input type="hidden" name="city" value={selectedCity} required />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="district">İlçe *</Label>
-                                        <Select
-                                            name="district"
-                                            required
+                                        <SearchablePicker
+                                            options={selectedCity ? getDistrictsOfCity(selectedCity) : []}
                                             value={selectedDistrict}
                                             onValueChange={setSelectedDistrict}
                                             disabled={!selectedCity}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="İlçe seçiniz" />
-                                            </SelectTrigger>
-                                            <SelectContent className="max-h-60">
-                                                {selectedCity &&
-                                                    getDistrictsOfCity(selectedCity).map((d) => (
-                                                        <SelectItem key={d} value={d}>
-                                                            {d}
-                                                        </SelectItem>
-                                                    ))}
-                                            </SelectContent>
-                                        </Select>
+                                            placeholder="İlçe seçiniz"
+                                            searchPlaceholder="İlçe ara..."
+                                            title="İlçe Seçimi"
+                                            emptyMessage={selectedCity ? "İlçe bulunamadı." : "Önce şehir seçiniz."}
+                                        />
+                                        <input type="hidden" name="district" value={selectedDistrict} required />
                                     </div>
-                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="address">Adres *</Label>
                                     <Textarea

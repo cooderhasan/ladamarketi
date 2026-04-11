@@ -406,12 +406,20 @@ export async function syncAllYKOrders() {
         const creds = await getYKConfig();
         if (!creds) return { success: false, error: "YK entegrasyonu yapılandırılmamış." };
 
+        // Son 14 günü hesapla
+        const fourteenDaysAgo = new Date();
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
         // Güncellenecek siparişleri bul: YK anahtarı olan ama henüz teslim/iptal edilmemişler
+        // Performans için sadece son 14 günün siparişlerine bakıyoruz.
         const activeOrders = await prisma.order.findMany({
             where: {
                 ykCargoKey: { not: null },
                 status: {
                     notIn: ["DELIVERED", "CANCELLED"]
+                },
+                createdAt: {
+                    gte: fourteenDaysAgo
                 }
             },
             select: { id: true, ykCargoKey: true, orderNumber: true, ykSyncedAt: true }

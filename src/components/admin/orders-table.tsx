@@ -33,7 +33,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updateOrderStatus, updateOrderTracking, bulkUpdateOrderStatus, sendOrderToYurtici, cancelYKOrder, queryYKOrder, bulkSendOrdersToYurtici } from "@/app/admin/(protected)/orders/actions";
+import { updateOrderStatus, updateOrderTracking, bulkUpdateOrderStatus, sendOrderToYurtici, cancelYKOrder, queryYKOrder, bulkSendOrdersToYurtici, syncAllYKOrders } from "@/app/admin/(protected)/orders/actions";
 import { getYKStatusLabel, getYKStatusColor } from "@/services/yurtici/api";
 import { toast } from "sonner";
 import { OrderWithItems } from "@/types";
@@ -80,6 +80,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isBulkLoading, setIsBulkLoading] = useState(false);
     const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+    const [isSyncingYK, setIsSyncingYK] = useState(false);
 
     // Sync local order state when props change (due to server refetch)
     useEffect(() => {
@@ -228,6 +229,23 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
         }
     };
 
+    const handleYKSync = async () => {
+        setIsSyncingYK(true);
+        try {
+            const result = await syncAllYKOrders();
+            if (result.success) {
+                toast.success(result.message);
+                router.refresh();
+            } else {
+                toast.error(result.error);
+            }
+        } catch (error) {
+            toast.error("İşlem sırasında bir hata oluştu");
+        } finally {
+            setIsSyncingYK(false);
+        }
+    };
+
     return (
         <div className="space-y-4">
             {/* Bulk Actions Bar */}
@@ -366,6 +384,16 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
 
                     {/* Actions */}
                     <div className="flex items-end gap-2 md:ml-auto w-full md:w-auto pt-2 md:pt-0">
+                        <Button 
+                            onClick={handleYKSync} 
+                            disabled={isSyncingYK}
+                            variant="outline" 
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50 gap-2 shrink-0"
+                            title="Yolda olan Yurtiçi Kargo durumlarını son 14 güne göre güncelle"
+                        >
+                            <RefreshCw className={`h-4 w-4 ${isSyncingYK ? "animate-spin" : ""}`} />
+                            <span className="hidden sm:inline">Kargoları Güncelle</span>
+                        </Button>
                         <Button onClick={resetFilters} variant="ghost" className="text-gray-500 hover:text-gray-700">
                             Temizle
                         </Button>
