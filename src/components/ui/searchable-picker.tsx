@@ -70,12 +70,12 @@ export function SearchablePicker({
       </SheetTrigger>
       <SheetContent 
         side="bottom" 
-        className="h-[85vh] sm:h-[600px] sm:max-w-[500px] sm:left-1/2 sm:-translate-x-1/2 sm:bottom-10 sm:rounded-2xl p-0 flex flex-col shadow-2xl border dark:border-gray-800"
+        className="h-[85vh] sm:h-[600px] sm:max-w-[500px] sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:bottom-auto sm:rounded-2xl p-0 flex flex-col shadow-2xl border dark:border-gray-800"
       >
-        <SheetHeader className="p-4 border-b">
+        <SheetHeader className="p-4 border-b shrink-0">
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
-        <div className="p-4 border-b">
+        <div className="p-4 border-b shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -87,7 +87,7 @@ export function SearchablePicker({
             />
           </div>
         </div>
-        <ScrollArea className="flex-1" type="always">
+        <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
           <div className="p-2">
             {filteredOptions.length === 0 ? (
               <p className="py-6 text-center text-sm text-muted-foreground">
@@ -98,6 +98,7 @@ export function SearchablePicker({
                 {filteredOptions.map((option) => (
                   <button
                     key={option}
+                    type="button"
                     onClick={() => handleSelect(option)}
                     className={cn(
                       "flex items-center justify-between px-4 py-3 text-sm text-left rounded-md transition-colors hover:bg-accent",
@@ -113,7 +114,26 @@ export function SearchablePicker({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
+        
+        <style jsx global>{`
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            display: block !important;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+          }
+        `}</style>
       </SheetContent>
     </Sheet>
   )
