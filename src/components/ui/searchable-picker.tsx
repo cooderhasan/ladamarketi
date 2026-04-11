@@ -70,7 +70,7 @@ export function SearchablePicker({
       </SheetTrigger>
       <SheetContent 
         side="bottom" 
-        className="h-[80vh] sm:h-[60vh] p-0 flex flex-col rounded-t-xl"
+        className="h-[85vh] sm:h-[600px] sm:max-w-[500px] sm:left-1/2 sm:-translate-x-1/2 sm:bottom-10 sm:rounded-2xl p-0 flex flex-col shadow-2xl border dark:border-gray-800"
       >
         <SheetHeader className="p-4 border-b">
           <SheetTitle>{title}</SheetTitle>
