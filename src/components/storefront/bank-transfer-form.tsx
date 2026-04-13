@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { submitBankTransferNotification } from "@/app/actions/bank-transfer";
+import { toast } from "sonner";
 
 interface BankTransferFormProps {
   orderId: string;
@@ -34,7 +35,6 @@ const BANKS = [
 export function BankTransferForm({ orderId, orderTotal, bankInfo }: BankTransferFormProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const [formData, setFormData] = useState({
     senderName: "",
     bankName: "",
@@ -44,24 +44,37 @@ export function BankTransferForm({ orderId, orderTotal, bankInfo }: BankTransfer
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (!formData.senderName || !formData.bankName || !formData.amount) {
-      setResult({ success: false, message: "Lütfen zorunlu alanları doldurun." });
+      toast.error("Lütfen zorunlu alanları doldurun.");
       return;
     }
+    
     setLoading(true);
-    const res = await submitBankTransferNotification({
-      orderId,
-      senderName: formData.senderName,
-      bankName: formData.bankName,
-      amount: parseFloat(formData.amount),
-      transferDate: formData.transferDate,
-      notes: formData.notes || undefined,
-    });
-    setResult(res);
-    setLoading(false);
-    if (res.success) {
-      setOpen(false);
+    try {
+      const res = await submitBankTransferNotification({
+        orderId,
+        senderName: formData.senderName,
+        bankName: formData.bankName,
+        amount: parseFloat(formData.amount),
+        transferDate: formData.transferDate,
+        notes: formData.notes || undefined,
+      });
+
+      if (res.success) {
+        toast.success(res.message);
+        setOpen(false);
+      } else {
+        toast.error(res.message || "Bir hata oluştu.");
+      }
+    } catch (error: any) {
+      toast.error("İşlem sırasında bir hata oluştu: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,12 +96,7 @@ export function BankTransferForm({ orderId, orderTotal, bankInfo }: BankTransfer
         </div>
       )}
 
-      {/* Sonuç mesajı */}
-      {result && (
-        <div className={`p-3 rounded-lg text-sm ${result.success ? "bg-green-50 text-green-800 border border-green-200" : "bg-red-50 text-red-800 border border-red-200"}`}>
-          {result.message}
-        </div>
-      )}
+      {/* Sonuç mesajı artık toast ile gösteriliyor */}
 
       {!open ? (
         <button
