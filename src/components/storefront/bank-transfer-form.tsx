@@ -106,7 +106,7 @@ export function BankTransferForm({ orderId, orderTotal, bankInfo }: BankTransfer
           💳 Havale Yaptım, Bildir
         </button>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-3">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-3">
           <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Havale Bildirim Formu</h3>
           
           <div>
@@ -178,7 +178,8 @@ export function BankTransferForm({ orderId, orderTotal, bankInfo }: BankTransfer
 
           <div className="flex gap-2">
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               disabled={loading}
               className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors text-sm"
             >
@@ -192,7 +193,7 @@ export function BankTransferForm({ orderId, orderTotal, bankInfo }: BankTransfer
               İptal
             </button>
           </div>
-        </form>
+        </div>
       )}
     </div>
   );

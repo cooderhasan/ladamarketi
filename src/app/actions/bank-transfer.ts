@@ -47,8 +47,8 @@ export async function submitBankTransferNotification(data: {
       },
     });
 
-    revalidatePath(`/orders/${data.orderId}`);
-    revalidatePath(`/account/orders/${data.orderId}`);
+    // revalidatePath(`/orders/${data.orderId}`);
+    // revalidatePath(`/account/orders/${data.orderId}`);
     return { success: true, message: "Havale bildiriminiz alındı. En kısa sürede onaylanacaktır." };
   } catch (error: any) {
     return { success: false, message: "Hata: " + error.message };
