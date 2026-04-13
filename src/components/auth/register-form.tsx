@@ -40,11 +40,17 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
         }
 
         try {
-            await registerUser(formData);
-            setSuccess(true);
-            toast.success("Kayıt başarılı! Yönlendiriliyorsunuz...");
+            const result = await registerUser(formData);
+            
+            if (result.success) {
+                setSuccess(true);
+                toast.success("Kayıt başarılı! Yönlendiriliyorsunuz...");
+            } else {
+                toast.error(result.error || "Kayıt sırasında bir hata oluştu.");
+            }
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Bir hata oluştu.");
+            console.error("REGISTER_FORM_ERROR:", error);
+            toast.error("İşlem sırasında bir hata oluştu. Lütfen tekrar deneyiniz.");
         } finally {
             setLoading(false);
         }
@@ -207,7 +213,14 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
 
                     <div className="space-y-2">
                         <Label htmlFor="address">Adres *</Label>
-                        <Textarea id="address" name="address" rows={2} required />
+                        <Textarea 
+                            id="address" 
+                            name="address" 
+                            rows={2} 
+                            required 
+                            minLength={10}
+                            placeholder="Sokak, Mahalle, Bina No, Kat, Daire..."
+                        />
                     </div>
 
                     <Button type="submit" className="w-full h-12 text-lg" disabled={loading}>
