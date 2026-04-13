@@ -30,13 +30,12 @@ export async function GET() {
         `;
         const lowStock = Number(lowStockProducts[0]?.count || 0);
 
-        // Bugünkü yeni siparişler
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Yeni siparişler: Hazırlanması gereken (PENDING veya CONFIRMED) olanlar
         const newOrders = await prisma.order.count({
             where: {
-                createdAt: { gte: today },
-                status: "PENDING"
+                status: {
+                    in: ["PENDING", "CONFIRMED"]
+                }
             }
         });
 

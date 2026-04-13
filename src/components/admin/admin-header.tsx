@@ -128,7 +128,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                 {/* Hızlı Bildirim Rozetleri */}
                 <div className="hidden sm:flex items-center gap-2">
                     {notifications.find(n => n.id === "orders") && (
-                        <Link href="/admin/orders?status=PENDING">
+                        <Link href="/admin/orders">
                             <Badge className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 gap-2 animate-pulse cursor-pointer border-none shadow-lg">
                                 <ShoppingCart className="h-3.5 w-3.5" />
                                 <span className="font-bold">{notifications.find(n => n.id === "orders")?.count} Yeni Sipariş</span>
@@ -172,7 +172,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                             notifications.map((notification) => (
                                 <DropdownMenuItem key={notification.id} asChild>
                                     <Link
-                                        href={notification.link}
+                                        href={notification.id === "orders" ? "/admin/orders" : notification.link}
                                         className="flex items-start gap-3 p-3 cursor-pointer"
                                     >
                                         <div className="mt-0.5">
