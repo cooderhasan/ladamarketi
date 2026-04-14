@@ -12,6 +12,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
 import { registerUser } from "@/app/register/actions";
+import { SearchablePicker } from "@/components/ui/searchable-picker";
+import { getDistrictsOfCity, getCityNames } from "@/lib/cities";
 
 interface RegisterFormProps {
     logoUrl?: string;
@@ -25,6 +27,8 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [isCorporate, setIsCorporate] = useState(false);
+    const [selectedCity, setSelectedCity] = useState<string>("");
+    const [selectedDistrict, setSelectedDistrict] = useState<string>("");
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -203,11 +207,32 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
                     <div className="grid gap-4 md:grid-cols-2 pt-2 border-t">
                         <div className="space-y-2">
                             <Label htmlFor="city">Şehir *</Label>
-                            <Input id="city" name="city" required />
+                            <SearchablePicker
+                                options={getCityNames()}
+                                value={selectedCity}
+                                onValueChange={(val) => {
+                                    setSelectedCity(val);
+                                    setSelectedDistrict("");
+                                }}
+                                placeholder="Şehir seçiniz"
+                                searchPlaceholder="Şehir ara..."
+                                title="Şehir Seçimi"
+                            />
+                            <input type="hidden" name="city" value={selectedCity} required />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="district">İlçe *</Label>
-                            <Input id="district" name="district" required />
+                            <SearchablePicker
+                                options={selectedCity ? getDistrictsOfCity(selectedCity) : []}
+                                value={selectedDistrict}
+                                onValueChange={setSelectedDistrict}
+                                disabled={!selectedCity}
+                                placeholder="İlçe seçiniz"
+                                searchPlaceholder="İlçe ara..."
+                                title="İlçe Seçimi"
+                                emptyMessage={selectedCity ? "İlçe bulunamadı." : "Önce şehir seçiniz."}
+                            />
+                            <input type="hidden" name="district" value={selectedDistrict} required />
                         </div>
                     </div>
 
