@@ -121,6 +121,14 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
                 </div>
             </div>
 
+            {/* Customer Note */}
+            {order.notes && (
+                <div className="mb-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <h3 className="text-gray-500 font-semibold mb-2 uppercase tracking-wider text-xs">Müşteri Notu</h3>
+                    <p className="text-gray-800 whitespace-pre-wrap">{order.notes}</p>
+                </div>
+            )}
+
             {/* Order Items */}
             <div className="mb-0">
                 <table className="w-full text-left border-collapse">
