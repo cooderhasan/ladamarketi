@@ -4,8 +4,8 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 
-# Install OpenSSL (required for Prisma)
-RUN apk add --no-cache openssl
+# Install dependencies for Prisma and native modules
+RUN apk add --no-cache openssl libc6-compat
 
 # Copy package files AND prisma schema first (needed for postinstall)
 COPY package*.json ./
@@ -25,8 +25,8 @@ FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-# Install OpenSSL (required for Prisma)
-RUN apk add --no-cache openssl
+# Install dependencies for Prisma and native modules
+RUN apk add --no-cache openssl libc6-compat
 
 ENV NODE_ENV=production
 
