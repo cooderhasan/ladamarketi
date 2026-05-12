@@ -88,6 +88,7 @@ interface ProductDetailProps {
         averageRating: number;
         totalReviews: number;
     };
+    breadcrumbs?: { name: string; slug: string }[];
 }
 
 export function ProductDetail({
@@ -99,6 +100,7 @@ export function ProductDetail({
     whatsappNumber,
     reviews,
     reviewStats,
+    breadcrumbs = [],
 }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(product.minQuantity);
     const [inputValue, setInputValue] = useState(product.minQuantity.toString());
@@ -237,21 +239,17 @@ export function ProductDetail({
                     <Link href="/" className="hover:text-[#009AD0] transition-colors">
                         Ana Sayfa
                     </Link>
-                    <ChevronRightIcon className="w-3.5 h-3.5 text-gray-300 shrink-0" />
-                    <Link href="/products" className="hover:text-[#009AD0] transition-colors">
-                        Ürünler
-                    </Link>
-                    {product.category && (
-                        <>
+                    {breadcrumbs.map((crumb, index) => (
+                        <div key={crumb.slug} className="flex items-center gap-1.5">
                             <ChevronRightIcon className="w-3.5 h-3.5 text-gray-300 shrink-0" />
                             <Link
-                                href={`/products?category=${product.category.slug}`}
+                                href={`/products?category=${crumb.slug}`}
                                 className="hover:text-[#009AD0] transition-colors"
                             >
-                                {product.category.name}
+                                {crumb.name}
                             </Link>
-                        </>
-                    )}
+                        </div>
+                    ))}
                     <ChevronRightIcon className="w-3.5 h-3.5 text-gray-300 shrink-0" />
                     <span className="text-gray-800 dark:text-gray-200 font-medium truncate max-w-[200px]">{product.name}</span>
                 </nav>

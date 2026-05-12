@@ -50,7 +50,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
     const product = await prisma.product.findUnique({
         where: { slug, isActive: true },
         include: {
-            category: true,
+            category: {
+                include: {
+                    parent: {
+                        include: {
+                            parent: true
+                        }
+                    }
+                }
+            },
             brand: true,
             variants: {
                 where: { isActive: true },
@@ -104,6 +112,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
             priceAdjustment: Number(v.priceAdjustment),
         })),
     };
+
+    // Construct breadcrumbs from category tree
+    const breadcrumbs = [];
+    let currentCat: any = product.category;
+    while (currentCat) {
+        breadcrumbs.unshift({ name: currentCat.name, slug: currentCat.slug });
+        currentCat = currentCat.parent;
+    }
 
     const schema = {
         "@context": "https://schema.org",
@@ -161,6 +177,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     }
                 }))}
                 reviewStats={reviewStats}
+                breadcrumbs={breadcrumbs}
             />
         </>
     );
