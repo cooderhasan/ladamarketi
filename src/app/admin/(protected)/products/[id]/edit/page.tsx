@@ -35,9 +35,6 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
         prisma.category.findMany({
             where: {
                 isActive: true,
-                NOT: {
-                    name: { in: ["Root", "Home"] }
-                }
             },
             orderBy: { order: "asc" },
             select: { id: true, name: true, parentId: true },
