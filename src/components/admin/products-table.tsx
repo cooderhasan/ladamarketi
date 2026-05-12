@@ -65,6 +65,7 @@ interface Brand {
 interface ProductsTableProps {
     products: Product[];
     brands: Brand[];
+    categories?: { id: string; name: string }[];
     pagination?: {
         currentPage: number;
         totalPages: number;
@@ -84,13 +85,14 @@ const priceStatusOptions = [
     { value: "HAS_PRICE", label: "Fiyatlı" },
 ];
 
-export function ProductsTable({ products: initialProducts, brands, pagination }: ProductsTableProps) {
+export function ProductsTable({ products: initialProducts, brands, categories = [], pagination }: ProductsTableProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     // Filter States
     const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
     const [brandFilter, setBrandFilter] = useState(searchParams.get("brand") || "ALL");
+    const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "ALL");
     const [stockStatus, setStockStatus] = useState(searchParams.get("stockStatus") || "ALL");
     const [priceStatus, setPriceStatus] = useState(searchParams.get("priceStatus") || "ALL");
 
@@ -112,6 +114,9 @@ export function ProductsTable({ products: initialProducts, brands, pagination }:
         if (brandFilter && brandFilter !== "ALL") params.set("brand", brandFilter);
         else params.delete("brand");
 
+        if (categoryFilter && categoryFilter !== "ALL") params.set("category", categoryFilter);
+        else params.delete("category");
+
         if (stockStatus && stockStatus !== "ALL") params.set("stockStatus", stockStatus);
         else params.delete("stockStatus");
 
@@ -126,6 +131,7 @@ export function ProductsTable({ products: initialProducts, brands, pagination }:
     const resetFilters = () => {
         setSearchTerm("");
         setBrandFilter("ALL");
+        setCategoryFilter("ALL");
         setStockStatus("ALL");
         setPriceStatus("ALL");
         router.push("/admin/products");
@@ -204,6 +210,24 @@ export function ProductsTable({ products: initialProducts, brands, pagination }:
                                 className="pl-9"
                             />
                         </div>
+                    </div>
+
+                    {/* Category */}
+                    <div className="w-full md:w-[180px] space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Kategori</label>
+                        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Tümü" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Tümü</SelectItem>
+                                {categories.map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                        {category.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Brand */}

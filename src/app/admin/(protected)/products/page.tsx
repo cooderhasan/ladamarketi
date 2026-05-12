@@ -9,6 +9,7 @@ interface ProductsPageProps {
         page?: string;
         search?: string;
         brand?: string;
+        category?: string;
         stockStatus?: string;
         priceStatus?: string;
     }>;
@@ -22,6 +23,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
     const search = params.search || "";
     const brandFilter = params.brand || "";
+    const categoryFilter = params.category || "";
     const stockStatus = params.stockStatus || "ALL";
     const priceStatus = params.priceStatus || "ALL";
 
@@ -40,6 +42,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         where.brandId = brandFilter;
     }
 
+    if (categoryFilter && categoryFilter !== "ALL") {
+        where.categoryId = categoryFilter;
+    }
+
     if (stockStatus === "IN_STOCK") {
         where.stock = { gt: 0 };
     } else if (stockStatus === "OUT_OF_STOCK") {
@@ -52,8 +58,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         where.listPrice = { gt: 0 };
     }
 
-    // Parallel Fetch: Products + Total Count + Brands
-    const [products, totalCount, brands] = await Promise.all([
+    // Parallel Fetch: Products + Total Count + Brands + Categories
+    const [products, totalCount, brands, categories] = await Promise.all([
         prisma.product.findMany({
             where,
             include: {
@@ -68,6 +74,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         prisma.brand.findMany({
             where: { isActive: true },
             orderBy: { name: "asc" },
+        }),
+        prisma.category.findMany({
+            orderBy: { name: "asc" },
+            select: { id: true, name: true }
         }),
     ]);
 
@@ -110,6 +120,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <ProductsTable
                 products={serializedProducts}
                 brands={brands}
+                categories={categories}
                 pagination={{
                     currentPage: page,
                     totalPages,
