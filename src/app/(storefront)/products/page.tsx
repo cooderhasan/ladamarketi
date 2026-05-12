@@ -175,7 +175,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     const currentPage = params.page ? Number(params.page) : 1;
     const skip = (currentPage - 1) * PAGE_SIZE;
 
-    const ROOT_CATEGORY_ID = "cml9exnw20009orv864or2ni2"; // Known Root ID
+    const ROOT_CATEGORY_ID = null; // Known Root ID
     let sidebarCategories: any[] = [];
     let currentCategory: { name: string; slug: string } | null = null;
 
