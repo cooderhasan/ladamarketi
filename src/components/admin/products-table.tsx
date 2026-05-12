@@ -13,6 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
     Table,
     TableBody,
@@ -215,19 +216,16 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                     {/* Category */}
                     <div className="w-full md:w-[180px] space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Kategori</label>
-                        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Tümü" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="ALL">Tümü</SelectItem>
-                                {categories.map((category) => (
-                                    <SelectItem key={category.id} value={category.id}>
-                                        {category.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <SearchableSelect
+                            options={[
+                                { value: "ALL", label: "Tümü" },
+                                ...categories.map(c => ({ value: c.id, label: c.name }))
+                            ]}
+                            value={categoryFilter}
+                            onValueChange={setCategoryFilter}
+                            placeholder="Tümü"
+                            searchPlaceholder="Kategori ara..."
+                        />
                     </div>
 
                     {/* Brand */}
