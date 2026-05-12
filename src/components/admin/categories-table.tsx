@@ -212,7 +212,7 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setLocalCategories(categories);
     }, [categories]);
 
-    const ITEMS_PER_PAGE = reorderMode === "none" ? 10 : 1000; // Show all when reordering
+    const ITEMS_PER_PAGE = reorderMode === "none" ? 100 : 1000; // Show all when reordering
 
     // Filter categories based on search
     const filteredCategories = localCategories.filter(category => {
