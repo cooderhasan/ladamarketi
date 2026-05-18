@@ -351,11 +351,21 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="max-w-[200px]">
                                             {product.categories && product.categories.length > 0 ? (
-                                                <span className="text-sm font-medium">
-                                                    {product.categories.map(c => c.name).join(", ")}
-                                                </span>
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <span className="text-sm font-medium truncate max-w-[150px]" title={product.categories.map(c => c.name).join(", ")}>
+                                                        {product.categories[0].name}
+                                                    </span>
+                                                    {product.categories.length > 1 && (
+                                                        <span 
+                                                            className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 cursor-help"
+                                                            title={product.categories.map(c => c.name).join(", ")}
+                                                        >
+                                                            +{product.categories.length - 1}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             ) : (
                                                 <span className="text-gray-400">-</span>
                                             )}
