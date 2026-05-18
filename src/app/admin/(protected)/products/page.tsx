@@ -43,7 +43,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     }
 
     if (categoryFilter && categoryFilter !== "ALL") {
-        where.categoryId = categoryFilter;
+        where.categories = {
+            some: {
+                id: categoryFilter
+            }
+        };
     }
 
     if (stockStatus === "IN_STOCK") {
@@ -63,7 +67,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         prisma.product.findMany({
             where,
             include: {
-                category: true,
+                categories: true,
                 brand: true,
             },
             orderBy: { createdAt: "desc" },

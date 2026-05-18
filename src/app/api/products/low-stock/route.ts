@@ -19,10 +19,15 @@ export async function GET() {
                 p.sku,
                 p.stock,
                 p."criticalStock",
-                c.name as "categoryName",
+                (
+                    SELECT cat.name 
+                    FROM categories cat 
+                    JOIN "_CategoryToProduct" c2p ON c2p."A" = cat.id 
+                    WHERE c2p."B" = p.id 
+                    LIMIT 1
+                ) as "categoryName",
                 b.name as "brandName"
             FROM products p
-            LEFT JOIN categories c ON p."categoryId" = c.id
             LEFT JOIN brands b ON p."brandId" = b.id
             WHERE p."isActive" = true AND p.stock <= p."criticalStock"
             ORDER BY p.stock ASC, p.name ASC

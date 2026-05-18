@@ -22,7 +22,7 @@ async function getStockStats() {
             sku: true,
             stock: true,
             criticalStock: true,
-            category: { select: { name: true } },
+            categories: { select: { name: true } },
             brand: { select: { name: true } },
         },
         orderBy: { stock: "asc" }
@@ -218,7 +218,11 @@ export default async function StockReportPage() {
                                                 {product.sku || "-"}
                                             </TableCell>
                                             <TableCell className="text-gray-500">
-                                                {product.category?.name || "-"}
+                                                {product.categories && product.categories.length > 0 ? (
+                                                    product.categories.map(c => c.name).join(", ")
+                                                ) : (
+                                                    "-"
+                                                )}
                                             </TableCell>
                                             <TableCell className="text-gray-500">
                                                 {product.brand?.name || "-"}

@@ -48,10 +48,10 @@ interface Product {
     isBestSeller: boolean;
     isActive: boolean;
     isBundle?: boolean;
-    category: {
+    categories: {
         id: string;
         name: string;
-    } | null;
+    }[];
     brand: {
         id: string;
         name: string;
@@ -352,7 +352,11 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            {product.category?.name || (
+                                            {product.categories && product.categories.length > 0 ? (
+                                                <span className="text-sm font-medium">
+                                                    {product.categories.map(c => c.name).join(", ")}
+                                                </span>
+                                            ) : (
                                                 <span className="text-gray-400">-</span>
                                             )}
                                         </TableCell>

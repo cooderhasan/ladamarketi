@@ -90,6 +90,7 @@ export async function createProduct(formData: FormData) {
             ...productData,
             images,
             ...(brandId && brandId !== "none" && { brand: { connect: { id: brandId } } }),
+            ...(validCategoryIds.length > 0 && { category: { connect: { id: validCategoryIds[0] } } }),
             categories: {
                 connect: validCategoryIds.map((id) => ({ id })),
             },
@@ -228,9 +229,9 @@ export async function updateProduct(productId: string, formData: FormData) {
             ...updateData,
             images,
             brand: brandId ? { connect: { id: brandId } } : { disconnect: true },
-            // category: categoryId ? { connect: { id: categoryId } } : { disconnect: true },
+            category: validIds.length > 0 ? { connect: { id: validIds[0] } } : { disconnect: true },
             categories: {
-                set: validatedData.categoryIds.map((id) => ({ id })),
+                set: validIds.map((id) => ({ id })),
             },
         },
     });
