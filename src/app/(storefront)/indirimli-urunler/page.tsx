@@ -8,7 +8,7 @@ export const metadata = {
     title: "İndirimli Ürünler | Lada Marketi",
     description: "En uygun fiyatlı Lada yedek parçaları ve fırsat ürünleri.",
     alternates: {
-        canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://ladamarketi.com"}/indirimli-urunler`
+        canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com"}/indirimli-urunler`
     }
 };
 

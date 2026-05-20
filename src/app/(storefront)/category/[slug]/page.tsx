@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
         title: `${category.name} | Lada Marketi`,
         description: `${category.name} kategorisindeki en kaliteli yedek parça ve aksesuarları inceleyin.`,
         alternates: {
-            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://ladamarketi.com"}/category/${slug}`
+            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com"}/category/${slug}`
         }
     };
 }

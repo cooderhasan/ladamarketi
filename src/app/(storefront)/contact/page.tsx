@@ -2,6 +2,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Mail, MapPin, Phone, Clock, Building2, FileText, MessageCircle } from "lucide-react";
 import { getSiteSettings } from "@/lib/settings";
 import { ContactForm } from "@/components/storefront/contact-form";
+import { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings();
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
+    return {
+        title: `İletişim | ${settings.siteName || "Lada Marketi"}`,
+        description: "Lada yedek parça ve aksesuar ihtiyaçlarınız için bizimle iletişime geçin. Konya Eski Sanayi şubemiz, telefon ve WhatsApp hatlarımızla hizmetinizdeyiz.",
+        alternates: {
+            canonical: `${baseUrl}/contact`
+        }
+    };
+}
 
 export default async function ContactPage() {
     const settings = await getSiteSettings();

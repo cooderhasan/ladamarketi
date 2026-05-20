@@ -2,6 +2,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Building2, Users, Target, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import { getSiteSettings } from "@/lib/settings";
+import { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings();
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
+    return {
+        title: `Hakkımızda | ${settings.siteName || "Lada Marketi"}`,
+        description: settings.seoDescription || "Lada Marketi yedek parça ve aksesuar toptan ve perakende satış çözümleri. Bizimle ilgili daha fazlasını öğrenin.",
+        alternates: {
+            canonical: `${baseUrl}/about`
+        }
+    };
+}
 
 export default async function AboutPage() {
     const settings = await getSiteSettings();

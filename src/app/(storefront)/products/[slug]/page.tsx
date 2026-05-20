@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
             images: product.images || [],
         },
         alternates: {
-            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://ladamarketi.com"}/products/${slug}`
+            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com"}/products/${slug}`
         }
     };
 }
@@ -121,11 +121,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         currentCat = currentCat.parent;
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
+    const absoluteImages = product.images?.map(img => img.startsWith("http") ? img : `${baseUrl}${img.startsWith("/") ? "" : "/"}${img}`) || [];
+
     const schema = {
         "@context": "https://schema.org",
         "@type": "Product",
         name: product.name,
-        image: product.images,
+        image: absoluteImages,
         description: product.description?.replace(/<[^>]*>?/gm, "") || product.name, // Strip HTML
         sku: product.sku,
         mpn: product.sku,
@@ -135,7 +138,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         },
         offers: {
             "@type": "Offer",
-            url: `${process.env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
+            url: `${baseUrl}/products/${product.slug}`,
             priceCurrency: "TRY",
             price: Number(product.listPrice),
             priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
@@ -148,9 +151,35 @@ export default async function ProductPage({ params }: ProductPageProps) {
         },
     };
 
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Ana Sayfa",
+                "item": baseUrl
+            },
+            ...breadcrumbs.map((bc, index) => ({
+                "@type": "ListItem",
+                "position": index + 2,
+                "name": bc.name,
+                "item": `${baseUrl}/category/${bc.slug}`
+            })),
+            {
+                "@type": "ListItem",
+                "position": breadcrumbs.length + 2,
+                "name": product.name,
+                "item": `${baseUrl}/products/${product.slug}`
+            }
+        ]
+    };
+
     return (
         <>
-            <JsonLd data={schema} />
+            <JsonLd id="product-jsonld" data={schema} />
+            <JsonLd id="breadcrumb-jsonld" data={breadcrumbSchema} />
             <ProductDetail
                 product={serializedProduct}
                 relatedProducts={relatedProducts.map(p => ({

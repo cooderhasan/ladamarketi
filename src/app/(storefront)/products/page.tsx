@@ -49,7 +49,7 @@ export async function generateMetadata({ searchParams }: ProductsPageProps): Pro
         title: `${title} | Lada Marketi`,
         description,
         alternates: {
-            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://ladamarketi.com"}/products`
+            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com"}/products`
         }
     };
 }

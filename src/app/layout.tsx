@@ -46,6 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: general.seoTitle || general.siteName || "B2B E-Ticaret Platformu",
       description: general.seoDescription || "B2B Toptan Satış Platformu",
       siteName: general.siteName || "B2B",
+      images: general.logoUrl ? [{ url: general.logoUrl }] : [],
     },
     alternates: {
       canonical: "./",
@@ -69,7 +70,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en">
+    <html lang="tr">
       <body className="antialiased">
         <Providers>
           {children}
