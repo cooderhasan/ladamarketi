@@ -7,12 +7,12 @@ import Link from "next/link";
 export function UpdateBanner() {
     const [isVisible, setIsVisible] = useState(false);
 
-    // Bitiş tarihi: 28 Mart 2026 (Bugün 25 Mart + 3 gün)
-    const expiryDate = new Date("2026-03-29T00:00:00Z").getTime();
+    // Bitiş tarihi: 7 Haziran 2026 (3 gün sonrası için)
+    const expiryDate = new Date("2026-06-07T00:00:00Z").getTime();
 
     useEffect(() => {
         const now = new Date().getTime();
-        const isDismissed = localStorage.getItem("admin-update-dismissed");
+        const isDismissed = localStorage.getItem("admin-update-v2-dismissed");
         
         if (now < expiryDate && !isDismissed) {
             setIsVisible(true);
@@ -21,7 +21,7 @@ export function UpdateBanner() {
 
     const dismiss = () => {
         setIsVisible(false);
-        localStorage.setItem("admin-update-dismissed", "true");
+        localStorage.setItem("admin-update-v2-dismissed", "true");
     };
 
     if (!isVisible) return null;
@@ -32,25 +32,25 @@ export function UpdateBanner() {
                 <p className="text-sm leading-6 text-gray-900 dark:text-gray-100">
                     <strong className="font-bold flex items-center gap-1.5">
                         <Sparkles className="h-4 w-4 text-amber-500" />
-                        Yeni Güncelleme
+                        Yeni Sistem Güncellemeleri
                     </strong>
                     <svg viewBox="0 0 2 2" className="mx-2 inline h-0.5 w-0.5 fill-current" aria-hidden="true">
                         <circle cx="1" cy="1" r="1" />
                     </svg>
-                    Google Merchant Center Entegrasyonu ve Havale/EFT Bildirim Modülü başarıyla tamamlandı!
+                    Sipariş yazdırma durumu takibi, yazdırma filtresi, bildirim alanına iade talebi gösterimi ve şifre sıfırlama sistemi eklendi!
                 </p>
                 <div className="flex items-center gap-3">
                     <Link
-                        href="/admin/integrations/google"
+                        href="/admin/orders"
                         className="flex-none rounded-full bg-gray-900 dark:bg-white px-3.5 py-1 text-sm font-semibold text-white dark:text-gray-900 shadow-sm hover:bg-gray-700 dark:hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
                     >
-                        Merchant panelini gör <span aria-hidden="true">&rarr;</span>
+                        Siparişleri Gör <span aria-hidden="true">&rarr;</span>
                     </Link>
                     <Link
-                        href="/admin/bank-transfers"
+                        href="/admin/returns"
                         className="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100 flex items-center gap-1 hover:underline"
                     >
-                        Havale Bildirimleri <ArrowRight className="h-3 w-3" />
+                        İade Talepleri <ArrowRight className="h-3 w-3" />
                     </Link>
                 </div>
             </div>
