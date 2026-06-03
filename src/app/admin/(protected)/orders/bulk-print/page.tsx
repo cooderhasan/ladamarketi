@@ -61,7 +61,7 @@ export default async function BulkOrderPrintPage({ searchParams }: BulkPrintPage
                 }
             `}</style>
 
-            <AutoPrint />
+            <AutoPrint orderIds={ids} />
 
             {/* Actions (Hidden in Print) */}
             <div className="no-print sticky top-0 z-50 p-4 bg-white border-b shadow-sm flex justify-between items-center">

@@ -568,3 +568,32 @@ export async function bulkSendOrdersToYurtici(orderIds: string[]) {
         return { success: false, error: error instanceof Error ? error.message : "Toplu gönderim başarısız." };
     }
 }
+
+/**
+ * Siparişlerin yazdırıldığını toplu veya tekil olarak işaretler.
+ * Print sayfaları açıldığında otomatik olarak çağrılır.
+ */
+export async function markOrdersPrinted(orderIds: string | string[]) {
+    try {
+        const session = await auth();
+        if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+            throw new Error("Unauthorized");
+        }
+
+        const ids = Array.isArray(orderIds) ? orderIds : [orderIds];
+
+        await prisma.order.updateMany({
+            where: { id: { in: ids } },
+            data: {
+                isPrinted: true,
+                printedAt: new Date(),
+            },
+        });
+
+        revalidatePath("/admin/orders");
+        return { success: true };
+    } catch (error) {
+        console.error("markOrdersPrinted error:", error);
+        return { success: false, error: "Yazdırma durumu güncellenemedi." };
+    }
+}

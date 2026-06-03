@@ -44,6 +44,11 @@ export async function GET() {
             where: { status: "PENDING" }
         });
 
+        // Bekleyen iade talepleri
+        const pendingReturns = await prisma.returnRequest.count({
+            where: { status: "PENDING" }
+        });
+
         const notifications = [];
 
         if (pendingQuotes > 0) {
@@ -65,6 +70,17 @@ export async function GET() {
                 link: "/admin/bank-transfers",
                 type: "bank-transfer",
                 count: pendingTransfers
+            });
+        }
+
+        if (pendingReturns > 0) {
+            notifications.push({
+                id: "returns",
+                title: "İade Talebi",
+                description: `${pendingReturns} adet bekleyen iade talebi var`,
+                link: "/admin/returns",
+                type: "return",
+                count: pendingReturns
             });
         }
 
@@ -101,7 +117,7 @@ export async function GET() {
             });
         }
 
-        const totalCount = pendingQuotes + pendingDealers + lowStock + newOrders + pendingTransfers;
+        const totalCount = pendingQuotes + pendingDealers + lowStock + newOrders + pendingTransfers + pendingReturns;
 
         return NextResponse.json({
             notifications,

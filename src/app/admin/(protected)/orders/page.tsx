@@ -10,6 +10,7 @@ interface OrdersPageProps {
         cargo?: string;
         startDate?: string;
         endDate?: string;
+        printed?: string; // "YES" | "NO" | "ALL"
     }>;
 }
 
@@ -22,6 +23,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     const search = params.search || "";
     const status = params.status as OrderStatus | string | undefined;
     const cargo = params.cargo;
+    const printed = params.printed; // "YES" | "NO" | undefined/"ALL"
     const startDate = params.startDate ? new Date(params.startDate) : undefined;
     const endDate = params.endDate ? new Date(params.endDate) : undefined;
 
@@ -76,6 +78,13 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         }
     }
 
+    // Print Filter
+    if (printed === "YES") {
+        where.isPrinted = true;
+    } else if (printed === "NO") {
+        where.isPrinted = false;
+    }
+
     // Date Filtering
     if (startDate || endDate) {
         where.createdAt = {};
@@ -119,6 +128,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     const serializedOrders = orders.map((order: any) => ({
         ...order,
         guestEmail: order.guestEmail,
+        isPrinted: order.isPrinted ?? false,
+        printedAt: order.printedAt ? order.printedAt.toISOString() : null,
         subtotal: Number(order.subtotal),
         discountAmount: Number(order.discountAmount),
         vatAmount: Number(order.vatAmount),

@@ -51,7 +51,7 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
 
 
             {/* Auto-print component */}
-            <AutoPrint />
+            <AutoPrint orderIds={id} />
 
             {/* Actions (Hidden in Print) */}
             <div className="no-print mb-8 flex justify-between items-center bg-gray-100 p-4 rounded-lg">

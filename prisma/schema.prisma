@@ -316,6 +316,8 @@ model Order {
   ykSyncedAt          DateTime?     // Son YK senkronizasyon zamanı
   ykError             String?       // Son YK hata mesajı
   notes                String?
+  isPrinted            Boolean       @default(false) // Sipariş yazdırıldı mı?
+  printedAt            DateTime?     // Sipariş yazdırılma zamanı
   items                OrderItem[]
   payment              Payment?
   transactions         CurrentAccountTransaction[] // Cari hareket bağlantısı

@@ -109,10 +109,18 @@ export function LoginForm({ logoUrl, siteName }: LoginFormProps) {
 
                         {/* Password Field */}
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-gray-700 dark:text-gray-300 font-medium flex items-center gap-2">
-                                <Lock className="h-4 w-4 text-[#009AD0]" />
-                                Şifre
-                            </Label>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="password" className="text-gray-700 dark:text-gray-300 font-medium flex items-center gap-2">
+                                    <Lock className="h-4 w-4 text-[#009AD0]" />
+                                    Şifre
+                                </Label>
+                                <Link
+                                    href="/forgot-password"
+                                    className="text-xs text-[#009AD0] hover:underline"
+                                >
+                                    Şifremi Unuttum
+                                </Link>
+                            </div>
                             <div className="relative">
                                 <Input
                                     id="password"

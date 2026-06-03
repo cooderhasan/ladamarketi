@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2, Menu, Landmark } from "lucide-react";
+import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2, Menu, Landmark, RotateCcw } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart-store";
 import type { UserRole, UserStatus } from "@prisma/client";
@@ -43,13 +43,14 @@ const notificationIcons: Record<string, React.ReactNode> = {
     stock: <Package className="h-4 w-4 text-orange-600" />,
     order: <ShoppingCart className="h-4 w-4 text-green-600" />,
     "bank-transfer": <Landmark className="h-4 w-4 text-amber-600" />,
+    return: <RotateCcw className="h-4 w-4 text-red-600" />,
 };
 
 export function AdminHeader({ user }: AdminHeaderProps) {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
-    const prevCounts = useRef<{ orders: number; transfers: number }>({ orders: 0, transfers: 0 });
+    const prevCounts = useRef<{ orders: number; transfers: number; returns: number }>({ orders: 0, transfers: 0, returns: 0 });
 
     useEffect(() => {
         async function fetchNotifications() {
@@ -79,14 +80,17 @@ export function AdminHeader({ user }: AdminHeaderProps) {
 
         const orderNotification = notifications.find(n => n.id === "orders");
         const transferNotification = notifications.find(n => n.id === "bank-transfers");
+        const returnNotification = notifications.find(n => n.id === "returns");
 
         const currentOrderCount = orderNotification?.count || 0;
         const currentTransferCount = transferNotification?.count || 0;
+        const currentReturnCount = returnNotification?.count || 0;
 
         // Sayı arttıysa ses çal
         if (
             (currentOrderCount > prevCounts.current.orders) ||
-            (currentTransferCount > prevCounts.current.transfers)
+            (currentTransferCount > prevCounts.current.transfers) ||
+            (currentReturnCount > prevCounts.current.returns)
         ) {
             const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3");
             audio.play().catch(e => console.log("Ses çalma hatası (Tarayıcı izni gerekiyor olabilir):", e));
@@ -95,7 +99,8 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         // Mevcut sayıları referans olarak kaydet
         prevCounts.current = {
             orders: currentOrderCount,
-            transfers: currentTransferCount
+            transfers: currentTransferCount,
+            returns: currentReturnCount,
         };
     }, [notifications, loading]);
 
@@ -140,6 +145,14 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                             <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 gap-2 cursor-pointer border-none shadow-lg">
                                 <Landmark className="h-3.5 w-3.5" />
                                 <span className="font-bold">{notifications.find(n => n.id === "bank-transfers")?.count} Yeni Havale</span>
+                            </Badge>
+                        </Link>
+                    )}
+                    {notifications.find(n => n.id === "returns") && (
+                        <Link href="/admin/returns">
+                            <Badge className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 gap-2 cursor-pointer border-none shadow-lg">
+                                <RotateCcw className="h-3.5 w-3.5" />
+                                <span className="font-bold">{notifications.find(n => n.id === "returns")?.count} İade Talebi</span>
                             </Badge>
                         </Link>
                     )}
