@@ -1,4 +1,5 @@
 import React from 'react';
+import path from 'path';
 import {
     Document,
     Page,
@@ -9,11 +10,12 @@ import {
     renderToBuffer,
 } from '@react-pdf/renderer';
 
+const FONT_DIR = path.join(process.cwd(), 'public', 'fonts');
 Font.register({
-    family: 'Roboto',
+    family: 'NotoSans',
     fonts: [
-        { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf', fontWeight: 'normal' },
-        { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc9.ttf', fontWeight: 'bold' },
+        { src: path.join(FONT_DIR, 'NotoSans-Regular.ttf'), fontWeight: 'normal' },
+        { src: path.join(FONT_DIR, 'NotoSans-Bold.ttf'),    fontWeight: 'bold' },
     ],
 });
 
@@ -27,7 +29,7 @@ const SELLER = {
 
 const styles = StyleSheet.create({
     page: {
-        fontFamily: 'Roboto',
+        fontFamily: 'NotoSans',
         fontSize: 9,
         paddingTop: 36,
         paddingBottom: 56,
