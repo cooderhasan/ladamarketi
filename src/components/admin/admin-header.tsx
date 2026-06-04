@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2, Menu, Landmark, RotateCcw } from "lucide-react";
+import { Bell, LogOut, User, FileQuestion, Users, Package, ShoppingCart, Loader2, Menu, Landmark, RotateCcw, X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart-store";
 import type { UserRole, UserStatus } from "@prisma/client";
@@ -51,6 +51,18 @@ export function AdminHeader({ user }: AdminHeaderProps) {
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const prevCounts = useRef<{ orders: number; transfers: number; returns: number }>({ orders: 0, transfers: 0, returns: 0 });
+    const [showBanner, setShowBanner] = useState(false);
+
+    useEffect(() => {
+        const isClosed = localStorage.getItem("admin-havale-banner-closed");
+        // Expiration date: 2 days from now (June 6th, 2026 at 20:00 UTC+3)
+        const expireTime = new Date("2026-06-06T20:00:00+03:00").getTime();
+        const isExpired = Date.now() > expireTime;
+
+        if (!isClosed && !isExpired) {
+            setShowBanner(true);
+        }
+    }, []);
 
     useEffect(() => {
         async function fetchNotifications() {
@@ -114,7 +126,30 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         : user?.email?.slice(0, 2).toUpperCase() || "AD";
 
     return (
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-gray-100 dark:border-gray-800 bg-white/50 backdrop-blur-xl dark:bg-gray-900/50 px-4 sm:px-6 lg:px-8 print:hidden">
+        <>
+            {showBanner && (
+                <div className="bg-gradient-to-r from-blue-600 to-[#009AD0] text-white py-2.5 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 text-xs sm:text-sm font-medium animate-in slide-in-from-top duration-300 print:hidden shrink-0">
+                    <div className="flex items-center gap-2">
+                        <Badge className="bg-white text-blue-700 font-extrabold text-[10px] uppercase hover:bg-white shrink-0">
+                            Yeni Özellik
+                        </Badge>
+                        <span className="leading-normal">
+                            <strong>Havale İndirimi Özelliği Yayında!</strong> Standart müşteriler için havale indirim oranını belirlemek üzere sol menüden <strong>Site Ayarları &gt; Ödeme Bilgileri</strong> sekmesine gidin.
+                        </span>
+                    </div>
+                    <button
+                        onClick={() => {
+                            localStorage.setItem("admin-havale-banner-closed", "true");
+                            setShowBanner(false);
+                        }}
+                        className="text-white/80 hover:text-white hover:bg-white/10 p-1.5 rounded transition-colors shrink-0"
+                        title="Kapat"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
+            <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-gray-100 dark:border-gray-800 bg-white/50 backdrop-blur-xl dark:bg-gray-900/50 px-4 sm:px-6 lg:px-8 print:hidden">
             <div className="flex-1 flex items-center gap-2 lg:pl-0">
                 <Button 
                     variant="ghost" 
@@ -251,5 +286,6 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                 </DropdownMenu>
             </div>
         </header>
-    );
+    </>
+);
 }
