@@ -197,6 +197,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 discountRate={discountRate}
                 isDealer={isDealer}
                 isAuthenticated={isAuthenticated}
+                bankTransferDiscountRate={Number(settings.bankTransferDiscountRate || 0)}
                 whatsappNumber={settings.whatsappNumber || settings.phone}
                 reviews={reviews.map(r => ({
                     ...r,

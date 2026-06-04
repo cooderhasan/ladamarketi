@@ -44,6 +44,7 @@ export default async function SettingsPage() {
         bankAccountName: "",
         bankIban1: "",
         bankIban2: "",
+        bankTransferDiscountRate: "0",
         // Analytics & Tracking
         googleAnalyticsId: "",
         metaPixelId: "",

@@ -178,10 +178,29 @@ export async function createOrder(data: CreateOrderData) {
             })
         );
 
+        // Fetch Site Settings for Bank Transfer Discount
+        const settingsRecord = await prisma.siteSettings.findUnique({
+            where: { key: "general" },
+        });
+        const settings = settingsRecord?.value as any || {};
+        const bankTransferDiscountRate = Number(settings.bankTransferDiscountRate || 0);
+
+        const isStandardCustomer = !userId || !isDealer;
+        const paymentMethod = data.paymentMethod || "BANK_TRANSFER";
+        const applyBankTransferDiscount = paymentMethod === "BANK_TRANSFER" && isStandardCustomer && bankTransferDiscountRate > 0;
+
+        let bankTransferDiscountVal = 0;
+        if (applyBankTransferDiscount) {
+            bankTransferDiscountVal = grandTotal * (bankTransferDiscountRate / 100);
+            grandTotal = grandTotal - bankTransferDiscountVal;
+            subtotal = subtotal * (1 - bankTransferDiscountRate / 100);
+            totalVatAmount = totalVatAmount * (1 - bankTransferDiscountRate / 100);
+            totalDiscountAmount = totalDiscountAmount + bankTransferDiscountVal;
+        }
+
         const total = grandTotal + (data.shippingCost || 0); // Include shipping cost in final total
         const discountAmount = totalDiscountAmount; // For record keeping
         const vatAmount = totalVatAmount;
-        const paymentMethod = data.paymentMethod || "BANK_TRANSFER";
         const orderNumber = generateOrderNumber();
 
         // Create order with transaction
@@ -234,7 +253,9 @@ export async function createOrder(data: CreateOrderData) {
                     cargoCompany: data.cargoCompany,
                     shippingCost: data.shippingCost,
                     shippingDesi: data.shippingDesi,
-                    notes: data.notes,
+                    notes: applyBankTransferDiscount
+                        ? `${data.notes || ""}\n[Sistem Notu: %${bankTransferDiscountRate} Havale İndirimi uygulandı.]`.trim()
+                        : data.notes,
                     items: {
                         create: orderItems,
                     },
@@ -326,11 +347,7 @@ export async function createOrder(data: CreateOrderData) {
             });
         }
 
-        // Fetch Site Settings for Bank Info
-        const settingsRecord = await prisma.siteSettings.findUnique({
-            where: { key: "general" },
-        });
-        const settings = settingsRecord?.value as any || {};
+        // Site Settings are already loaded at the start of the function
 
         // Send confirmation email (to user email or guest email)
         // Send confirmation email (to user email or guest email)

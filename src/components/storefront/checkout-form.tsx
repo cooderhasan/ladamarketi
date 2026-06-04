@@ -50,9 +50,10 @@ interface CheckoutFormProps {
         }[];
     }[];
     freeShippingLimit: number;
+    bankTransferDiscountRate?: number;
 }
 
-export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }: CheckoutFormProps) {
+export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, bankTransferDiscountRate = 0 }: CheckoutFormProps) {
     // ...
     const router = useRouter();
     const { items, getSummary, discountRate, clearCart } = useCartStore();
@@ -108,7 +109,14 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
         }
     }
 
-    const grandTotal = summary.total + shippingCost;
+    // Bank transfer discount for standard customers (discountRate === 0)
+    const isStandardCustomer = discountRate === 0;
+    const applyBankTransferDiscount = paymentMethod === "BANK_TRANSFER" && isStandardCustomer && bankTransferDiscountRate > 0;
+    const bankTransferDiscountAmount = applyBankTransferDiscount
+        ? Math.round((summary.total * bankTransferDiscountRate / 100) * 100) / 100
+        : 0;
+
+    const grandTotal = summary.total - bankTransferDiscountAmount + shippingCost;
     const canUseCurrentAccount = initialData?.currentAccount && initialData.currentAccount.availableLimit >= grandTotal;
 
     if (items.length === 0) {
@@ -373,8 +381,13 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                     <Building2 className={`h-6 w-6 mt-1 ${paymentMethod === "BANK_TRANSFER" ? "text-blue-600" : "text-gray-500"}`} />
                                     <div className="flex-1">
                                         <div className="flex justify-between">
-                                            <p className={`font-medium ${paymentMethod === "BANK_TRANSFER" ? "text-blue-700 dark:text-blue-400" : "text-gray-900 dark:text-white"}`}>
-                                                Havale / EFT
+                                            <p className={`font-medium flex items-center gap-2 ${paymentMethod === "BANK_TRANSFER" ? "text-blue-700 dark:text-blue-400" : "text-gray-900 dark:text-white"}`}>
+                                                <span>Havale / EFT</span>
+                                                {discountRate === 0 && bankTransferDiscountRate > 0 && (
+                                                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                                                        %{bankTransferDiscountRate} İndirimli
+                                                    </span>
+                                                )}
                                             </p>
                                         </div>
                                         <p className="text-sm text-gray-500 mt-1">
@@ -526,6 +539,12 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }:
                                         <span>KDV Toplam</span>
                                         <span>{formatPrice(summary.vatAmount)}</span>
                                     </div>
+                                    {bankTransferDiscountAmount > 0 && (
+                                        <div className="flex justify-between text-emerald-600 font-semibold animate-in fade-in slide-in-from-top-1 duration-200">
+                                            <span>Havale İndirimi (%{bankTransferDiscountRate})</span>
+                                            <span>-{formatPrice(bankTransferDiscountAmount)}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between items-center font-medium">
                                         <span className="text-gray-600 dark:text-gray-400">Kargo</span>
                                         {isFreeShipping ? (

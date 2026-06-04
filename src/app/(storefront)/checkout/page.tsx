@@ -83,5 +83,12 @@ export default async function CheckoutPage() {
         }))
     }));
 
-    return <CheckoutForm initialData={initialData} cargoCompanies={serializedCargoCompanies} freeShippingLimit={freeShippingLimit} />;
+    return (
+        <CheckoutForm
+            initialData={initialData}
+            cargoCompanies={serializedCargoCompanies}
+            freeShippingLimit={freeShippingLimit}
+            bankTransferDiscountRate={Number(settings.bankTransferDiscountRate || 0)}
+        />
+    );
 }
