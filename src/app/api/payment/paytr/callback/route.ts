@@ -93,7 +93,10 @@ export async function POST(req: NextRequest) {
                             address: shippingAddress?.address || "",
                             city: shippingAddress?.city || "",
                             district: shippingAddress?.district || "",
+                            phone: shippingAddress?.phone || "",
+                            name: shippingAddress?.name || "",
                         },
+                        shippingCost: Number(order.shippingCost) || 0,
                         cargoCompany: order.cargoCompany || undefined,
                     });
                 }

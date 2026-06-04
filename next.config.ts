@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // @react-pdf/renderer sunucu taraflı çalışmalı, istemci bundle'a dahil edilmemeli
+  serverExternalPackages: ['@react-pdf/renderer'],
   experimental: {
     cpus: 2,
     workerThreads: false,

@@ -3,6 +3,9 @@ import { OrderConfirmationEmail } from '@/emails/order-confirmation';
 import { AdminNewOrderEmail } from '@/emails/admin-new-order';
 import { ShippingNotificationEmail } from '@/emails/shipping-notification';
 import { AbandonedCartNotificationEmail } from '@/emails/abandoned-cart-notification';
+import { generateOnBilgilendirmePdf } from '@/lib/on-bilgilendirme-pdf';
+import { generateSatisSozlesmesiPdf } from '@/lib/satis-sozlesmesi-pdf';
+import { generateIptalIadePdf } from '@/lib/iptal-iade-pdf';
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789");
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "ladamarketi@gmail.com";
@@ -28,7 +31,10 @@ interface SendOrderConfirmationProps {
         address: string;
         city: string;
         district?: string;
+        phone?: string;
+        name?: string;
     };
+    shippingCost?: number;
     cargoCompany?: string;
 }
 
@@ -48,6 +54,61 @@ export async function sendOrderConfirmationEmail(props: SendOrderConfirmationPro
     }
 
     try {
+        // 3 PDF'i paralel olarak üret (biri hata verse diğerleri etkilenmez)
+        const orderDate = new Date();
+        const pdfCommonProps = {
+            orderNumber: props.orderNumber,
+            orderDate,
+            customerName: props.customerName,
+        };
+
+        const [onBilgiResult, satisSozResult, iptalIadeResult] = await Promise.allSettled([
+            generateOnBilgilendirmePdf({
+                ...pdfCommonProps,
+                customerAddress: props.shippingAddress.address,
+                customerCity: props.shippingAddress.city,
+                customerDistrict: props.shippingAddress.district,
+                customerPhone: props.shippingAddress.phone,
+                customerEmail: props.to,
+                items: props.items.map((item) => ({
+                    productName: item.productName,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice,
+                    lineTotal: item.lineTotal,
+                })),
+                totalAmount: props.totalAmount,
+                shippingCost: props.shippingCost,
+                paymentMethod: props.paymentMethod,
+            }),
+            generateSatisSozlesmesiPdf({
+                ...pdfCommonProps,
+                customerAddress: props.shippingAddress.address,
+                customerCity: props.shippingAddress.city,
+                customerDistrict: props.shippingAddress.district,
+                customerPhone: props.shippingAddress.phone,
+                customerEmail: props.to,
+            }),
+            generateIptalIadePdf(pdfCommonProps),
+        ]);
+
+        // Başarıyla üretilen PDF'leri ek olarak hazırla
+        const attachments: { filename: string; content: Buffer }[] = [];
+        if (onBilgiResult.status === 'fulfilled') {
+            attachments.push({ filename: `on-bilgilendirme-${props.orderNumber}.pdf`, content: onBilgiResult.value });
+        } else {
+            console.error('Ön bilgilendirme PDF hatası:', onBilgiResult.reason);
+        }
+        if (satisSozResult.status === 'fulfilled') {
+            attachments.push({ filename: `satis-sozlesmesi-${props.orderNumber}.pdf`, content: satisSozResult.value });
+        } else {
+            console.error('Satış sözleşmesi PDF hatası:', satisSozResult.reason);
+        }
+        if (iptalIadeResult.status === 'fulfilled') {
+            attachments.push({ filename: `iptal-iade-${props.orderNumber}.pdf`, content: iptalIadeResult.value });
+        } else {
+            console.error('İptal/iade PDF hatası:', iptalIadeResult.reason);
+        }
+
         const { data, error } = await resend.emails.send({
             from: 'Sipariş <siparis@ladamarketi.com>',
             to: [props.to],
@@ -60,6 +121,7 @@ export async function sendOrderConfirmationEmail(props: SendOrderConfirmationPro
                 paymentMethod: props.paymentMethod,
                 bankInfo: props.bankInfo,
             }),
+            attachments: attachments.length > 0 ? attachments : undefined,
         });
 
         if (error) {
