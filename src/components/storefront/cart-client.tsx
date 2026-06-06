@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatPrice, calculatePrice } from "@/lib/helpers";
+import { useMemo } from "react";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 
 interface CartClientProps {
@@ -33,6 +34,22 @@ export function CartClient({ bankTransferDiscountRate = 0 }: CartClientProps) {
     }
 
     const summary = getSummary();
+
+    // Havale indirimine uygun olan toplam (sadece indirimli olmayan ürünler)
+    const bankTransferEligibleTotal = useMemo(() => {
+        if (discountRate !== 0 || bankTransferDiscountRate <= 0) return 0;
+        return items.reduce((acc, item) => {
+            const hasSalePrice = item.salePrice && item.salePrice > 0 && item.salePrice < item.listPrice;
+            if (!hasSalePrice) {
+                const price = calculatePrice(item.listPrice, item.salePrice || undefined, item.discountRate !== undefined ? item.discountRate : discountRate, item.vatRate);
+                return acc + price.finalPrice * item.quantity;
+            }
+            return acc;
+        }, 0);
+    }, [items, discountRate, bankTransferDiscountRate]);
+    
+    const bankTransferDiscountAmount = bankTransferEligibleTotal * (bankTransferDiscountRate / 100);
+    const hasMixedCart = bankTransferEligibleTotal > 0 && bankTransferEligibleTotal < summary.total;
 
     if (items.length === 0) {
         return (
@@ -73,7 +90,12 @@ export function CartClient({ bankTransferDiscountRate = 0 }: CartClientProps) {
                             Havale / EFT İndirim Fırsatı!
                         </p>
                         <p className="text-xs text-emerald-700/80 dark:text-emerald-400 mt-0.5">
-                            Bu siparişi havale ile tamamlayarak sepet toplamında ekstra <strong className="text-emerald-800 dark:text-emerald-200">%{bankTransferDiscountRate}</strong> indirim kazanabilirsiniz.
+                            {hasMixedCart
+                                ? <>İndirimli olmayan ürünlerde havale ile ekstra <strong className="text-emerald-800 dark:text-emerald-200">%{bankTransferDiscountRate}</strong> indirim kazanabilirsiniz. İndirimli ürünlerde havale indirimi uygulanmaz.</>
+                                : bankTransferEligibleTotal > 0
+                                    ? <>Bu siparişi havale ile tamamlayarak sepet toplamında ekstra <strong className="text-emerald-800 dark:text-emerald-200">%{bankTransferDiscountRate}</strong> indirim kazanabilirsiniz.</>
+                                    : <>Sepetinizdeki tüm ürünler zaten indirimli olduğundan havale indirimi uygulanmamaktadır.</>
+                            }
                         </p>
                     </div>
                 </div>
@@ -234,11 +256,11 @@ export function CartClient({ bankTransferDiscountRate = 0 }: CartClientProps) {
                             </div>
 
                             {/* Potential Bank Transfer Price display */}
-                            {discountRate === 0 && bankTransferDiscountRate > 0 && (
+                            {discountRate === 0 && bankTransferDiscountRate > 0 && bankTransferDiscountAmount > 0 && (
                                 <div className="bg-emerald-50/50 dark:bg-emerald-950/10 p-3 rounded-lg border border-emerald-100 dark:border-emerald-900/20 text-xs flex justify-between items-center text-emerald-800 dark:text-emerald-300">
                                     <span>Havale ile Ödeme Fiyatı:</span>
                                     <span className="font-bold text-sm">
-                                        {formatPrice(summary.total * (1 - bankTransferDiscountRate / 100))}
+                                        {formatPrice(summary.total - bankTransferDiscountAmount)}
                                     </span>
                                 </div>
                             )}

@@ -112,8 +112,23 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, b
     // Bank transfer discount for standard customers (discountRate === 0)
     const isStandardCustomer = discountRate === 0;
     const applyBankTransferDiscount = paymentMethod === "BANK_TRANSFER" && isStandardCustomer && bankTransferDiscountRate > 0;
+    
+    // Havale indirimine uygun olan toplam (sadece indirimli olmayan ürünler)
+    const potentialBankTransferEligibleTotal = (isStandardCustomer && bankTransferDiscountRate > 0)
+        ? items.reduce((acc, item) => {
+            const hasSalePrice = item.salePrice && item.salePrice > 0 && item.salePrice < item.listPrice;
+            if (!hasSalePrice) {
+                const price = calculatePrice(item.listPrice, item.salePrice || undefined, item.discountRate !== undefined ? item.discountRate : discountRate, item.vatRate);
+                return acc + price.finalPrice * item.quantity;
+            }
+            return acc;
+        }, 0)
+        : 0;
+    
+    const hasMixedCart = potentialBankTransferEligibleTotal > 0 && potentialBankTransferEligibleTotal < summary.total;
+    
     const bankTransferDiscountAmount = applyBankTransferDiscount
-        ? Math.round((summary.total * bankTransferDiscountRate / 100) * 100) / 100
+        ? Math.round((potentialBankTransferEligibleTotal * bankTransferDiscountRate / 100) * 100) / 100
         : 0;
 
     const grandTotal = summary.total - bankTransferDiscountAmount + shippingCost;
@@ -392,6 +407,23 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, b
                                         </div>
                                         <p className="text-sm text-gray-500 mt-1">
                                             Banka hesap bilgilerimize havale yaparak ödeme yapabilirsiniz.
+                                            {isStandardCustomer && bankTransferDiscountRate > 0 && (
+                                                <>
+                                                    {hasMixedCart ? (
+                                                        <span className="block text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+                                                            * Havale indirimi sadece indirimli olmayan ürünlerde geçerlidir.
+                                                        </span>
+                                                    ) : potentialBankTransferEligibleTotal > 0 ? (
+                                                        <span className="block text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+                                                            * Havale ödemelerinde ekstra %{bankTransferDiscountRate} indirim uygulanır.
+                                                        </span>
+                                                    ) : (
+                                                        <span className="block text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                                                            * Sepetinizdeki tüm ürünler indirimli olduğundan havale indirimi uygulanmaz.
+                                                        </span>
+                                                    )}
+                                                </>
+                                            )}
                                         </p>
                                     </div>
                                     <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === "BANK_TRANSFER" ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300"}`}>

@@ -191,10 +191,37 @@ export async function createOrder(data: CreateOrderData) {
 
         let bankTransferDiscountVal = 0;
         if (applyBankTransferDiscount) {
-            bankTransferDiscountVal = grandTotal * (bankTransferDiscountRate / 100);
+            // Havale indirimi sadece indirimli OLMAYAN ürünlere uygulanır.
+            // Zaten salePrice'ı olan (indirimli) ürünlere havale indirimi uygulanmaz.
+            let eligibleTotal = 0; // Havale indirimine uygun toplam
+            let eligibleSubtotal = 0;
+            let eligibleVat = 0;
+
+            for (const item of orderItems) {
+                // item'ın ait olduğu ürünün salePrice bilgisini kontrol et
+                const origProduct = await prisma.product.findUnique({
+                    where: { id: item.productId },
+                    select: { salePrice: true, listPrice: true },
+                });
+                const hasSalePrice = origProduct?.salePrice && Number(origProduct.salePrice) > 0 && Number(origProduct.salePrice) < Number(origProduct.listPrice);
+
+                if (!hasSalePrice) {
+                    // Bu ürün indirimli değil, havale indirimine uygun
+                    const itemLineTotal = item.lineTotal;
+                    const itemVatRate = item.vatRate;
+                    const itemNetTotal = itemLineTotal / (1 + itemVatRate / 100);
+                    const itemVat = itemLineTotal - itemNetTotal;
+
+                    eligibleTotal += itemLineTotal;
+                    eligibleSubtotal += itemNetTotal;
+                    eligibleVat += itemVat;
+                }
+            }
+
+            bankTransferDiscountVal = eligibleTotal * (bankTransferDiscountRate / 100);
             grandTotal = grandTotal - bankTransferDiscountVal;
-            subtotal = subtotal * (1 - bankTransferDiscountRate / 100);
-            totalVatAmount = totalVatAmount * (1 - bankTransferDiscountRate / 100);
+            subtotal = subtotal - (eligibleSubtotal * (bankTransferDiscountRate / 100));
+            totalVatAmount = totalVatAmount - (eligibleVat * (bankTransferDiscountRate / 100));
             totalDiscountAmount = totalDiscountAmount + bankTransferDiscountVal;
         }
 
