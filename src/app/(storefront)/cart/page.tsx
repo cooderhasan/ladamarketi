@@ -9,6 +9,12 @@ export const metadata = {
 export default async function CartPage() {
     const settings = await getSiteSettings();
     const bankTransferDiscountRate = Number(settings.bankTransferDiscountRate || 0);
+    const minOrderLimit = Number(settings.minOrderLimit || 0);
 
-    return <CartClient bankTransferDiscountRate={bankTransferDiscountRate} />;
+    return (
+        <CartClient
+            bankTransferDiscountRate={bankTransferDiscountRate}
+            minOrderLimit={minOrderLimit}
+        />
+    );
 }

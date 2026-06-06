@@ -184,6 +184,11 @@ export async function createOrder(data: CreateOrderData) {
         });
         const settings = settingsRecord?.value as any || {};
         const bankTransferDiscountRate = Number(settings.bankTransferDiscountRate || 0);
+        const minOrderLimit = Number(settings.minOrderLimit || 0);
+
+        if (minOrderLimit > 0 && grandTotal < minOrderLimit) {
+            throw new Error(`Minimum sipariş tutarı ${minOrderLimit} TL olmalıdır.`);
+        }
 
         const isStandardCustomer = !userId || !isDealer;
         const paymentMethod = data.paymentMethod || "BANK_TRANSFER";

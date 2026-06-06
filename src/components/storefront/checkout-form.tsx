@@ -51,9 +51,10 @@ interface CheckoutFormProps {
     }[];
     freeShippingLimit: number;
     bankTransferDiscountRate?: number;
+    minOrderLimit?: number;
 }
 
-export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, bankTransferDiscountRate = 0 }: CheckoutFormProps) {
+export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, bankTransferDiscountRate = 0, minOrderLimit = 0 }: CheckoutFormProps) {
     // ...
     const router = useRouter();
     const { items, getSummary, discountRate, clearCart } = useCartStore();
@@ -132,6 +133,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, b
         : 0;
 
     const grandTotal = summary.total - bankTransferDiscountAmount + shippingCost;
+    const isUnderMinLimit = minOrderLimit > 0 && summary.total < minOrderLimit;
     const canUseCurrentAccount = initialData?.currentAccount && initialData.currentAccount.availableLimit >= grandTotal;
 
     if (items.length === 0) {
@@ -144,6 +146,10 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, b
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        if (isUnderMinLimit) {
+            toast.error(`Minimum sipariş tutarı ${formatPrice(minOrderLimit)} olmalıdır.`);
+            return;
+        }
         setLoading(true);
 
         const formData = new FormData(e.currentTarget);
@@ -605,19 +611,27 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, b
                                     </div>
                                 </div>
 
+                                {isUnderMinLimit && (
+                                    <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-xs text-red-700 dark:text-red-400 font-medium mb-3 animate-in fade-in duration-200">
+                                        En az <strong>{formatPrice(minOrderLimit)}</strong> tutarında sipariş verebilirsiniz. Siparişi tamamlayabilmek için sepetinize <strong>{formatPrice(minOrderLimit - summary.total)}</strong> değerinde ürün daha eklemelisiniz.
+                                    </div>
+                                )}
+
                                 <Button
                                     type="submit"
-                                    className="w-full h-12 text-lg font-semibold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20"
-                                    disabled={loading}
+                                    className={`w-full h-12 text-lg font-semibold ${isUnderMinLimit ? "bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-800 shadow-none" : "bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20"}`}
+                                    disabled={loading || isUnderMinLimit}
                                 >
                                     {loading ? (
                                         "Sipariş Oluşturuluyor..."
                                     ) : (
                                         <>
                                             Siparişi Onayla
-                                            <span className="ml-2 font-normal text-blue-100/80">
-                                                • {formatPrice(grandTotal)}
-                                            </span>
+                                            {!isUnderMinLimit && (
+                                                <span className="ml-2 font-normal text-blue-100/80">
+                                                    • {formatPrice(grandTotal)}
+                                                </span>
+                                            )}
                                         </>
                                     )}
                                 </Button>

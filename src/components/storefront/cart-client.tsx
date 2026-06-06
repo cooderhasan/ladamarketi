@@ -14,9 +14,10 @@ import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 
 interface CartClientProps {
     bankTransferDiscountRate?: number;
+    minOrderLimit?: number;
 }
 
-export function CartClient({ bankTransferDiscountRate = 0 }: CartClientProps) {
+export function CartClient({ bankTransferDiscountRate = 0, minOrderLimit = 0 }: CartClientProps) {
     const { items, removeItem, updateQuantity, getSummary, discountRate, isAuthenticated } =
         useCartStore();
     const [mounted, setMounted] = useState(false);
@@ -50,6 +51,7 @@ export function CartClient({ bankTransferDiscountRate = 0 }: CartClientProps) {
     
     const bankTransferDiscountAmount = bankTransferEligibleTotal * (bankTransferDiscountRate / 100);
     const hasMixedCart = bankTransferEligibleTotal > 0 && bankTransferEligibleTotal < summary.total;
+    const isUnderMinLimit = minOrderLimit > 0 && summary.total < minOrderLimit;
 
     if (items.length === 0) {
         return (
@@ -265,11 +267,23 @@ export function CartClient({ bankTransferDiscountRate = 0 }: CartClientProps) {
                                 </div>
                             )}
 
-                            <Link href={isAuthenticated ? "/checkout" : "/checkout/auth"} className="block">
-                                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 text-lg font-bold shadow-lg shadow-blue-600/20">
+                            {isUnderMinLimit && (
+                                <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-xs text-red-700 dark:text-red-400 font-medium mb-3 animate-in fade-in duration-200">
+                                    En az <strong>{formatPrice(minOrderLimit)}</strong> tutarında sipariş verebilirsiniz. Siparişi tamamlayabilmek için sepetinize <strong>{formatPrice(minOrderLimit - summary.total)}</strong> değerinde ürün daha eklemelisiniz.
+                                </div>
+                            )}
+
+                            {isUnderMinLimit ? (
+                                <Button disabled className="w-full bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 rounded-xl py-6 text-lg font-bold cursor-not-allowed">
                                     Siparişi Tamamla
                                 </Button>
-                            </Link>
+                            ) : (
+                                <Link href={isAuthenticated ? "/checkout" : "/checkout/auth"} className="block">
+                                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 text-lg font-bold shadow-lg shadow-blue-600/20">
+                                        Siparişi Tamamla
+                                    </Button>
+                                </Link>
+                            )}
 
                             <Link href="/products" className="block text-center mt-4">
                                 <Button variant="outline" className="w-full rounded-xl py-6">

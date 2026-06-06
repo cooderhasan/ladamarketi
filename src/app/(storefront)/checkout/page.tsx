@@ -83,12 +83,15 @@ export default async function CheckoutPage() {
         }))
     }));
 
+    const minOrderLimit = Number(settings.minOrderLimit || 0);
+
     return (
         <CheckoutForm
             initialData={initialData}
             cargoCompanies={serializedCargoCompanies}
             freeShippingLimit={freeShippingLimit}
             bankTransferDiscountRate={Number(settings.bankTransferDiscountRate || 0)}
+            minOrderLimit={minOrderLimit}
         />
     );
 }
