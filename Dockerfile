@@ -35,19 +35,18 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy built files
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/scripts ./scripts
-COPY --from=builder /app/full_backup.json ./full_backup.json
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/full_backup.json ./full_backup.json
 
-# Create farmework specific directories
-RUN mkdir -p /app/public/uploads /app/public/img && chmod -R 777 /app/public/uploads /app/public/img
-
-# Set permissions
-RUN chown -R nextjs:nodejs /app
+# Create framework specific directories and set correct permissions
+RUN mkdir -p /app/public/uploads /app/public/img && \
+    chown -R nextjs:nodejs /app/public/uploads /app/public/img && \
+    chmod -R 777 /app/public/uploads /app/public/img
 
 # USER nextjs
 
