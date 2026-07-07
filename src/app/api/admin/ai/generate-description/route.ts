@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
             next: { revalidate: 0 }
         });
     } catch (err: any) {
+        console.error(`[AI_FETCH_ERROR] URL: ${url} | Hata: ${err.message} | Kod: ${err.cause?.code || 'N/A'}`);
         return NextResponse.json({ 
             success: false, 
             error: `Kaynak siteye erişilirken ağ hatası oluştu: ${err.message || "Bilinmeyen ağ hatası"}` 
