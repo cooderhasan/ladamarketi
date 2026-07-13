@@ -198,8 +198,30 @@ export async function syncOrdersFromHepsiburada() {
 
                 if (productId) {
                     const qty = item.quantity || 1;
-                    const price = Number(item.price?.amount || item.totalPrice?.amount || 0) / qty; // HB structure varies
+                    
+                    // Birim fiyat hesaplama:
+                    // 1. item.unitPrice varsa doğrudan birim fiyat olarak kullan
+                    // 2. item.price.amount varsa bu birim fiyattır, bölme yapma
+                    // 3. item.totalPrice.amount varsa bu satır toplamıdır, qty'ye böl
+                    // 4. Hiçbiri yoksa kendi veritabanımızdaki fiyatı kullan
+                    let price = 0;
+                    if (item.unitPrice != null) {
+                        price = Number(item.unitPrice);
+                    } else if (item.price?.amount != null) {
+                        // price.amount birim fiyattır, bölme yapma
+                        price = Number(item.price.amount);
+                    } else if (item.totalPrice?.amount != null) {
+                        // totalPrice.amount satır toplamıdır, qty'ye böl
+                        price = Number(item.totalPrice.amount) / qty;
+                    } else {
+                        // Fallback: kendi ürün fiyatımızı kullan
+                        const fallbackProduct = variant?.product || await prisma.product.findUnique({ where: { id: productId } });
+                        if (fallbackProduct) {
+                            price = Number((fallbackProduct as any).hepsiburadaPrice) || Number(fallbackProduct.listPrice) || 0;
+                        }
+                    }
 
+                    const lineTotal = price * qty;
                     orderItems.push({
                         productId,
                         variantId,
@@ -208,9 +230,9 @@ export async function syncOrdersFromHepsiburada() {
                         unitPrice: price,
                         discountRate: 0,
                         vatRate: 20,
-                        lineTotal: price * qty
+                        lineTotal: lineTotal
                     });
-                    total += price * qty;
+                    total += lineTotal;
                 }
             }
 

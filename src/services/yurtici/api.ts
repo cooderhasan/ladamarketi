@@ -102,17 +102,26 @@ async function sendSoapRequest(
    </soapenv:Body>
 </soapenv:Envelope>`;
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "text/xml; charset=utf-8",
-            "SOAPAction": "",
-        },
-        body: envelope,
-    });
+    // 15 saniye timeout — DNS veya bağlantı sorunu varsa isteğin asılı kalmasını önler
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
-    const text = await response.text();
-    return text;
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/xml; charset=utf-8",
+                "SOAPAction": "",
+            },
+            body: envelope,
+            signal: controller.signal,
+        });
+
+        const text = await response.text();
+        return text;
+    } finally {
+        clearTimeout(timeoutId);
+    }
 }
 
 /**
