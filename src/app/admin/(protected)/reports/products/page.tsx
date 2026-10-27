@@ -25,12 +25,16 @@ async function getTopProducts() {
     }>>`
         SELECT 
             oi."productId",
-            oi."productName",
+            MAX(oi."productName") as "productName",
             SUM(oi.quantity) as "totalQuantity",
             SUM(CAST(oi."lineTotal" AS DECIMAL)) as "totalRevenue",
             COUNT(DISTINCT oi."orderId") as "orderCount"
         FROM order_items oi
-        GROUP BY oi."productId", oi."productName"
+        JOIN orders o ON o.id = oi."orderId"
+        -- Ciro kuralı Genel Bakış ile aynı: iptal ve kart ödemesi tamamlanmamış siparişler hariç
+        WHERE o.status NOT IN ('CANCELLED', 'WAITING_FOR_PAYMENT')
+        -- Yalnızca ürüne göre: ürün adı sonradan değiştiyse aynı ürün iki satıra bölünmesin
+        GROUP BY oi."productId"
         ORDER BY "totalQuantity" DESC
         LIMIT 20
     `;

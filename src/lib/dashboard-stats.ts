@@ -68,6 +68,25 @@ export async function dailyRevenue(from: Date, days: number) {
     });
 }
 
+/** Türkiye ayına göre aylık ciro; siparişsiz aylar 0 olarak gelir (eskiden yeniye). month: "YYYY-MM" */
+export async function monthlyRevenue(ref: Date, months: number) {
+    const from = trStartOfMonth(ref, -(months - 1));
+    const to = trStartOfMonth(ref, 1);
+    const rows = await prisma.$queryRaw<{ m: string; revenue: number; orders: bigint }[]>`
+        SELECT to_char(("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Istanbul', 'YYYY-MM') AS m,
+               COALESCE(SUM(total), 0)::float AS revenue,
+               COUNT(*) AS orders
+        FROM orders
+        WHERE "createdAt" >= ${from} AND "createdAt" < ${to} AND status NOT IN ('CANCELLED', 'WAITING_FOR_PAYMENT')
+        GROUP BY m
+    `;
+    const byMonth = new Map(rows.map((r) => [r.m, { revenue: Number(r.revenue), orders: Number(r.orders) }]));
+    return Array.from({ length: months }, (_, i) => {
+        const key = new Date(trStartOfMonth(ref, i - (months - 1)).getTime() + TR_OFFSET_MS).toISOString().slice(0, 7);
+        return { month: key, ...(byMonth.get(key) || { revenue: 0, orders: 0 }) };
+    });
+}
+
 export interface PeriodStat {
     revenue: number;
     orders: number;

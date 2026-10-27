@@ -29,8 +29,11 @@ async function getCategorySales() {
             SUM(CAST(oi."lineTotal" AS DECIMAL)) as "totalRevenue",
             COUNT(DISTINCT oi."productId") as "productCount"
         FROM order_items oi
+        JOIN orders o ON o.id = oi."orderId"
         JOIN products p ON oi."productId" = p.id
         LEFT JOIN categories c ON p."categoryId" = c.id
+        -- Ciro kuralı Genel Bakış ile aynı: iptal ve kart ödemesi tamamlanmamış siparişler hariç
+        WHERE o.status NOT IN ('CANCELLED', 'WAITING_FOR_PAYMENT')
         GROUP BY p."categoryId", c.name
         ORDER BY "totalRevenue" DESC
     `;

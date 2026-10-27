@@ -30,6 +30,8 @@ async function getDealerPerformance() {
             SUM(CAST(o.total AS DECIMAL)) as "totalSpent"
         FROM users u
         JOIN orders o ON u.id = o."userId"
+        -- Ciro kuralı Genel Bakış ile aynı: iptal ve kart ödemesi tamamlanmamış siparişler hariç
+        WHERE o.status NOT IN ('CANCELLED', 'WAITING_FOR_PAYMENT')
         GROUP BY u.id, u.email, u."companyName"
         ORDER BY "totalSpent" DESC
         LIMIT 20

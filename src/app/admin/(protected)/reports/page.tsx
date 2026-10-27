@@ -12,7 +12,7 @@ import {
 const reports = [
     {
         title: "Satış Özeti",
-        description: "Günlük, haftalık ve aylık satış analizi",
+        description: "Günlük satış, geçen aya ve son 12 aya göre karşılaştırma",
         href: "/admin/reports/sales",
         icon: TrendingUp,
         color: "bg-blue-100 text-blue-600",

@@ -4,7 +4,16 @@ import { formatPrice } from "@/lib/helpers";
  * Son 30 günün günlük cirosu: kütüphanesiz SVG (sunucuda çizilir, tarayıcıya JS gitmez).
  * Çubuğun üzerine gelince tarih, ciro ve sipariş sayısı tarayıcının kendi ipucuyla görünür.
  */
-export function SalesBarChart({ data }: { data: { date: string; revenue: number; orders: number }[] }) {
+export function SalesBarChart({
+    data,
+    lastLabel = "Bugün",
+    ariaLabel = "Son 30 günün günlük cirosu",
+}: {
+    data: { date: string; revenue: number; orders: number }[];
+    /** Son çubuğun altındaki etiket; geçmiş bir ay gösteriliyorsa tarih yazılır */
+    lastLabel?: string;
+    ariaLabel?: string;
+}) {
     const W = 600;
     const H = 180;
     const PAD_B = 18;
@@ -24,7 +33,7 @@ export function SalesBarChart({ data }: { data: { date: string; revenue: number;
                 <span className="text-sm text-gray-500">{orders} sipariş · günlük ortalama {formatPrice(total / data.length)}</span>
             </div>
             {/* w-full h-auto: grafik kartın tamamına yayılır (sabit yükseklikte en/boy oranı yüzünden ortada dar kalıyordu) */}
-            <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto text-[#009AD0] dark:text-sky-400" role="img" aria-label="Son 30 günün günlük cirosu">
+            <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto text-[#009AD0] dark:text-sky-400" role="img" aria-label={ariaLabel}>
                 {/* yatay kılavuz çizgileri */}
                 {[0.25, 0.5, 0.75, 1].map((f) => (
                     <line key={f} x1="0" x2={W} y1={(H - PAD_B) * (1 - f)} y2={(H - PAD_B) * (1 - f)} className="stroke-gray-100 dark:stroke-gray-800" strokeWidth="1" />
@@ -54,7 +63,7 @@ export function SalesBarChart({ data }: { data: { date: string; revenue: number;
                                     className="fill-gray-400"
                                     fontSize="10"
                                 >
-                                    {isLast ? "Bugün" : fmtDay(d.date)}
+                                    {isLast ? lastLabel || fmtDay(d.date) : fmtDay(d.date)}
                                 </text>
                             )}
                         </g>
