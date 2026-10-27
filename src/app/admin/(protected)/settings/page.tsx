@@ -22,6 +22,7 @@ export default async function SettingsPage() {
         // Branding
         logoUrl: "",
         faviconUrl: "",
+        ogImageUrl: "", // Paylaşım görseli (boşsa logo kullanılır)
 
         // SEO
         seoTitle: "",

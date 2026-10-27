@@ -53,7 +53,10 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: SITE_BRAND,
       type: "website",
       locale: "tr_TR",
-      images: general.logoUrl ? [{ url: general.logoUrl }] : [],
+      // "./" her sayfanın kendi adresine çözülür (canonical gibi); ürün sayfası kendi url'ini verir
+      url: "./",
+      // Ayarlar > Marka & Görseller > Paylaşım Görseli; boşsa logo
+      images: general.ogImageUrl || general.logoUrl ? [{ url: general.ogImageUrl || general.logoUrl }] : [],
     },
     alternates: {
       canonical: "./",

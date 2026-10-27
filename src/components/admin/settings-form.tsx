@@ -178,7 +178,7 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                         <Card>
                             <CardHeader>
                                 <CardTitle>Marka Görselleri</CardTitle>
-                                <CardDescription>Site logosu ve tarayıcı ikonu</CardDescription>
+                                <CardDescription>Site logosu, tarayıcı ikonu ve paylaşım görseli</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-8">
                                 <div className="space-y-2">
@@ -199,6 +199,21 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                                         value={settings.faviconUrl ? [settings.faviconUrl] : []}
                                         onChange={(urls) => updateField("faviconUrl", urls[0] || "")}
                                         onRemove={() => updateField("faviconUrl", "")}
+                                        maxFiles={1}
+                                    />
+                                </div>
+
+                                <div className="space-y-2 pt-4 border-t">
+                                    <Label>Paylaşım Görseli (WhatsApp, Facebook, Instagram)</Label>
+                                    <div className="text-xs text-gray-500 mb-2">
+                                        Ana sayfa ve kategori linkleri paylaşılınca görünen görsel. Önerilen: 1200x630px, JPG, 300 KB altı
+                                        (WhatsApp daha büyük görselde önizleme göstermiyor). Boş bırakılırsa site logosu kullanılır.
+                                        Ürün linklerinde ürünün kendi görseli görünür.
+                                    </div>
+                                    <ImageUpload
+                                        value={settings.ogImageUrl ? [settings.ogImageUrl] : []}
+                                        onChange={(urls) => updateField("ogImageUrl", urls[0] || "")}
+                                        onRemove={() => updateField("ogImageUrl", "")}
                                         maxFiles={1}
                                     />
                                 </div>
