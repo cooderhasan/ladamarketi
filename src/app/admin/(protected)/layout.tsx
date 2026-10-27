@@ -8,6 +8,9 @@ import { AiAnnouncementBanner } from "@/components/admin/ai-announcement-banner"
 import { AbandonedCartBanner } from "@/components/admin/abandoned-cart-banner";
 import { Toaster } from "@/components/ui/sonner";
 
+// Tarayıcı sekmesinde mağaza başlığı yerine panel adı görünsün (çok sekme açıkken karışmasın)
+export const metadata = { title: { absolute: "Yönetim Paneli" }, robots: { index: false, follow: false } };
+
 export default async function AdminLayout({
     children,
 }: {
@@ -28,11 +31,11 @@ export default async function AdminLayout({
     const settings = await getSiteSettings();
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 print:bg-white flex">
+        <div className="admin-shell min-h-screen bg-gray-50 dark:bg-gray-900 print:bg-white flex">
             {/* New Modern Sidebar */}
             <AdminSidebarModern settings={settings} />
 
-            <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 lg:pl-72 print:pl-0">
+            <div className="admin-content flex-1 flex flex-col min-w-0 transition-[padding] duration-200 lg:pl-72 print:pl-0">
                 <AdminHeader user={session?.user as any} />
                 <AiAnnouncementBanner />
                 <AbandonedCartBanner />

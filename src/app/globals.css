@@ -186,3 +186,26 @@
 .dark .product-description-content li {
   color: oklch(0.7 0.02 260);
 }
+
+/* Yönetim paneli: açılır liste (Select/Dialog) açılınca kaydırma çubuğu kaybolup sayfa ~15px genişliyor, sınırda
+   duran filtre satırları alt satıra atlıyordu. Çubuğun yeri hep ayrılır ve Radix'in telafi boşluğu kapatılır. */
+html:has(.admin-shell) {
+  scrollbar-gutter: stable;
+}
+html:has(.admin-shell) body[data-scroll-locked] {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Yönetim menüsü daraltılınca içerik alanı da sola yaklaşsın (menü 80px'e iniyor, içerik 288px boşlukta kalıyordu) */
+@media (min-width: 1024px) {
+  html[data-admin-sidebar="collapsed"] .admin-content {
+    padding-left: 80px;
+  }
+}
+
+/* Yönetim menüsü kaydırma çubuğu: ince ve sade */
+.admin-shell .custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(209 213 219 / 0.8) transparent;
+}

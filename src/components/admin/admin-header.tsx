@@ -81,9 +81,19 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         }
 
         fetchNotifications();
-        // Her 60 saniyede bir güncelle
-        const interval = setInterval(fetchNotifications, 60000);
-        return () => clearInterval(interval);
+        // Her 60 saniyede bir güncelle; sekme arka plandayken sorma (açık kalan sekmeler boşuna sorgu yapmasın),
+        // sekmeye dönünce hemen güncelle
+        const interval = setInterval(() => {
+            if (document.visibilityState === "visible") fetchNotifications();
+        }, 60000);
+        const onVisible = () => {
+            if (document.visibilityState === "visible") fetchNotifications();
+        };
+        document.addEventListener("visibilitychange", onVisible);
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener("visibilitychange", onVisible);
+        };
     }, []);
 
     // Sesli bildirim kontrolü
@@ -168,7 +178,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                 {/* Hızlı Bildirim Rozetleri */}
                 <div className="hidden sm:flex items-center gap-2">
                     {notifications.find(n => n.id === "orders") && (
-                        <Link href="/admin/orders">
+                        <Link prefetch={false} href="/admin/orders">
                             <Badge className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 gap-2 animate-pulse cursor-pointer border-none shadow-lg">
                                 <ShoppingCart className="h-3.5 w-3.5" />
                                 <span className="font-bold">{notifications.find(n => n.id === "orders")?.count} Yeni Sipariş</span>
@@ -176,7 +186,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                         </Link>
                     )}
                     {notifications.find(n => n.id === "bank-transfers") && (
-                        <Link href="/admin/bank-transfers">
+                        <Link prefetch={false} href="/admin/bank-transfers">
                             <Badge className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 gap-2 cursor-pointer border-none shadow-lg">
                                 <Landmark className="h-3.5 w-3.5" />
                                 <span className="font-bold">{notifications.find(n => n.id === "bank-transfers")?.count} Yeni Havale</span>
@@ -184,7 +194,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                         </Link>
                     )}
                     {notifications.find(n => n.id === "returns") && (
-                        <Link href="/admin/returns">
+                        <Link prefetch={false} href="/admin/returns">
                             <Badge className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 gap-2 cursor-pointer border-none shadow-lg">
                                 <RotateCcw className="h-3.5 w-3.5" />
                                 <span className="font-bold">{notifications.find(n => n.id === "returns")?.count} İade Talebi</span>
@@ -220,6 +230,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                             notifications.map((notification) => (
                                 <DropdownMenuItem key={notification.id} asChild>
                                     <Link
+                                        prefetch={false}
                                         href={notification.id === "orders" ? "/admin/orders" : notification.link}
                                         className="flex items-start gap-3 p-3 cursor-pointer"
                                     >
@@ -261,7 +272,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                                     {user?.companyName || "Admin"}
                                 </p>
                                 <p className="text-xs leading-none text-muted-foreground">
-                                    {user?.email || "admin@b2b.com"}
+                                    {user?.email || ""}
                                 </p>
                             </div>
                         </DropdownMenuLabel>
