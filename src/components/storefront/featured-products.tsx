@@ -35,8 +35,8 @@ interface FeaturedProductsProps {
     variant?: "featured" | "new" | "bestseller" | "deals" | "default";
 }
 
-// Sütun sayısına göre tam satırları göster (2 sütunda 6, 3 sütunda 6, 4 sütunda 8'e kadar):
-// alt satırda tek başına kalan ürün olmasın, telefonda sayfa da gereksiz uzamasın
+// Sütun sayısına göre tam satırları göster (3 sütunda 6, 4 sütunda 8'e kadar): alt satırda tek başına kalan ürün olmasın.
+// Telefonda satır yana kaydığı için satır hesabı yok, 8'e kadar ürün gösterilir.
 function fullRows(count: number, cols: number, max: number) {
     const n = Math.min(count, max);
     return Math.floor(n / cols) * cols || n;
@@ -70,7 +70,7 @@ export function FeaturedProducts({
     // "Öne Çıkanlar" hafif mavi zeminli bir bant içinde: bölümler alt alta aynı görünmesin
     const banded = variant === "featured";
 
-    const showBase = fullRows(products.length, 2, 6);
+    const showBase = Math.min(products.length, 8);
     const showMd = fullRows(products.length, 3, 6);
     const show2xl = fullRows(products.length, 4, 8);
 
@@ -101,12 +101,20 @@ export function FeaturedProducts({
                 </Link>
             </div>
 
-            {/* Products Grid */}
-            <div className="grid gap-3 md:gap-4 grid-cols-2 md:grid-cols-3 2xl:grid-cols-4">
+            {/* Telefonda yana kayan tek satır (alt alta 3 satır sayfayı çok uzatıyordu), tablet ve üstünde tablo.
+                Kaydırma kenara kadar uzanır: sayfanın / bandın kenar boşluğu eksi margin ile geri alınıyor */}
+            <div
+                className={[
+                    "flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                    banded ? "-mx-3 px-3 scroll-px-3 sm:-mx-6 sm:px-6 sm:scroll-px-6" : "-mx-4 px-4 scroll-px-4",
+                    "md:grid md:grid-cols-3 2xl:grid-cols-4 md:gap-4 md:overflow-visible md:mx-0 md:px-0 md:pb-0",
+                ].join(" ")}
+            >
                 {products.map((product, i) => (
                     <div
                         key={product.id}
                         className={[
+                            "w-[44%] sm:w-[31%] shrink-0 snap-start md:w-auto",
                             i < showBase ? "block" : "hidden",
                             i < showMd ? "md:block" : "md:hidden",
                             i < show2xl ? "2xl:block" : "2xl:hidden",

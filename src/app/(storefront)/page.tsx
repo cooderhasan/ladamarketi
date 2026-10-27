@@ -279,15 +279,16 @@ export default async function HomePage() {
                         )}
 
                         {/* Bannerlar: önceden en dipte, footer'ın hemen üstündeydi; artık ürün bölümlerinin arasında.
-                            Görseller 800x450 (16:9) ve üzerlerinde yazı var: oran korunuyor, kırpılmıyor, karartılmıyor */}
+                            Görseller 800x450 (16:9) ve üzerlerinde yazı var: oran korunuyor, kırpılmıyor, karartılmıyor.
+                            Telefonda yana kayan tek satır (alt alta ~620px yer tutuyordu) */}
                         {data.banners.length > 0 && (
-                            <section aria-label="Kampanyalar" className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-3">
+                            <section aria-label="Kampanyalar" className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 scroll-px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-3 sm:mx-0 sm:px-0 sm:pb-0 sm:overflow-visible md:gap-4">
                                 {data.banners.map((banner: any) => (
                                     <Link
                                         key={banner.id}
                                         href={banner.linkUrl || "#"}
                                         className={cn(
-                                            "relative aspect-[16/9] rounded-2xl overflow-hidden group block ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300",
+                                            "relative w-[85%] shrink-0 snap-start sm:w-auto aspect-[16/9] rounded-2xl overflow-hidden group block ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300",
                                             !banner.linkUrl && "cursor-default pointer-events-none"
                                         )}
                                     >
