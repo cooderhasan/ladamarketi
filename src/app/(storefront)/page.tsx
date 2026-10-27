@@ -7,7 +7,8 @@ import { CategorySectionModern } from "@/components/storefront/category-section-
 import { CategorySidebarModern } from "@/components/storefront/category-sidebar-modern";
 import Link from "next/link";
 import Image from "next/image";
-import { Truck, Shield, HeadphonesIcon } from "lucide-react";
+import { ModelShortcuts } from "@/components/storefront/model-shortcuts";
+import { TrustBar } from "@/components/storefront/trust-bar";
 import { Metadata } from "next";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE_URL, absoluteUrl } from "@/lib/site-url";
@@ -219,61 +220,27 @@ export default async function HomePage() {
 
                     {/* Main Content */}
                     <div className="lg:col-span-3 space-y-12">
-                        <div className="space-y-5">
+                        <div className="space-y-6 md:space-y-8">
                             {/* Hero Slider */}
-                            <div className="rounded-xl overflow-hidden shadow-sm">
+                            <div className="rounded-2xl overflow-hidden shadow-sm ring-1 ring-black/5">
                                 <HeroSlider sliders={data.sliders} />
                             </div>
 
                             {/* Sayfanın ana başlığı (H1), görünür ve kısa; önceden ana sayfada H1 yoktu */}
-                            <div className="text-center">
-                                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                                    Lada Yedek Parça ve Aksesuar
-                                </h1>
-                                <p className="mt-1.5 text-sm md:text-base text-gray-500 dark:text-gray-400">
-                                    Niva, Vega, Samara ve Kalina için orijinal ve yan sanayi parçalar · Türkiye geneline kargo
-                                </p>
+                            <div className="text-center space-y-4 md:space-y-5">
+                                <div>
+                                    <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                                        Lada Yedek Parça ve Aksesuar
+                                    </h1>
+                                    <p className="mt-1.5 text-sm md:text-base text-gray-500 dark:text-gray-400">
+                                        Niva, Vega, Samara ve Kalina için orijinal ve yan sanayi parçalar · Türkiye geneline kargo
+                                    </p>
+                                </div>
+                                <ModelShortcuts categories={data.sidebarCategories} />
                             </div>
+
+                            <TrustBar bankTransferDiscountRate={general.bankTransferDiscountRate} />
                         </div>
-
-                        {/* Features - Modern Frameless Design */}
-                        <section className="grid gap-2 grid-cols-3 py-4 border-y border-gray-100 dark:border-gray-800">
-                            <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 group text-center md:text-left">
-                                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
-                                    <Truck className="h-5 w-5 text-blue-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-[10px] md:text-sm leading-tight">
-                                        Hızlı Teslimat
-                                    </h3>
-                                    <p className="hidden md:block text-xs text-gray-500">Aynı gün kargo imkanı</p>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 group text-center md:text-left">
-                                <div className="w-10 h-10 bg-green-50 dark:bg-green-900/20 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 shrink-0">
-                                    <Shield className="h-5 w-5 text-green-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-[10px] md:text-sm leading-tight">
-                                        Güvenli Ödeme
-                                    </h3>
-                                    <p className="hidden md:block text-xs text-gray-500">256-bit SSL sertifikası</p>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 group text-center md:text-left">
-                                <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
-                                    <HeadphonesIcon className="h-5 w-5 text-purple-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 dark:text-white text-[10px] md:text-sm leading-tight">
-                                        7/24 Destek
-                                    </h3>
-                                    <p className="hidden md:block text-xs text-gray-500">Müşteri hizmetleri desteği</p>
-                                </div>
-                            </div>
-                        </section>
 
                         {/* Categories */}
                         {data.categories.length > 0 && (
