@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import { OrdersTable } from "@/components/admin/orders-table";
 import { OrderStatus } from "@prisma/client";
+import { formatPrice } from "@/lib/helpers";
+import { NON_REVENUE_STATUSES, PAYMENT_METHOD_LABELS } from "@/lib/dashboard-stats";
 
 interface OrdersPageProps {
     searchParams: Promise<{
@@ -24,8 +26,11 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     const status = params.status as OrderStatus | string | undefined;
     const cargo = params.cargo;
     const printed = params.printed; // "YES" | "NO" | undefined/"ALL"
-    const startDate = params.startDate ? new Date(params.startDate) : undefined;
-    const endDate = params.endDate ? new Date(params.endDate) : undefined;
+    // Tarihler Türkiye saatine göre gün başı/sonu (sunucu UTC; önceden 00:00-03:00 arası siparişler önceki güne düşüyordu)
+    const trDay = (s: string, end: boolean) =>
+        /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(`${s}T${end ? "23:59:59.999" : "00:00:00"}+03:00`) : new Date(s);
+    const startDate = params.startDate ? trDay(params.startDate, false) : undefined;
+    const endDate = params.endDate ? trDay(params.endDate, true) : undefined;
 
     // Construct Where Clause
     const where: any = {};
@@ -95,15 +100,16 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
             where.createdAt.gte = startDate;
         }
         if (endDate) {
-            // End date'i günün sonuna ayarla (23:59:59)
-            const endOfDay = new Date(endDate);
-            endOfDay.setHours(23, 59, 59, 999);
-            where.createdAt.lte = endOfDay;
+            where.createdAt.lte = endDate;
         }
     }
 
-    // Parallel Fetch: Orders + Total Count
-    const [orders, totalCount] = await Promise.all([
+    // Ciroya katılan siparişler (iptal ve ödemesi tamamlanmamış hariç), ödeme yöntemi dökümü için
+    const revenueStatus = { status: { notIn: [...NON_REVENUE_STATUSES] as OrderStatus[] } };
+    const paymentMethods = Object.keys(PAYMENT_METHOD_LABELS);
+
+    // Parallel Fetch: Orders + Total Count + Filtre özeti
+    const [orders, totalCount, statusGroups, ...methodSums] = await Promise.all([
         prisma.order.findMany({
             where,
             include: {
@@ -124,7 +130,36 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
             take: limit,
         }),
         prisma.order.count({ where }),
+        // Filtreye uyan TÜM siparişlerin (sadece bu sayfanın değil) durum bazında adet ve tutarı
+        prisma.order.groupBy({
+            by: ["status"],
+            where,
+            _sum: { total: true },
+            _count: { _all: true },
+        }),
+        ...paymentMethods.map((method) =>
+            prisma.order.aggregate({
+                where: { AND: [where, revenueStatus, { payment: { method: method as any } }] },
+                _sum: { total: true },
+                _count: { _all: true },
+            })
+        ),
     ]);
+
+    // İptal ve ödemesi tamamlanmamış siparişler toplama katılmaz, ayrıca gösterilir
+    const summary = { count: 0, total: 0, cancelledCount: 0, cancelledTotal: 0, unpaidCount: 0, unpaidTotal: 0 };
+    for (const g of statusGroups) {
+        const n = g._count._all;
+        const t = Number(g._sum.total || 0);
+        if (g.status === "CANCELLED") { summary.cancelledCount += n; summary.cancelledTotal += t; continue; }
+        if (g.status === "WAITING_FOR_PAYMENT") { summary.unpaidCount += n; summary.unpaidTotal += t; continue; }
+        summary.count += n;
+        summary.total += t;
+    }
+    const byMethod = paymentMethods
+        .map((method, i) => ({ method, count: methodSums[i]._count._all, total: Number(methodSums[i]._sum.total || 0) }))
+        .filter((m) => m.count > 0)
+        .sort((a, b) => b.total - a.total);
 
     const totalPages = Math.ceil(totalCount / limit);
 
@@ -173,6 +208,36 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
                     totalCount,
                 }}
             />
+
+            {/* Filtre özeti: seçili tarih/durum/arama için toplam (tüm sayfalar) */}
+            <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                    <span className="text-sm font-medium text-gray-500">
+                        Filtreye uyan siparişler
+                        {params.startDate || params.endDate ? ` (${params.startDate || "…"} – ${params.endDate || "…"})` : ""}
+                    </span>
+                    <span className="text-lg font-bold text-gray-900 dark:text-white">
+                        {summary.count} sipariş · {formatPrice(summary.total)}
+                    </span>
+                </div>
+                {byMethod.length > 1 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {byMethod.map((m) => (
+                            <span key={m.method} className="rounded-lg bg-gray-50 px-2.5 py-1 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                <span className="font-semibold">{PAYMENT_METHOD_LABELS[m.method]}</span>: {m.count} · {formatPrice(m.total)}
+                            </span>
+                        ))}
+                    </div>
+                )}
+                {(summary.cancelledCount > 0 || summary.unpaidCount > 0) && (
+                    <p className="mt-2 text-xs text-gray-500">
+                        Toplama dahil değil:
+                        {summary.cancelledCount > 0 ? ` ${summary.cancelledCount} iptal (${formatPrice(summary.cancelledTotal)})` : ""}
+                        {summary.cancelledCount > 0 && summary.unpaidCount > 0 ? "," : ""}
+                        {summary.unpaidCount > 0 ? ` ${summary.unpaidCount} ödeme bekleyen (${formatPrice(summary.unpaidTotal)})` : ""}
+                    </p>
+                )}
+            </div>
         </div>
     );
 }
