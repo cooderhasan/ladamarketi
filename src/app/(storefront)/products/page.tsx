@@ -276,8 +276,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             </div>
 
             <div className="flex flex-col lg:flex-row gap-8 items-start">
-                {/* Masaüstü filtre paneli: ekrana sığmazsa tek parça kayar, kaydırma çubuğu gizli (önceden sabit yükseklik + görünür çubuk, içinde de liste başına ayrı çubuklar vardı) */}
-                <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {/* Masaüstü filtre paneli sayfayla birlikte akar (ekrana sabit değil): ekrana sabitken yüksekliği ekran boyuyla sınırlıydı,
+                    uzun panelde içinde ayrıca kaydırmak gerekiyordu */}
+                <aside className="hidden lg:block w-64 flex-shrink-0">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
                         <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#009AD0]"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
