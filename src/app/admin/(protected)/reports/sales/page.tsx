@@ -234,7 +234,7 @@ export default async function SalesReportPage({
                 <Card>
                     <CardHeader className="px-4 sm:px-6 pb-2">
                         <CardTitle className="text-base sm:text-lg">Aylık Karşılaştırma</CardTitle>
-                        <p className="text-xs text-gray-500">Son 12 ay; bir aya tıklayınca günlük dökümü açılır.</p>
+                        <p className="text-xs text-gray-500">Son 12 ay; devam eden ay geçen ayın aynı dönemiyle kıyaslanır. Bir aya tıklayınca günlük dökümü açılır.</p>
                     </CardHeader>
                     <CardContent className="px-2 sm:px-6 space-y-1">
                         {[...months].reverse().map((m, i, arr) => {
@@ -256,7 +256,14 @@ export default async function SalesReportPage({
                                         <span className="whitespace-nowrap">
                                             <span className="font-medium">{formatPrice(m.revenue)}</span>
                                             <span className="text-gray-500"> · {m.orders}</span>
-                                            {prev && <span className="ml-2 text-xs"><PctCell now={m.revenue} prev={prev.revenue} /></span>}
+                                            {/* Devam eden ay geçen ayın tamamıyla değil, aynı dönemiyle (ay başından bu saate kadar) kıyaslanır; üstteki "Bu Ay" kartıyla aynı */}
+                                            {m.month === currentKey ? (
+                                                <span className="ml-2 text-xs" title={`${monthLabel(shiftMonth(m.month, -1))} aynı döneme göre`}>
+                                                    <PctCell now={dash.month.revenue} prev={dash.month.prevRevenue} />
+                                                </span>
+                                            ) : (
+                                                prev && <span className="ml-2 text-xs"><PctCell now={m.revenue} prev={prev.revenue} /></span>
+                                            )}
                                         </span>
                                     </div>
                                     <div className="mt-1 h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
