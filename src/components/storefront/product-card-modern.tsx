@@ -179,8 +179,9 @@ export function ProductCardModern({
                         </span>
                     )}
 
-                    {/* Product Name */}
-                    <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-[13px] md:text-sm leading-snug line-clamp-2 min-h-[2.5rem] mb-2 md:mb-3 group-hover:text-[#00739C] dark:group-hover:text-[#4cc3ec] transition-colors">
+                    {/* Product Name: tam 2 satır yüksekliği (leading-snug 1.375 x 2 = 2.75em). Önceden 2.5rem (40px) iki satırdan
+                        uzundu, 3. satırın üst kenarı eski fiyatın üstünde görünüyordu */}
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-[13px] md:text-sm leading-snug line-clamp-2 min-h-[2.75em] mb-2 md:mb-3 group-hover:text-[#00739C] dark:group-hover:text-[#4cc3ec] transition-colors">
                         {product.name}
                     </h3>
 
