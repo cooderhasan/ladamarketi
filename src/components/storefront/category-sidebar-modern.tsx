@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Minus, ChevronRight, Menu } from "lucide-react";
+import { Plus, Minus, ChevronRight, Menu, Phone, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -15,9 +15,16 @@ interface Category {
 
 interface CategorySidebarProps {
     categories: Category[];
+    phone?: string;
+    whatsappNumber?: string;
 }
 
-export function CategorySidebarModern({ categories }: CategorySidebarProps) {
+// Ayarlardaki telefon "0534 519 44 72 - 538 816 84 00" gibi birden fazla numara içerebiliyor: ilkini al
+function firstNumber(value?: string) {
+    return (value || "").split(/[-\/,|]/)[0].replace(/[^0-9]/g, "");
+}
+
+export function CategorySidebarModern({ categories, phone, whatsappNumber }: CategorySidebarProps) {
     const [openCategories, setOpenCategories] = useState<string[]>([]);
 
     const toggleCategory = (categoryId: string) => {
@@ -28,13 +35,18 @@ export function CategorySidebarModern({ categories }: CategorySidebarProps) {
         );
     };
 
+    const telDigits = firstNumber(phone);
+    // wa.me ülke koduyla ister: 0532... -> 90532..., 532... -> 90532...
+    const waRaw = firstNumber(whatsappNumber || phone);
+    const waDigits = waRaw.startsWith("0") ? "90" + waRaw.slice(1) : waRaw.length === 10 ? "90" + waRaw : waRaw;
+
     return (
         <div className="w-full flex flex-col gap-4">
             {/* Header - Modern Glassy Look */}
             <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-white/20 shadow-sm p-4 group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#009AD0]/10 to-[#009AD0]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="flex items-center gap-3 relative z-10">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                    <div className="p-2 bg-[#009AD0]/10 dark:bg-sky-900/30 rounded-lg text-[#00739C] dark:text-[#4cc3ec]">
                         <Menu className="h-5 w-5" />
                     </div>
                     <div>
@@ -116,14 +128,37 @@ export function CategorySidebarModern({ categories }: CategorySidebarProps) {
                 })}
             </div>
 
-            {/* Banner / Promotion Area in Sidebar */}
-            <div className="mt-4 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 p-4 text-center text-white shadow-lg shadow-blue-500/20">
-                <p className="text-xs font-medium opacity-80 mb-1">Lada Yedek Parça</p>
-                <p className="font-bold text-lg mb-2">Güvenli Alışveriş</p>
-                <div className="text-[10px] bg-white/20 rounded-full px-3 py-1 inline-block backdrop-blur-sm">
-                    %100 Orijinal
+            {/* Destek kartı: parça seçiminde yardım (önceden mor "Güvenli Alışveriş / %100 Orijinal" kartı vardı;
+                yan sanayi parça da satıldığı için o ifade kaldırıldı) */}
+            {(telDigits || waDigits) && (
+                <div className="mt-4 rounded-2xl bg-gradient-to-br from-[#0aa6dd] to-[#00739C] p-5 text-white shadow-lg shadow-[#009AD0]/20">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/75 mb-1">Parça mı arıyorsunuz?</p>
+                    <p className="font-bold text-lg leading-snug mb-1">Doğru parçayı birlikte bulalım</p>
+                    <p className="text-xs text-white/80 mb-4">Şasi numaranız veya aracınızın modeliyle bize ulaşın.</p>
+                    <div className="space-y-2">
+                        {waDigits && (
+                            <a
+                                href={`https://wa.me/${waDigits}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 h-10 rounded-xl bg-white text-[#00739C] text-sm font-bold hover:bg-white/90 transition-colors"
+                            >
+                                <MessageCircle className="h-4 w-4" />
+                                WhatsApp&apos;tan Yazın
+                            </a>
+                        )}
+                        {telDigits && (
+                            <a
+                                href={`tel:${telDigits}`}
+                                className="flex items-center justify-center gap-2 h-10 rounded-xl bg-white/15 ring-1 ring-inset ring-white/25 text-sm font-semibold hover:bg-white/25 transition-colors"
+                            >
+                                <Phone className="h-4 w-4" />
+                                {phone?.split(/[-\/,|]/)[0].trim()}
+                            </a>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

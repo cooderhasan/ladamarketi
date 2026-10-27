@@ -20,7 +20,7 @@ export function CategorySectionModern({ categories }: CategorySectionProps) {
     const bottomRow = categories.slice(2, 5);
 
     return (
-        <section className="container mx-auto px-4">
+        <section>
             <div className="space-y-4">
                 {/* Top Row: 2 Large Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

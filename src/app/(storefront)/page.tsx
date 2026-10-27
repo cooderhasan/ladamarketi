@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function getHomeData() {
-    const [sliders, featuredProducts, newProducts, bestSellers, categories, sidebarCategories, banners] =
+    const [sliders, featuredProducts, newProducts, bestSellers, categories, sidebarCategories, banners, saleCandidates] =
         await Promise.all([
             prisma.slider.findMany({
                 where: { isActive: true },
@@ -44,17 +44,23 @@ async function getHomeData() {
             }),
             prisma.product.findMany({
                 where: { isActive: true, isFeatured: true },
-                include: { category: true, brand: true },
+                include: { category: true, brand: true, _count: { select: { variants: true } } },
+                // Sabit sıra: sırasızken düzenlenen ürün listede yer değiştirebiliyordu
+                orderBy: [{ createdAt: "desc" }, { id: "asc" }],
                 take: 8,
             }),
             prisma.product.findMany({
                 where: { isActive: true, isNew: true },
-                include: { category: true, brand: true },
+                include: { category: true, brand: true, _count: { select: { variants: true } } },
+                // Sabit sıra: sırasızken düzenlenen ürün listede yer değiştirebiliyordu
+                orderBy: [{ createdAt: "desc" }, { id: "asc" }],
                 take: 8,
             }),
             prisma.product.findMany({
                 where: { isActive: true, isBestSeller: true },
-                include: { category: true, brand: true },
+                include: { category: true, brand: true, _count: { select: { variants: true } } },
+                // Sabit sıra: sırasızken düzenlenen ürün listede yer değiştirebiliyordu
+                orderBy: [{ createdAt: "desc" }, { id: "asc" }],
                 take: 8,
             }),
             prisma.category.findMany({
@@ -83,8 +89,26 @@ async function getHomeData() {
             prisma.banner.findMany({
                 where: { isActive: true },
                 orderBy: { order: "asc" },
-            })
+            }),
+            // Fırsat Ürünleri: stokta olan, indirimli fiyatı liste fiyatından düşük ürünler.
+            // İndirim oranı veritabanında sıralanamadığı için en yeni 40 aday alınıp aşağıda orana göre sıralanıyor.
+            prisma.product.findMany({
+                where: {
+                    isActive: true,
+                    stock: { gt: 0 },
+                    salePrice: { not: null, lt: prisma.product.fields.listPrice },
+                },
+                include: { category: true, brand: true, _count: { select: { variants: true } } },
+                orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+                take: 40,
+            }),
         ]);
+
+    const discountOf = (p: any) => {
+        const list = Number(p.listPrice || 0);
+        return list > 0 ? (list - Number(p.salePrice || 0)) / list : 0;
+    };
+    const saleProducts = [...saleCandidates].sort((a, b) => discountOf(b) - discountOf(a)).slice(0, 8);
 
     const transformProduct = (product: any) => ({
         ...product,
@@ -124,6 +148,7 @@ async function getHomeData() {
         featuredProducts: featuredProducts.map(transformProduct),
         newProducts: newProducts.map(transformProduct),
         bestSellers: bestSellers.map(transformProduct),
+        saleProducts: saleProducts.map(transformProduct),
         categories: categories.map(transformCategory),
         sidebarCategories: sidebarCategories,
         banners: banners.map(transformBanner),
@@ -189,7 +214,7 @@ export default async function HomePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Left Sidebar - Desktop Only */}
                     <aside className="hidden lg:block lg:col-span-1 h-fit sticky top-24 z-30">
-                        <CategorySidebarModern categories={data.sidebarCategories} />
+                        <CategorySidebarModern categories={data.sidebarCategories} phone={general.phone} whatsappNumber={general.whatsappNumber} />
                     </aside>
 
                     {/* Main Content */}
@@ -255,17 +280,6 @@ export default async function HomePage() {
                             <CategorySectionModern categories={data.categories} />
                         )}
 
-                        {/* Featured Products */}
-                        {data.featuredProducts.length > 0 && (
-                            <FeaturedProducts
-                                title="Öne Çıkan Ürünler"
-                                products={data.featuredProducts}
-                                discountRate={discountRate}
-                                isDealer={isDealer}
-                                variant="featured"
-                            />
-                        )}
-
                         {/* New Products */}
                         {data.newProducts.length > 0 && (
                             <FeaturedProducts
@@ -275,6 +289,28 @@ export default async function HomePage() {
                                 isDealer={isDealer}
                                 badge="Yeni"
                                 variant="new"
+                            />
+                        )}
+
+                        {/* Fırsat Ürünleri: en yüksek indirimli ürünler, tümü /indirimli-urunler'de; indirimli ürün yoksa görünmez */}
+                        {data.saleProducts.length > 0 && (
+                            <FeaturedProducts
+                                title="Fırsat Ürünleri"
+                                products={data.saleProducts}
+                                discountRate={discountRate}
+                                isDealer={isDealer}
+                                variant="deals"
+                            />
+                        )}
+
+                        {/* Featured Products */}
+                        {data.featuredProducts.length > 0 && (
+                            <FeaturedProducts
+                                title="Öne Çıkan Ürünler"
+                                products={data.featuredProducts}
+                                discountRate={discountRate}
+                                isDealer={isDealer}
+                                variant="featured"
                             />
                         )}
 

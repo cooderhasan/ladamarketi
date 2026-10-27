@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatPrice, calculatePrice } from "@/lib/helpers";
-import { ShoppingCart, Eye } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useCartStore } from "@/stores/cart-store";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -118,22 +118,29 @@ export function ProductCardModern({
 
     return (
         <Link href={`/products/${product.slug}`} className="group block h-full">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden transition-all duration-500 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] h-full flex flex-col relative group/card border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-300 ring-1 ring-gray-200/70 dark:ring-gray-700 hover:ring-[#009AD0]/25 hover:shadow-[0_12px_32px_-8px_rgba(0,115,156,0.22)] md:hover:-translate-y-1 h-full flex flex-col relative group/card">
 
-                {/* Image Section - Cleaner, Larger */}
-                <div className="relative aspect-square bg-white p-4 flex items-center justify-center overflow-hidden">
-                    {/* Discount Badge (Dealer or Sale) - Modern Pill Style */}
+                {/* Görsel alanı: açık gri zemin. Ürün fotoğrafları çoğunlukla beyaz zeminli; mix-blend-multiply ile beyaz,
+                    zemin rengine karışır ve ürün gri sayfada "beyaz kutu içinde beyaz kutu" gibi kaybolmaz */}
+                <div className="relative aspect-square m-2 md:m-2.5 rounded-xl bg-[#f3f6f9] dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+                    {/* Sol üst: indirim */}
                     {(isDealer && discountRate > 0 || hasSalePrice) && (
-                        <div className="absolute top-4 left-4 z-10 bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-red-500/30">
-                            %{Math.max(discountRate, saleDiscountRate)} İNDİRİM
+                        <div className="absolute top-2.5 left-2.5 z-10">
+                            <div className="bg-red-500 text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap">
+                                %{Math.max(discountRate, saleDiscountRate)} İNDİRİM
+                            </div>
                         </div>
                     )}
-                    {/* Custom Badge */}
+
+                    {/* Sağ üst: Yeni / Popüler */}
                     {badge && (
-                        <div className="absolute top-4 right-4 z-10 bg-blue-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-blue-500/30">
-                            {badge}
+                        <div className="absolute top-2.5 right-2.5 z-10">
+                            <div className="bg-[#009AD0] text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap">
+                                {badge}
+                            </div>
                         </div>
                     )}
+
                     {/* Stock Badge */}
                     {product.stock === 0 && (
                         <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-20 flex items-center justify-center">
@@ -148,11 +155,11 @@ export function ProductCardModern({
                             src={product.images[0]}
                             alt={product.name}
                             fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
                             priority={priority}
                             loading={priority ? "eager" : "lazy"}
                             className={cn(
-                                "object-contain p-2 transition-all duration-700 ease-in-out group-hover/card:scale-110",
+                                "object-contain p-3 md:p-4 mix-blend-multiply dark:mix-blend-normal transition-transform duration-500 ease-out group-hover/card:scale-105",
                                 product.stock === 0 && "opacity-50 grayscale"
                             )}
                         />
@@ -161,58 +168,54 @@ export function ProductCardModern({
                             <span className="text-5xl">📦</span>
                         </div>
                     )}
-
-                    {/* Hover Action Overlay (Optional - Keep clean for now or add Quick View) */}
                 </div>
 
                 {/* Content Section */}
-                <div className="p-3 md:p-5 flex-1 flex flex-col bg-gray-50/30 dark:bg-gray-800/50">
-                    {/* Brand */}
+                <div className="px-3 pb-3 pt-1 md:px-4 md:pb-4 flex-1 flex flex-col">
+                    {/* Marka: sade gri yazı */}
                     {product.brand && (
-                        <p className="text-blue-600 dark:text-blue-400 font-bold text-[10px] uppercase tracking-widest mb-1 md:mb-1.5 opacity-80">
+                        <span className="truncate text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1 md:mb-1.5" title={product.brand.name}>
                             {product.brand.name}
-                        </p>
+                        </span>
                     )}
 
                     {/* Product Name */}
-                    <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm leading-relaxed line-clamp-2 h-10 mb-2 md:mb-4 group-hover:text-blue-600 transition-colors">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-[13px] md:text-sm leading-snug line-clamp-2 min-h-[2.5rem] mb-2 md:mb-3 group-hover:text-[#00739C] dark:group-hover:text-[#4cc3ec] transition-colors">
                         {product.name}
                     </h3>
 
-                    {/* Price Section */}
-                    <div className="mt-auto pt-3 md:pt-4 border-t border-dashed border-gray-200 dark:border-gray-700">
-                        <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-1.5 min-w-0">
-                            <div className="flex flex-col min-w-0 pr-1">
-                                {showStrikethrough && (
-                                    <span className="text-[10px] md:text-xs text-gray-400 line-through font-medium truncate">
-                                        {formatPrice(strikethroughPrice)}
-                                    </span>
-                                )}
-                                <span className="text-base md:text-lg font-black text-gray-900 dark:text-white tracking-tight truncate">
-                                    {formatPrice(displayPrice)}
+                    {/* Fiyat + tam genişlik "Sepete Ekle" (telefonda da yazılı; önceden telefonda sadece simge vardı) */}
+                    <div className="mt-auto space-y-2.5">
+                        <div className="flex flex-col min-w-0">
+                            {showStrikethrough && (
+                                <span className="text-[10px] md:text-xs text-gray-400 line-through font-medium truncate leading-none mb-0.5">
+                                    {formatPrice(strikethroughPrice)}
                                 </span>
-                            </div>
-
-                            {/* Modern Add Button */}
-                            <div className="relative shrink-0 ml-auto">
-                                {product.stock > 0 && !hasVariants ? (
-                                    <button
-                                        onClick={handleAddToCart}
-                                        className="h-9 w-9 md:w-auto md:px-3.5 flex items-center justify-center rounded-full bg-blue-600 text-white text-[11px] font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:scale-105 hover:shadow-blue-600/40 transition-all duration-300 active:scale-95 gap-1.5 whitespace-nowrap"
-                                        title="Sepete Ekle"
-                                    >
-                                        <span className="hidden md:inline">Sepete Ekle</span>
-                                        <ShoppingCart className="w-4 h-4" />
-                                    </button>
-                                ) : (
-                                    <Link href={`/products/${product.slug}`}>
-                                        <button className="h-9 px-3.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white text-xs font-bold hover:bg-gray-200 transition-colors">
-                                            {hasVariants ? "SEÇENEKLER" : "TÜKENDİ"}
-                                        </button>
-                                    </Link>
-                                )}
-                            </div>
+                            )}
+                            <span className="text-lg md:text-xl font-extrabold text-gray-900 dark:text-white tracking-tight truncate">
+                                {formatPrice(displayPrice)}
+                            </span>
                         </div>
+
+                        {product.stock > 0 && !hasVariants ? (
+                            <button
+                                type="button"
+                                onClick={handleAddToCart}
+                                className="w-full h-10 md:h-11 flex items-center justify-center gap-2 md:gap-2.5 rounded-xl bg-gradient-to-b from-[#0aa6dd] to-[#0088bb] text-white text-[13px] md:text-[15px] font-bold tracking-wide shadow-md shadow-[#009AD0]/25 ring-1 ring-inset ring-white/10 hover:from-[#0088bb] hover:to-[#00739C] hover:shadow-lg hover:shadow-[#009AD0]/35 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 whitespace-nowrap"
+                            >
+                                <ShoppingBag className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2} />
+                                Sepete Ekle
+                            </button>
+                        ) : hasVariants && product.stock > 0 ? (
+                            // Kartın kendisi ürün sayfasına gider; seçim orada yapılır (önceden link içinde link vardı)
+                            <span className="w-full h-10 md:h-11 flex items-center justify-center gap-2 rounded-xl border border-[#009AD0]/40 text-[#00739C] dark:text-[#4cc3ec] text-[13px] md:text-[15px] font-bold group-hover/card:bg-[#009AD0] group-hover/card:text-white group-hover/card:border-[#009AD0] transition-all duration-200 whitespace-nowrap">
+                                Seçenekleri Gör
+                            </span>
+                        ) : (
+                            <span className="w-full h-10 md:h-11 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-[13px] md:text-[15px] font-bold whitespace-nowrap">
+                                Tükendi
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
