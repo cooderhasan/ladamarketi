@@ -15,7 +15,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ShoppingCart, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap, ChevronDown, Home, Car, Truck, Building2, Mail, Info, Cog, Plus, Minus, ChevronRight } from "lucide-react";
+import { ShoppingCart, ShoppingBag, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap, ChevronDown, Home, Car, Truck, Building2, Mail, Info, Cog, Plus, Minus, ChevronRight } from "lucide-react";
 
 
 
@@ -55,12 +55,25 @@ interface StorefrontHeaderProps {
     sidebarCategories?: Category[];
 }
 
+/** Telefonu okunaklı göster: 05345194472 / 5388168400 -> 0534 519 44 72 / 0538 816 84 00 */
+function displayPhone(digits: string) {
+    const d = digits.length === 10 ? "0" + digits : digits;
+    if (d.length === 11 && d.startsWith("0")) return `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7, 9)} ${d.slice(9)}`;
+    return digits;
+}
+
 export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sidebarCategories = [], phone, facebookUrl, instagramUrl, twitterUrl, linkedinUrl }: StorefrontHeaderProps) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const items = useCartStore((state) => state.items);
     const clearCart = useCartStore((state) => state.clearCart);
     const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+    // "0534 519 44 72 - 538 816 84 00" -> ["05345194472", "05388168400"]
+    const phoneNumbers = (phone || "")
+        .split(/\s[-/|,]\s|\s*[/|,]\s*/)
+        .map((p) => p.replace(/\D/g, ""))
+        .filter((p) => p.length >= 10)
+        .map((p) => (p.length === 10 ? "0" + p : p));
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -118,7 +131,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
             {/* Top Row: Logo, Search, User Actions */}
             <div className="border-b dark:border-gray-800/50">
                 <div className="container mx-auto px-4">
-                    <div className="flex h-16 items-center justify-between gap-4">
+                    <div className="flex h-16 lg:h-20 items-center justify-between gap-2 lg:gap-6">
                         {/* Left: Logo + Phone */}
                         <div className="flex items-center gap-4 shrink-0">
                             {/* Logo */}
@@ -151,30 +164,40 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                                 )}
                             </Link>
 
-                            {/* Call Center (Desktop) - Next to Logo */}
-                            {phone && (
-                                <a
-                                    href={`tel:${phone.replace(/\s/g, '')}`}
-                                    className="hidden lg:flex items-center gap-2 text-gray-600 hover:text-[#009AD0] transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 border-l border-gray-200 ml-2 pl-4"
-                                >
-                                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                        <Phone className="h-4 w-4 text-green-600" />
+                            {/* Çağrı merkezi (masaüstü): çalışma saati + büyük numara. Ayarlarda iki numara var
+                                ("0534 519 44 72 - 538 816 84 00"): ilki büyük, ikincisi altında küçük; her biri ayrı aranabilir.
+                                Önceden tek bağlantıydı ve iki numara birleşip "tel:05345194472-5388168400" oluyordu */}
+                            {phoneNumbers.length > 0 && (
+                                <div className="hidden lg:flex items-center gap-3 ml-2 xl:ml-4 shrink-0">
+                                    <a
+                                        href={`tel:${phoneNumbers[0]}`}
+                                        aria-label={`Ara: ${displayPhone(phoneNumbers[0])}`}
+                                        className="w-11 h-11 bg-green-500 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-green-500/25 transition-transform duration-200 hover:scale-105"
+                                    >
+                                        <Phone className="h-5 w-5 text-white" />
+                                    </a>
+                                    <div className="flex flex-col leading-tight">
+                                        <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">Pzt–Cmt 08:00–20:00</span>
+                                        <a href={`tel:${phoneNumbers[0]}`} className="text-[17px] font-extrabold tracking-tight text-[#00739C] dark:text-white whitespace-nowrap hover:underline">
+                                            {displayPhone(phoneNumbers[0])}
+                                        </a>
+                                        {phoneNumbers[1] && (
+                                            <a href={`tel:${phoneNumbers[1]}`} className="text-[14px] font-bold tracking-tight text-gray-700 dark:text-gray-300 whitespace-nowrap hover:text-[#00739C] hover:underline">
+                                                {displayPhone(phoneNumbers[1])}
+                                            </a>
+                                        )}
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] text-gray-500 font-medium">Çağrı Merkezi</span>
-                                        <span className="text-sm font-bold text-gray-900">{phone}</span>
-                                    </div>
-                                </a>
+                                </div>
                             )}
                         </div>
 
                         {/* Center: Search Bar */}
-                        <div className="flex-1 max-w-xl mx-auto hidden md:block">
+                        <div className="flex-1 min-w-0 max-w-2xl mx-auto hidden md:block px-2 lg:px-4">
                             <SearchInput />
                         </div>
 
                         {/* Right Actions */}
-                        <div className="flex items-center gap-2 md:gap-4">
+                        <div className="flex items-center gap-1 md:gap-2 lg:gap-3 shrink-0">
 
                             {/* User Panel */}
                             <div
@@ -183,28 +206,22 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                                 className="relative"
                             >
                                 {!mounted ? (
-                                    <button className="flex items-center gap-3 text-gray-700 hover:text-[#009AD0] transition-colors px-3 py-2 rounded-lg hover:bg-gray-100">
+                                    <button aria-label="Giriş Yap" className="flex items-center gap-1 md:gap-2.5 text-gray-700 hover:text-[#00739C] transition-colors px-1.5 md:px-3 py-1.5 md:py-2 rounded-lg hover:bg-gray-100">
                                         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                                            <User className="h-5 w-5" />
+                                            <User className="h-5 w-5" strokeWidth={1.6} />
                                         </div>
-                                        <div className="hidden sm:flex flex-col items-start">
-                                            <span className="text-[10px] text-gray-500">Kullanıcı</span>
-                                            <span className="text-sm font-semibold">Giriş Yap</span>
-                                        </div>
+                                        <span className="hidden sm:inline text-sm font-semibold">Giriş Yap</span>
                                     </button>
                                 ) : (
                                     <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen} modal={false}>
                                         <DropdownMenuTrigger asChild>
-                                            <button className="flex items-center gap-3 text-gray-700 hover:text-[#009AD0] transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 outline-none">
+                                            <button aria-label={user ? "Hesabım" : "Giriş Yap"} className="flex items-center gap-1 md:gap-2.5 text-gray-700 hover:text-[#00739C] transition-colors px-1.5 md:px-3 py-1.5 md:py-2 rounded-lg hover:bg-gray-100 outline-none">
                                                 <div className={`w-10 h-10 ${user ? 'bg-[#009AD0]/10' : 'bg-gray-100'} rounded-full flex items-center justify-center`}>
-                                                    <User className={`h-5 w-5 ${user ? 'text-[#009AD0]' : ''}`} />
+                                                    <User className={`h-5 w-5 ${user ? 'text-[#00739C]' : ''}`} strokeWidth={1.6} />
                                                 </div>
-                                                <div className="hidden sm:flex flex-col items-start">
-                                                    <span className="text-[10px] text-gray-500">Kullanıcı</span>
-                                                    <span className="text-sm font-semibold">
-                                                        {user ? "Hesabım" : "Giriş Yap"}
-                                                    </span>
-                                                </div>
+                                                <span className="hidden sm:inline text-sm font-semibold">
+                                                    {user ? "Hesabım" : "Giriş Yap"}
+                                                </span>
                                             </button>
                                         </DropdownMenuTrigger>
 
@@ -280,25 +297,25 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                                 )}
                             </div>
 
-                            {/* Cart - Visible for everyone */}
-                            <Link href="/cart" className={cn(
-                                "flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 pl-4",
-                                user && "border-l"
-                            )}>
+                            {/* Sepet: ince çizgili çanta ikonu (turuncu dolu daire yerine); boşken "0" balonu ve "₺0" yerine sadece "Sepetim" */}
+                            <Link href="/cart" aria-label="Alışveriş Sepetim" className="group/cart flex items-center gap-1 md:gap-2.5 text-gray-700 hover:text-[#00739C] transition-colors px-1.5 md:px-3 py-1.5 md:py-2 rounded-lg hover:bg-gray-100">
                                 <div className="relative">
-                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                        <ShoppingCart className="h-5 w-5 text-orange-600" />
+                                    <div className="w-10 h-10 rounded-full bg-gray-100 group-hover/cart:bg-[#009AD0]/10 flex items-center justify-center transition-colors">
+                                        <ShoppingBag className="h-[21px] w-[21px] text-[#00739C]" strokeWidth={1.6} />
                                     </div>
-                                    <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white border-2 border-white">
-                                        {mounted ? itemCount : 0}
-                                    </span>
+                                    {mounted && itemCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 flex items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white border-2 border-white">
+                                            {itemCount > 99 ? "99+" : itemCount}
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="hidden sm:flex flex-col items-start">
-                                    <span className="text-[10px] text-gray-500">Sepetim</span>
-                                    <span className="text-sm font-bold text-orange-600">
+                                {mounted && itemCount > 0 ? (
+                                    <span className="hidden sm:inline text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                         <CartTotalDisplay />
                                     </span>
-                                </div>
+                                ) : (
+                                    <span className="hidden sm:inline text-sm font-semibold whitespace-nowrap">Sepetim</span>
+                                )}
                             </Link>
 
                             {/* Mobile Menu Toggle */}
@@ -393,7 +410,8 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 <ShoppingCart className="h-4 w-4" />
-                                Sepetim ({mounted ? itemCount : 0})
+                                {/* Boşken "(0)" yazmasın */}
+                                Sepetim{mounted && itemCount > 0 ? ` (${itemCount})` : ""}
                             </Link>
                             <Link
                                 href={user ? "/account" : "/login"}
