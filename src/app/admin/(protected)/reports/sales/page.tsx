@@ -105,7 +105,7 @@ export default async function SalesReportPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <TrendingUp className="h-6 w-6 text-blue-600" />
@@ -124,7 +124,7 @@ export default async function SalesReportPage() {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-gray-500">

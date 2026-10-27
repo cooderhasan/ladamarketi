@@ -89,7 +89,7 @@ export default async function AdminDashboardPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-gray-500">

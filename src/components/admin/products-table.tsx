@@ -172,10 +172,57 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
         }
     };
 
+    // Masaüstü tablo ve mobil kart aynı menüyü kullanır
+    const renderActionsMenu = (product: Product) => (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={loading === product.id}
+                >
+                    <MoreHorizontal className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                    <Link href={`/admin/products/${product.id}/edit`}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Düzenle
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link 
+                        href={`/products/${product.slug}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                    >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Görüntüle
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={() =>
+                        handleToggleStatus(product.id, product.isActive)
+                    }
+                >
+                    {product.isActive ? "Pasif Yap" : "Aktif Yap"}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    className="text-red-600"
+                    onClick={() => handleDelete(product.id)}
+                >
+                    <Trash className="h-4 w-4 mr-2" />
+                    Sil
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+
     return (
         <div className="space-y-4">
             {/* Action Buttons */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="text-sm text-gray-500">
                     {pagination && `${pagination.totalCount} ürün`}
                 </div>
@@ -196,10 +243,10 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
             </div>
 
             {/* Filter Bar */}
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow border border-gray-100 dark:border-gray-800">
-                <div className="flex flex-col md:flex-row md:items-end gap-4">
+            <div className="bg-white dark:bg-gray-900 p-3 sm:p-4 rounded-lg shadow border border-gray-100 dark:border-gray-800">
+                <div className="grid grid-cols-2 gap-3 md:flex md:flex-row md:flex-wrap md:items-end md:gap-4">
                     {/* Search */}
-                    <div className="flex-1 min-w-[200px] space-y-2">
+                    <div className="col-span-2 flex-1 md:min-w-[200px] space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Arama</label>
                         <div className="relative">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
@@ -214,7 +261,7 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                     </div>
 
                     {/* Category */}
-                    <div className="w-full md:w-[180px] space-y-2">
+                    <div className="min-w-0 w-full md:w-[180px] space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Kategori</label>
                         <SearchableSelect
                             options={[
@@ -229,10 +276,10 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                     </div>
 
                     {/* Brand */}
-                    <div className="w-full md:w-[180px] space-y-2">
+                    <div className="min-w-0 w-full md:w-[180px] space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Marka</label>
                         <Select value={brandFilter} onValueChange={setBrandFilter}>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Tümü" />
                             </SelectTrigger>
                             <SelectContent>
@@ -247,10 +294,10 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                     </div>
 
                     {/* Stock Status */}
-                    <div className="w-full md:w-[180px] space-y-2">
+                    <div className="min-w-0 w-full md:w-[180px] space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Stok Durumu</label>
                         <Select value={stockStatus} onValueChange={setStockStatus}>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Tümü" />
                             </SelectTrigger>
                             <SelectContent>
@@ -264,10 +311,10 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                     </div>
 
                     {/* Price Status */}
-                    <div className="w-full md:w-[180px] space-y-2">
+                    <div className="min-w-0 w-full md:w-[180px] space-y-2">
                         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Fiyat Durumu</label>
                         <Select value={priceStatus} onValueChange={setPriceStatus}>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Tümü" />
                             </SelectTrigger>
                             <SelectContent>
@@ -281,11 +328,11 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-end gap-2 md:ml-auto w-full md:w-auto pt-2 md:pt-0">
-                        <Button onClick={resetFilters} variant="ghost" className="text-gray-500 hover:text-gray-700">
+                    <div className="contents md:flex md:items-end md:gap-2 md:ml-auto md:w-auto">
+                        <Button onClick={resetFilters} variant="outline" className="w-full md:w-auto md:border-0 md:shadow-none text-gray-500 hover:text-gray-700">
                             Temizle
                         </Button>
-                        <Button onClick={applyFilters} className="min-w-[100px]">
+                        <Button onClick={applyFilters} className="w-full md:w-auto md:min-w-[100px]">
                             Filtrele
                         </Button>
                     </div>
@@ -294,7 +341,60 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
 
             {/* Table */}
             <div className="rounded-lg border bg-white dark:bg-gray-800 shadow">
-                <div className="overflow-x-auto">
+                {/* Mobil: kart listesi */}
+                <div className="md:hidden">
+                    {products.length === 0 ? (
+                        <p className="text-center py-8 text-gray-500">Ürün bulunamadı.</p>
+                    ) : (
+                        <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                            {products.map((product) => (
+                                <div key={product.id} className="p-3 flex items-start gap-3">
+                                    <div className="flex-1 min-w-0 space-y-1">
+                                        <Link
+                                            href={`/admin/products/${product.id}/edit`}
+                                            className="block text-sm font-medium leading-snug break-words hover:text-blue-600"
+                                        >
+                                            {product.name}
+                                        </Link>
+                                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-gray-500">
+                                            {product.sku && <span className="font-mono break-all">{product.sku}</span>}
+                                            {product.brand?.name && <span>· {product.brand.name}</span>}
+                                            {product.categories && product.categories.length > 0 && (
+                                                <span className="truncate max-w-[160px]">· {product.categories[0].name}{product.categories.length > 1 ? ` +${product.categories.length - 1}` : ""}</span>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                            <span className="text-sm font-semibold whitespace-nowrap">{formatPrice(Number(product.listPrice))}</span>
+                                            <Badge variant={product.stock > 10 ? "default" : "destructive"} className="text-[11px]">
+                                                Stok: {product.stock}
+                                            </Badge>
+                                            <Badge
+                                                variant={product.isActive ? "default" : "secondary"}
+                                                className={`text-[11px] ${product.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                                            >
+                                                {product.isActive ? "Aktif" : "Pasif"}
+                                            </Badge>
+                                            {(product as any).isBundle && (
+                                                <span className="inline-flex items-center gap-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                                    <Package className="h-3 w-3" />
+                                                    Paket
+                                                </span>
+                                            )}
+                                            {product.isFeatured && <Star className="h-3 w-3 text-yellow-500" />}
+                                            {product.isNew && <Sparkles className="h-3 w-3 text-blue-500" />}
+                                            {product.isBestSeller && <TrendingUp className="h-3 w-3 text-green-500" />}
+                                        </div>
+                                    </div>
+                                    <div className="shrink-0">
+                                        {renderActionsMenu(product)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="hidden md:block overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -402,49 +502,7 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        disabled={loading === product.id}
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem asChild>
-                                                        <Link href={`/admin/products/${product.id}/edit`}>
-                                                            <Edit className="h-4 w-4 mr-2" />
-                                                            Düzenle
-                                                        </Link>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem asChild>
-                                                        <Link 
-                                                            href={`/products/${product.slug}`} 
-                                                            target="_blank" 
-                                                            rel="noopener noreferrer"
-                                                        >
-                                                            <ExternalLink className="h-4 w-4 mr-2" />
-                                                            Görüntüle
-                                                        </Link>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        onClick={() =>
-                                                            handleToggleStatus(product.id, product.isActive)
-                                                        }
-                                                    >
-                                                        {product.isActive ? "Pasif Yap" : "Aktif Yap"}
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        className="text-red-600"
-                                                        onClick={() => handleDelete(product.id)}
-                                                    >
-                                                        <Trash className="h-4 w-4 mr-2" />
-                                                        Sil
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                            {renderActionsMenu(product)}
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -455,8 +513,8 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
 
                 {/* Pagination Controls */}
                 {pagination && pagination.totalPages > 1 && (
-                    <div className="flex items-center justify-between p-4 border-t">
-                        <div className="text-sm text-gray-500">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:p-4 border-t">
+                        <div className="text-sm text-gray-500 text-center sm:text-left">
                             Toplam {pagination.totalCount} ürün, Sayfa {pagination.currentPage} / {pagination.totalPages}
                         </div>
                         <div className="flex gap-2">
