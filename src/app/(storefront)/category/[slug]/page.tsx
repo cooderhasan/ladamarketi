@@ -53,7 +53,10 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     // --- Fetch Category ---
     const category = await prisma.category.findUnique({
         where: { slug },
-        include: { children: { select: { id: true, name: true, slug: true, imageUrl: true } } }
+        include: {
+            children: { select: { id: true, name: true, slug: true, imageUrl: true } },
+            parent: { select: { name: true, slug: true } },
+        }
     });
 
     if (!category) {
@@ -152,7 +155,21 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     }
 
 
-    const [products, totalCount, brands, variants] = await Promise.all([
+    // Kategori listesinin üstü: alt kategorisi olan sayfada "Tüm <Kategori>", alt kategoride "← <Üst kategori>"
+    const categoryNav = category.children.length > 0
+        ? { label: `Tüm ${category.name}`, href: `/category/${category.slug}`, active: true }
+        : category.parent
+            ? { label: category.parent.name, href: `/category/${category.parent.slug}`, active: false, back: true }
+            // Alt kategorisi olmayan ana kategori: liste zaten ana kategoriler, üst satır gerekmez
+            : null;
+
+    // Filtrelerdeki marka / renk / beden sadece bu kategorinin ürünlerinden (önceden tüm sitenin markaları listeleniyordu)
+    const categoryScope: Prisma.ProductWhereInput = {
+        isActive: true,
+        categories: { some: { id: { in: categoryIds } } },
+    } as any;
+
+    const [products, totalCount, brandRows, variants] = await Promise.all([
         prisma.product.findMany({
             where,
             include: {
@@ -166,18 +183,22 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         }),
         prisma.product.count({ where }),
         prisma.brand.findMany({
-            where: { isActive: true },
+            where: { isActive: true, products: { some: categoryScope } },
             orderBy: { name: "asc" },
-            select: { id: true, name: true, slug: true }
+            // Markanın bu kategorideki ürün sayısı (filtrede çoktan aza sıralanır, sayı yanında görünür)
+            select: { id: true, name: true, slug: true, _count: { select: { products: { where: categoryScope } } } }
         }),
         prisma.productVariant.findMany({
-            where: { isActive: true },
+            where: { isActive: true, product: categoryScope },
             select: { color: true, size: true },
             distinct: ['color', 'size']
         })
     ]);
 
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+    const brands = brandRows
+        .map((b) => ({ id: b.id, name: b.name, slug: b.slug, count: b._count.products }))
+        .filter((b) => b.count > 0);
     const uniqueColors = Array.from(new Set(variants.map(v => v.color).filter(Boolean))) as string[];
     const uniqueSizes = Array.from(new Set(variants.map(v => v.size).filter(Boolean))) as string[];
 
@@ -201,6 +222,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                         colors={uniqueColors}
                         sizes={uniqueSizes}
                         activeCategorySlug={slug}
+                        categoryNav={categoryNav}
                     />
                     <div className="flex items-center gap-2 ml-auto md:ml-0">
                         <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline-block">Sıralama:</span>
@@ -210,8 +232,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             </div>
 
             <div className="flex flex-col lg:flex-row gap-8 items-start">
-                {/* Sidebar Filters - Desktop Sticky */}
-                <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto pr-2 custom-scrollbar">
+                {/* Masaüstü filtre paneli: ekrana sığmazsa tek parça kayar, kaydırma çubuğu gizli (önceden sabit yükseklik + görünür çubuk, içinde de liste başına ayrı çubuklar vardı) */}
+                <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
                         <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#009AD0]"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
@@ -223,6 +245,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                             colors={uniqueColors}
                             sizes={uniqueSizes}
                             activeCategorySlug={slug}
+                            categoryNav={categoryNav}
                         />
                     </div>
                 </aside>

@@ -6,13 +6,16 @@ import { Filter } from "lucide-react";
 import { ProductFilters } from "./product-filters";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 interface MobileProductFiltersProps {
     categories: { id: string; name: string; slug: string }[];
-    brands: { id: string; name: string; slug: string }[];
+    brands: { id: string; name: string; slug: string; count?: number }[];
     colors: string[];
     sizes: string[];
     activeCategorySlug?: string;
+    /** Kategori listesinin üstündeki bağlantı (kategori sayfasında: "Tüm X" ya da "← Üst kategori"); yoksa "Tüm Kategoriler" */
+    categoryNav?: { label: string; href: string; active: boolean; back?: boolean } | null;
 }
 
 export function MobileProductFilters({
@@ -21,15 +24,32 @@ export function MobileProductFilters({
     colors,
     sizes,
     activeCategorySlug,
+    categoryNav,
 }: MobileProductFiltersProps) {
     const [open, setOpen] = useState(false);
+    const searchParams = useSearchParams();
+
+    // Seçili filtre sayısı butonda rozet olarak görünür
+    const activeFiltersCount = ["brands", "colors", "sizes"].reduce(
+        (acc, key) => acc + searchParams.getAll(key).length,
+        0
+    ) + (searchParams.get("min_price") || searchParams.get("max_price") ? 1 : 0);
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="lg:hidden flex items-center gap-2 border-dashed">
-                    <Filter className="w-4 h-4" />
-                    Filtrele
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="lg:hidden flex items-center gap-2 rounded-xl h-10 px-3.5 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 font-semibold text-xs text-gray-700 dark:text-gray-200 shadow-xs hover:border-[#009AD0]"
+                >
+                    <Filter className="w-3.5 h-3.5 text-[#009AD0]" />
+                    <span>Filtrele</span>
+                    {activeFiltersCount > 0 && (
+                        <span className="flex items-center justify-center min-w-5 h-5 px-1.5 text-[11px] font-bold text-white bg-[#009AD0] rounded-full">
+                            {activeFiltersCount}
+                        </span>
+                    )}
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
@@ -37,13 +57,18 @@ export function MobileProductFilters({
                     <SheetTitle className="text-left">Filtreler</SheetTitle>
                 </SheetHeader>
                 <ScrollArea className="h-[calc(100vh-80px)] px-6 py-4">
-                    <ProductFilters
-                        categories={categories}
-                        brands={brands}
-                        colors={colors}
-                        sizes={sizes}
-                        activeCategorySlug={activeCategorySlug}
-                    />
+                    <div className="pb-24">
+                        <ProductFilters
+                            categories={categories}
+                            brands={brands}
+                            colors={colors}
+                            sizes={sizes}
+                            activeCategorySlug={activeCategorySlug}
+                            categoryNav={categoryNav}
+                            // Kategori seçilince / fiyat uygulanınca panel kapanır; marka işaretlerken açık kalır
+                            onFilterApply={() => setTimeout(() => setOpen(false), 300)}
+                        />
+                    </div>
                 </ScrollArea>
             </SheetContent>
         </Sheet>
