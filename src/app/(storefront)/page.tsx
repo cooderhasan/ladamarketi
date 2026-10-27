@@ -9,6 +9,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ModelShortcuts } from "@/components/storefront/model-shortcuts";
 import { TrustBar } from "@/components/storefront/trust-bar";
+import { WhyUs } from "@/components/storefront/why-us";
+import { unstable_cache } from "next/cache";
 import { Metadata } from "next";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE_URL, absoluteUrl } from "@/lib/site-url";
@@ -36,8 +38,8 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-async function getHomeData() {
-    const [sliders, featuredProducts, newProducts, bestSellers, categories, sidebarCategories, banners, saleCandidates] =
+async function loadHomeData() {
+    const [sliders, featuredProducts, newProducts, bestSellers, categories, sidebarCategories, banners, saleCandidates, productCount] =
         await Promise.all([
             prisma.slider.findMany({
                 where: { isActive: true },
@@ -103,6 +105,7 @@ async function getHomeData() {
                 orderBy: [{ createdAt: "desc" }, { id: "asc" }],
                 take: 40,
             }),
+            prisma.product.count({ where: { isActive: true } }),
         ]);
 
     const discountOf = (p: any) => {
@@ -153,8 +156,13 @@ async function getHomeData() {
         categories: categories.map(transformCategory),
         sidebarCategories: sidebarCategories,
         banners: banners.map(transformBanner),
+        productCount,
     };
 }
+
+// Ana sayfa verisi herkes için aynı (kullanıcıya özel fiyat istemcide hesaplanıyor): 60 sn önbellek.
+// Önceden her ziyarette ~9 sorgu çalışıyordu. Admin'de yapılan değişiklik en geç 1 dakikada görünür.
+const getHomeData = unstable_cache(loadHomeData, ["home-data-v1"], { revalidate: 60, tags: ["home-data"] });
 
 export default async function HomePage() {
     const session = await auth();
@@ -270,6 +278,36 @@ export default async function HomePage() {
                             />
                         )}
 
+                        {/* Bannerlar: önceden en dipte, footer'ın hemen üstündeydi; artık ürün bölümlerinin arasında.
+                            Görseller 800x450 (16:9) ve üzerlerinde yazı var: oran korunuyor, kırpılmıyor, karartılmıyor */}
+                        {data.banners.length > 0 && (
+                            <section aria-label="Kampanyalar" className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-3">
+                                {data.banners.map((banner: any) => (
+                                    <Link
+                                        key={banner.id}
+                                        href={banner.linkUrl || "#"}
+                                        className={cn(
+                                            "relative aspect-[16/9] rounded-2xl overflow-hidden group block ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300",
+                                            !banner.linkUrl && "cursor-default pointer-events-none"
+                                        )}
+                                    >
+                                        <Image
+                                            src={banner.imageUrl}
+                                            alt={banner.title || "Kampanya"}
+                                            fill
+                                            sizes="(max-width: 640px) 100vw, 33vw"
+                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                        {banner.title && (
+                                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pt-10">
+                                                <h3 className="text-white font-bold text-base md:text-lg drop-shadow-md">{banner.title}</h3>
+                                            </div>
+                                        )}
+                                    </Link>
+                                ))}
+                            </section>
+                        )}
+
                         {/* Featured Products */}
                         {data.featuredProducts.length > 0 && (
                             <FeaturedProducts
@@ -295,36 +333,10 @@ export default async function HomePage() {
                     </div>
                 </div>
 
-                {/* Bottom Banners */}
-                {data.banners.length > 0 && (
-                    <section className="mt-12 mb-8">
-                        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-                            {data.banners.map((banner: any) => (
-                                <Link
-                                    key={banner.id}
-                                    href={banner.linkUrl || "#"}
-                                    className={cn(
-                                        "relative h-48 md:h-64 rounded-2xl overflow-hidden group block",
-                                        !banner.linkUrl && "cursor-default"
-                                    )}
-                                >
-                                    <Image
-                                        src={banner.imageUrl}
-                                        alt={banner.title || "Banner"}
-                                        fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                                    {banner.title && (
-                                        <div className="absolute bottom-4 left-4 right-4 z-10">
-                                            <h3 className="text-white font-bold text-lg drop-shadow-md">{banner.title}</h3>
-                                        </div>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-                )}
+                {/* Neden Lada Marketi: sayfanın kapanışı (önceden en altta bannerlar vardı) */}
+                <div className="mt-12 md:mt-16 mb-4">
+                    <WhyUs productCount={data.productCount} />
+                </div>
             </div>
         </>
     );
