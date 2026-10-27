@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/db";
+import { findProductsInStockFirst } from "@/lib/product-listing";
 import { auth } from "@/lib/auth";
 import { ProductCardModern } from "@/components/storefront/product-card-modern";
 import { ProductFilters } from "@/components/storefront/product-filters";
 import { MobileProductFilters } from "@/components/storefront/mobile-product-filters";
 import { Prisma } from "@prisma/client";
 import { ProductSort } from "@/components/storefront/product-sort";
+import { ProductStockToggle } from "@/components/storefront/product-stock-toggle";
 import { Pagination } from "@/components/storefront/pagination";
 import { Metadata } from "next";
 
@@ -19,6 +21,7 @@ interface ProductsPageProps {
         colors?: string | string[];
         sizes?: string | string[];
         page?: string;
+        in_stock?: string;
         is_on_sale?: string;
     }>;
 }
@@ -125,6 +128,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         };
     }
 
+    // Sadece stoktakiler (?in_stock=true)
+    if (params.in_stock === "true") {
+        where.stock = { gt: 0 };
+    }
+
     // Brands
     const brandSlugs = typeof params.brands === 'string' ? [params.brands] : params.brands;
     if (brandSlugs && brandSlugs.length > 0) {
@@ -210,8 +218,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         });
     }
 
-    const [products, totalCount, brands, variants] = await Promise.all([
-        prisma.product.findMany({
+    const [{ products, totalCount }, brands, variants] = await Promise.all([
+        // Stoktakiler önce, tükenenler sonda (lib/product-listing)
+        findProductsInStockFirst({
             where,
             include: {
                 category: true,
@@ -222,7 +231,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             skip,
             take: PAGE_SIZE,
         }),
-        prisma.product.count({ where }),
         prisma.brand.findMany({
             where: { isActive: true },
             orderBy: { name: "asc" },
@@ -243,33 +251,38 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
     return (
         <div className="container mx-auto px-4 py-8">
-            {/* Header Section */}
+            {/* Telefonda "Filtrele" başlığın yanında; altta "Sadece Stoktakiler" + sıralama tek satır (üçü yan yana sığmıyordu) */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        {currentCategory
-                            ? currentCategory.name
-                            : params.search
-                                ? `"${params.search}" Arama Sonuçları`
-                                : params.is_on_sale === "true"
-                                    ? "İndirimli Ürünler"
-                                    : "Tüm Ürünler"}
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400">
-                        Toplam <span className="font-semibold text-gray-900 dark:text-white">{totalCount}</span> ürün listeleniyor
-                    </p>
+                <div className="flex items-start justify-between gap-3 w-full md:w-auto">
+                    <div className="min-w-0">
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                            {currentCategory
+                                ? currentCategory.name
+                                : params.search
+                                    ? `"${params.search}" Arama Sonuçları`
+                                    : params.is_on_sale === "true"
+                                        ? "İndirimli Ürünler"
+                                        : "Tüm Ürünler"}
+                        </h1>
+                        <p className="text-gray-500 dark:text-gray-400">
+                            Toplam <span className="font-semibold text-gray-900 dark:text-white">{totalCount}</span> ürün listeleniyor
+                        </p>
+                    </div>
+                    <div className="lg:hidden shrink-0">
+                        <MobileProductFilters
+                            categories={sidebarCategories}
+                            brands={brands}
+                            colors={uniqueColors}
+                            sizes={uniqueSizes}
+                            activeCategorySlug={params.category}
+                        />
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                    <MobileProductFilters
-                        categories={sidebarCategories}
-                        brands={brands}
-                        colors={uniqueColors}
-                        sizes={uniqueSizes}
-                        activeCategorySlug={params.category}
-                    />
-                    <div className="flex items-center gap-2 ml-auto md:ml-0">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline-block">Sıralama:</span>
+                <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full md:w-auto">
+                    <ProductStockToggle />
+                    <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden xl:inline-block">Sıralama:</span>
                         <ProductSort initialSort={params.sort || "newest"} />
                     </div>
                 </div>
