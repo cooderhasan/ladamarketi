@@ -53,6 +53,8 @@ interface OrdersTableProps {
 const orderStatuses = [
     { value: "ALL", label: "Tümü" },
     { value: "PENDING", label: "Ödeme Bekleniyor" },
+    // Onaylandı + Hazırlanıyor birlikte (Genel Bakış'taki "Kargolanacak" kartı bu filtreyle açar)
+    { value: "TO_SHIP", label: "Kargolanacaklar" },
     { value: "CONFIRMED", label: "Onaylandı" },
     { value: "PROCESSING", label: "Hazırlanıyor" },
     { value: "SHIPPED", label: "Kargolandı" },
@@ -268,7 +270,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                     </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                    {orderStatuses.filter(s => s.value !== 'ALL').map((status) => (
+                    {orderStatuses.filter(s => s.value !== 'ALL' && s.value !== 'TO_SHIP').map((status) => (
                         <SelectItem key={status.value} value={status.value}>
                             {status.label}
                         </SelectItem>
@@ -340,7 +342,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                 <SelectValue placeholder="Durumu Güncelle" />
                             </SelectTrigger>
                             <SelectContent>
-                                {orderStatuses.filter(s => s.value !== 'ALL').map((status) => (
+                                {orderStatuses.filter(s => s.value !== 'ALL' && s.value !== 'TO_SHIP').map((status) => (
                                     <SelectItem key={status.value} value={status.value}>
                                         {status.label}
                                     </SelectItem>

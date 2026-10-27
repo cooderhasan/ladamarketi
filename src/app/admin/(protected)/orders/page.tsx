@@ -39,7 +39,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         ];
     }
 
-    if (status && status !== "ALL") {
+    if (status === "TO_SHIP") {
+        // Onaylandı + Hazırlanıyor birlikte (Genel Bakış'taki "Kargolanacak" kartı bu filtreyle açar)
+        where.status = { in: ["CONFIRMED", "PROCESSING"] as OrderStatus[] };
+    } else if (status && status !== "ALL") {
         const normalizedStatus = status.toUpperCase();
         if (Object.values(OrderStatus).includes(normalizedStatus as OrderStatus)) {
             where.status = normalizedStatus as OrderStatus;
