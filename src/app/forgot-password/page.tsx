@@ -3,7 +3,7 @@ import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { Suspense } from "react";
 
 export const metadata = {
-    title: "Şifremi Unuttum | Lada Marketi",
+    title: "Şifremi Unuttum",
     description: "Şifrenizi sıfırlamak için e-posta adresinizi girin.",
 };
 

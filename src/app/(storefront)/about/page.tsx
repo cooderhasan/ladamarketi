@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const settings = await getSiteSettings();
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
     return {
-        title: `Hakkımızda | ${settings.siteName || "Lada Marketi"}`,
+        title: "Hakkımızda",
         description: settings.seoDescription || "Lada Marketi yedek parça ve aksesuar toptan ve perakende satış çözümleri. Bizimle ilgili daha fazlasını öğrenin.",
         alternates: {
             canonical: `${baseUrl}/about`

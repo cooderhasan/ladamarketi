@@ -16,6 +16,7 @@ import Script from "next/script";
 // });
 
 import { prisma } from "@/lib/db";
+import { SITE_URL, SITE_BRAND } from "@/lib/site-url";
 
 export async function generateMetadata(): Promise<Metadata> {
   let general: any = {};
@@ -31,11 +32,15 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
+    // Göreli adresler (canonical "./", /uploads/... görselleri) bu adrese göre mutlak yapılır;
+    // tanımlı değilken og:image canlıda "http://localhost:3000/..." çıkıyordu (paylaşımlarda görsel yoktu)
+    metadataBase: new URL(SITE_URL),
     title: {
-      default: general.seoTitle || general.siteName || "B2B E-Ticaret Platformu",
-      template: `%s | ${general.siteName || "B2B"}`,
+      default: general.seoTitle || general.siteName || SITE_BRAND,
+      // Kısa marka: uzun site adı (~45 karakter) ürün başlıklarını 100+ karaktere çıkarıyordu, Google ~60 karakter gösteriyor
+      template: `%s | ${SITE_BRAND}`,
     },
-    description: general.seoDescription || "B2B Toptan Satış Platformu",
+    description: general.seoDescription || "Lada yedek parça ve aksesuar satış platformu.",
     keywords: general.seoKeywords?.split(",") || [],
     icons: {
       icon: general.faviconUrl || "/favicon.ico",
@@ -43,9 +48,11 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: general.faviconUrl || "/favicon.ico", // Or a specific apple touch icon if available
     },
     openGraph: {
-      title: general.seoTitle || general.siteName || "B2B E-Ticaret Platformu",
-      description: general.seoDescription || "B2B Toptan Satış Platformu",
-      siteName: general.siteName || "B2B",
+      title: general.seoTitle || general.siteName || SITE_BRAND,
+      description: general.seoDescription || "Lada yedek parça ve aksesuar satış platformu.",
+      siteName: SITE_BRAND,
+      type: "website",
+      locale: "tr_TR",
       images: general.logoUrl ? [{ url: general.logoUrl }] : [],
     },
     alternates: {

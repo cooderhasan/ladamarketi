@@ -29,6 +29,36 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
+  // Arama motorlarında görünmemesi gereken sayfalar (sepet, ödeme, hesap, giriş vb.): noindex, linkler takip edilir.
+  // Başlıkla verilir; bu sayfaların çoğu istemci bileşeni (layout'larına metadata eklenemiyor).
+  async headers() {
+    const noindexPaths = [
+      "/cart",
+      "/checkout/:path*",
+      "/account/:path*",
+      "/orders/:path*",
+      "/payment/:path*",
+      "/quick-order",
+      "/request-quote",
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/reset-password",
+    ];
+    return [
+      // "/x/:path*" kalıbı "/x" sayfasının kendisini de kapsar
+      ...noindexPaths.map((source) => ({
+        source,
+        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
+      })),
+      // Ürün arama sonuçları (/products?search=...): sonsuz sayıda ince içerikli sayfa oluşmasın
+      {
+        source: "/products",
+        has: [{ type: "query" as const, key: "search" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, follow" }],
+      },
+    ];
+  },
   async redirects() {
     let customRedirects = [];
     try {

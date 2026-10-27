@@ -6,6 +6,8 @@ import { ProductDetail } from "@/components/storefront/product-detail";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Metadata } from "next";
 import { getProductReviews, getReviewStats } from "@/app/actions/review";
+import { stripHtmlToText } from "@/lib/helpers";
+import { SITE_URL, absoluteUrl } from "@/lib/site-url";
 
 interface ProductPageProps {
     params: Promise<{ slug: string }>;
@@ -20,18 +22,22 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
     if (!product) return { title: "Ürün Bulunamadı" };
 
-    const description = product.description?.replace(/<[^>]*>?/gm, "").slice(0, 160) || `${product.name} uygun fiyat ve taksit seçenekleriyle Lada Marketi'nde.`;
+    const description = stripHtmlToText(product.description).slice(0, 160) || `${product.name} uygun fiyat ve taksit seçenekleriyle Lada Marketi'nde.`;
+    const url = `${SITE_URL}/products/${slug}`;
 
     return {
-        title: `${product.name} | Lada Marketi`,
+        // Marka layout şablonundan eklenir ("| Lada Marketi"); burada da eklenince başlıkta iki kez çıkıyordu
+        title: product.name,
         description,
         openGraph: {
             title: product.name,
             description,
-            images: product.images || [],
+            url,
+            type: "website",
+            images: (product.images || []).map(absoluteUrl),
         },
         alternates: {
-            canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com"}/products/${slug}`
+            canonical: url
         }
     };
 }
@@ -121,15 +127,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
         currentCat = currentCat.parent;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
-    const absoluteImages = product.images?.map(img => img.startsWith("http") ? img : `${baseUrl}${img.startsWith("/") ? "" : "/"}${img}`) || [];
+    const baseUrl = SITE_URL;
+    const absoluteImages = product.images?.map(absoluteUrl) || [];
+    // Şemadaki fiyat sayfada ziyaretçiye gösterilenle aynı olmalı: indirimli fiyat liste fiyatından düşükse o
+    // (önceden hep liste fiyatı yazılıyordu; indirimli üründe Google'da fiyat uyuşmazlığı oluyordu)
+    const listPrice = Number(product.listPrice);
+    const salePrice = product.salePrice != null ? Number(product.salePrice) : null;
+    const schemaPrice = salePrice != null && salePrice > 0 && salePrice < listPrice ? salePrice : listPrice;
 
     const schema = {
         "@context": "https://schema.org",
         "@type": "Product",
         name: product.name,
         image: absoluteImages,
-        description: product.description?.replace(/<[^>]*>?/gm, "") || product.name, // Strip HTML
+        description: stripHtmlToText(product.description) || product.name,
         sku: product.sku,
         mpn: product.sku,
         brand: {
@@ -140,7 +151,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             "@type": "Offer",
             url: `${baseUrl}/products/${product.slug}`,
             priceCurrency: "TRY",
-            price: Number(product.listPrice),
+            price: schemaPrice,
             priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
             itemCondition: "https://schema.org/NewCondition",
             availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",

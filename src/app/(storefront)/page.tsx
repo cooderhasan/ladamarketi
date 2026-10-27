@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Truck, Shield, HeadphonesIcon } from "lucide-react";
 import { Metadata } from "next";
 import { JsonLd } from "@/components/seo/json-ld";
+import { SITE_URL, absoluteUrl } from "@/lib/site-url";
 
 export const dynamic = 'force-dynamic';
 
@@ -24,14 +25,12 @@ export async function generateMetadata(): Promise<Metadata> {
         console.warn("Could not fetch site settings for homepage metadata.", error);
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
-
     return {
-        title: general.seoTitle || general.siteName || "B2B E-Ticaret Platformu | Lada Marketi",
+        title: { absolute: general.seoTitle || general.siteName || "Lada Yedek Parça ve Aksesuar | Lada Marketi" },
         description: general.seoDescription || "Lada yedek parça ve aksesuar toptan ve perakende satış platformu.",
         keywords: general.seoKeywords?.split(",") || [],
         alternates: {
-            canonical: baseUrl,
+            canonical: "/",
         },
     };
 }
@@ -148,8 +147,9 @@ export default async function HomePage() {
         console.warn("Could not fetch site settings for homepage schema.", e);
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
-    const logoUrl = general.logoUrl || `${baseUrl}/logo.png`;
+    const baseUrl = SITE_URL;
+    // Yapısal veride görsel adresi mutlak olmalı (ayarlardaki logo "/uploads/..." şeklinde göreli)
+    const logoUrl = absoluteUrl(general.logoUrl || "/logo.png");
     const companySchema = {
         "@context": "https://schema.org",
         "@type": "Store",
@@ -194,9 +194,21 @@ export default async function HomePage() {
 
                     {/* Main Content */}
                     <div className="lg:col-span-3 space-y-12">
-                        {/* Hero Slider */}
-                        <div className="rounded-xl overflow-hidden shadow-sm">
-                            <HeroSlider sliders={data.sliders} />
+                        <div className="space-y-5">
+                            {/* Hero Slider */}
+                            <div className="rounded-xl overflow-hidden shadow-sm">
+                                <HeroSlider sliders={data.sliders} />
+                            </div>
+
+                            {/* Sayfanın ana başlığı (H1), görünür ve kısa; önceden ana sayfada H1 yoktu */}
+                            <div className="text-center">
+                                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                                    Lada Yedek Parça ve Aksesuar
+                                </h1>
+                                <p className="mt-1.5 text-sm md:text-base text-gray-500 dark:text-gray-400">
+                                    Niva, Vega, Samara ve Kalina için orijinal ve yan sanayi parçalar · Türkiye geneline kargo
+                                </p>
+                            </div>
                         </div>
 
                         {/* Features - Modern Frameless Design */}

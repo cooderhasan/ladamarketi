@@ -3,7 +3,7 @@ import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { Suspense } from "react";
 
 export const metadata = {
-    title: "Şifre Sıfırla | Lada Marketi",
+    title: "Şifre Sıfırla",
     description: "Yeni şifrenizi belirleyin.",
 };
 

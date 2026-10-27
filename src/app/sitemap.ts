@@ -1,19 +1,19 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
+import { SITE_URL } from "@/lib/site-url";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ladamarketi.com";
+    const baseUrl = SITE_URL;
 
-    // Static pages
+    // Static pages (/blog yoktu, 404 veriyordu; kaldırıldı)
     const routes = [
         "",
         "/about",
         "/contact",
         "/products",
-        "/blog",
+        "/indirimli-urunler",
     ].map((route) => ({
         url: `${baseUrl}${route}`,
-        lastModified: new Date(),
         changeFrequency: "daily" as const,
         priority: route === "" ? 1 : 0.8,
     }));
@@ -29,9 +29,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.warn("Could not fetch categories for sitemap, skipping.", error);
     }
 
+    // lastModified yok: kategoride güncelleme tarihi tutulmuyor; önceden her istekte "şimdi" yazılıyordu, Google bu durumda tarihi dikkate almıyor
     const categoryUrls = categories.map((category) => ({
         url: `${baseUrl}/category/${category.slug}`,
-        lastModified: new Date(),
         changeFrequency: "weekly" as const,
         priority: 0.8,
     }));
@@ -54,5 +54,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }));
 
-    return [...routes, ...categoryUrls, ...productUrls];
+    // Policies (KVKK, iade, mesafeli satış vb.)
+    let policies: { slug: string; updatedAt: Date }[] = [];
+    try {
+        policies = await prisma.policy.findMany({
+            select: { slug: true, updatedAt: true },
+        });
+    } catch (error) {
+        console.warn("Could not fetch policies for sitemap, skipping.", error);
+    }
+
+    const policyUrls = policies.map((policy) => ({
+        url: `${baseUrl}/policies/${policy.slug}`,
+        lastModified: policy.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.3,
+    }));
+
+    return [...routes, ...categoryUrls, ...productUrls, ...policyUrls];
 }

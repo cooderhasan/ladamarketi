@@ -1,18 +1,20 @@
-import Head from "next/head";
-import Script from "next/script";
-
 type JsonLdProps = {
     data: Record<string, any>;
     id?: string;
 };
 
+/**
+ * Yapısal veri sunucuda düz <script> olarak HTML'e yazılır.
+ * Önceden next/script (lazyOnload) ile sayfa yüklendikten sonra ekleniyordu; ilk HTML'de olmadığı için
+ * Google ürün fiyatı/stok ve breadcrumb bilgisini güvenilir okuyamıyordu.
+ */
 export function JsonLd({ data, id = "json-ld" }: JsonLdProps) {
     return (
-        <Script
+        <script
             id={id}
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-            strategy="lazyOnload"
+            // "<" kaçışı: açıklamadaki "</script>" metni etiketi erken kapatmasın
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
         />
     );
 }

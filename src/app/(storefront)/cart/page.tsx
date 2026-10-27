@@ -2,7 +2,7 @@ import { getSiteSettings } from "@/lib/settings";
 import { CartClient } from "@/components/storefront/cart-client";
 
 export const metadata = {
-    title: "Sepetim | Lada Marketi",
+    title: "Sepetim",
     description: "Sepetinizdeki ürünleri görüntüleyin ve siparişinizi güvenle tamamlayın.",
 };
 
