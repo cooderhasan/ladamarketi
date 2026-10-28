@@ -272,3 +272,12 @@ body.has-sticky-cart .cookie-consent {
 body[data-scroll-locked] .wa-float {
   display: none !important;
 }
+
+/* Yatay kayan şeritlerde kaydırma çubuğunu gizle (sınıf kullanılıyordu ama tanımlı değildi; telefonda gri çizgi görünüyordu) */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
