@@ -222,7 +222,7 @@ export default async function HomePage() {
             <div className="container mx-auto px-4 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Left Sidebar - Desktop Only */}
-                    <aside className="hidden lg:block lg:col-span-1 h-fit sticky top-32 z-30">
+                    <aside className="hidden lg:block lg:col-span-1 h-fit sticky top-[var(--sticky-top,8rem)] transition-[top] duration-300 z-30">
                         <CategorySidebarModern categories={data.sidebarCategories} phone={general.phone} whatsappNumber={general.whatsappNumber} />
                     </aside>
 

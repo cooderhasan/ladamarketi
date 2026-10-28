@@ -549,7 +549,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, b
                     </div>
 
                     <div className="lg:col-span-4">
-                        <Card className="sticky top-32 shadow-lg border-t-4 border-t-gray-800 dark:border-t-gray-200">
+                        <Card className="sticky top-[var(--sticky-top,8rem)] transition-[top] duration-300 shadow-lg border-t-4 border-t-gray-800 dark:border-t-gray-200">
                             <CardHeader className="pb-4">
                                 <CardTitle>Sipariş Özeti</CardTitle>
                             </CardHeader>

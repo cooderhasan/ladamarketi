@@ -105,6 +105,23 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
+    // Sayfadaki yapışan paneller (ana sayfa kategori menüsü, sepet/ödeme özeti) header'ı izlesin: header görünürken
+    // altına, gizliyken ekranın üstüne yapışır (--sticky-top). Önceden sabit 128px'te kalıyordu; header gizlenince
+    // üstte boşluk oluşuyordu
+    const headerRef = useRef<HTMLElement>(null);
+    const headerShown = !(headerHidden && !isMobileMenuOpen && !isDropdownOpen);
+    useEffect(() => {
+        const el = headerRef.current;
+        if (!el) return;
+        const update = () => {
+            document.documentElement.style.setProperty("--sticky-top", headerShown ? `${el.offsetHeight + 16}px` : "16px");
+        };
+        update();
+        const ro = new ResizeObserver(update);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [headerShown]);
+
     const handleMouseEnter = () => {
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
@@ -144,6 +161,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
 
     return (
         <header
+            ref={headerRef}
             className={cn(
                 "sticky top-0 z-50 w-full bg-white/95 supports-[backdrop-filter]:bg-white/80 dark:bg-gray-900/95 supports-[backdrop-filter]:dark:bg-gray-900/80 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 transition-transform duration-300",
                 // Mobil menü veya hesap menüsü açıkken gizlenmez

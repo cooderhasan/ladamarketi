@@ -62,7 +62,8 @@ export function CategorySidebarModern({ categories, phone, whatsappNumber }: Cat
 
             {/* Category List - Floating Cards style */}
             <div className="flex flex-col gap-2">
-                {categories.map((category) => {
+                {/* Eski siteden kalan "Home" kök kategorisi listede görünmesin */}
+                {categories.filter((c) => c.name.trim().toLowerCase() !== "home").map((category) => {
                     const isOpen = openCategories.includes(category.id);
                     const hasChildren = category.children && category.children.length > 0;
 
