@@ -109,9 +109,9 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                 )}
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
-                {/* Left Column: Order Items */}
-                <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column: Order Items (min-w-0: uzun ürün adı sütunu genişletmesin) */}
+                <div className="lg:col-span-2 space-y-6 min-w-0">
                     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-100 dark:border-gray-800">
                             <h2 className="font-bold flex items-center gap-2">
@@ -183,7 +183,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                 </div>
 
                 {/* Right Column: Order Summary & Details */}
-                <div className="space-y-6">
+                <div className="space-y-6 min-w-0">
                     {/* Payment Info */}
                     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
                         <h3 className="font-bold flex items-center gap-2 mb-4">

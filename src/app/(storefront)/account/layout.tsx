@@ -111,8 +111,10 @@ export default function AccountLayout({
                     </div>
                 </aside>
 
-                {/* Main Content */}
-                <main className="flex-1">
+                {/* Main Content: min-w-0 olmadan içerik alanı, içindeki tek satıra kısaltılmış uzun yazı (ör. sipariş
+                    detayında ürün adı) kadar genişliyor, sayfa ekrandan taşıyordu; telefonda tarayıcı sayfayı uzaklaştırıp
+                    masaüstü görünümüne geçiyordu */}
+                <main className="flex-1 min-w-0">
                     <div className="bg-white dark:bg-gray-900 rounded-lg border shadow-sm p-6 min-h-[500px]">
                         {children}
                     </div>
