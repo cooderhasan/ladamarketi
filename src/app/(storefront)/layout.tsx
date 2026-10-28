@@ -12,6 +12,7 @@ import { AddedToCartModal } from "@/components/storefront/added-to-cart-modal";
 import { CookieConsent } from "@/components/storefront/cookie-consent";
 
 import { WhatsAppButton } from "@/components/storefront/whatsapp-button";
+import { VisitSourceTracker } from "@/components/storefront/visit-source-tracker";
 
 export default async function StorefrontLayout({
     children,
@@ -187,6 +188,7 @@ export default async function StorefrontLayout({
             <main className="flex-1">{children}</main>
             <StorefrontFooter settings={settings} policies={policies} />
             <WhatsAppButton phone={settings.whatsappNumber || settings.phone} />
+            <VisitSourceTracker />
         </div>
     );
 }

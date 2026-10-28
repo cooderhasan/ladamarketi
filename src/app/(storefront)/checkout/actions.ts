@@ -1,6 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { headers } from "next/headers";
+import { sanitizeVisitSource, parseUserAgent, type VisitSource } from "@/lib/visit-source";
 import { auth } from "@/lib/auth";
 import { generateOrderNumber } from "@/lib/helpers";
 import { sendOrderConfirmationEmail, sendAdminNewOrderEmail } from "@/lib/email";
@@ -32,6 +34,7 @@ interface CreateOrderData {
     paymentMethod?: "BANK_TRANSFER" | "CREDIT_CARD" | "CURRENT_ACCOUNT";
     shippingCost?: number;
     shippingDesi?: number;
+    visitSource?: VisitSource; // müşterinin siteye geldiği kaynak (tarayıcıdan)
 }
 
 export async function createOrder(data: CreateOrderData) {
@@ -237,6 +240,11 @@ export async function createOrder(data: CreateOrderData) {
         const orderNumber = generateOrderNumber();
 
         // Create order with transaction
+        // Ziyaret kaynağı (tarayıcıdan, temizlenmiş) + cihaz (User-Agent'tan)
+        const attribution = {
+            ...sanitizeVisitSource(data.visitSource),
+            ...parseUserAgent((await headers()).get("user-agent")),
+        };
         const order = await prisma.$transaction(async (tx) => {
             // Check Critical Limit for Current Account (only for logged in users)
             if (paymentMethod === "CURRENT_ACCOUNT" && userId) {
@@ -282,7 +290,9 @@ export async function createOrder(data: CreateOrderData) {
                     total,
                     status: paymentMethod === "CURRENT_ACCOUNT" ? "CONFIRMED" :
                         paymentMethod === "CREDIT_CARD" ? "WAITING_FOR_PAYMENT" : "PENDING",
-                    shippingAddress: data.shippingAddress as any,
+                    // Ziyaret kaynağı (Google/direkt...) + cihaz (telefon/masaüstü) adres JSON'unda "attribution" anahtarında
+                    // (yeni sütun gerekmesin diye); admin sipariş detayında gösterilir
+                    shippingAddress: { ...data.shippingAddress, attribution } as any,
                     cargoCompany: data.cargoCompany,
                     shippingCost: data.shippingCost,
                     shippingDesi: data.shippingDesi,

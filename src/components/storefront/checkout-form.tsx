@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { readVisitSource } from "@/lib/visit-source";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/stores/cart-store";
@@ -219,6 +220,7 @@ export function CheckoutForm({ initialData, cargoCompanies, bankTransferDiscount
                 discountRate: Number(discountRate),
                 shippingCost: shippingCost,
                 shippingDesi: summary.totalDesi,
+                visitSource: readVisitSource() || undefined,
             });
 
             if (result.success) {

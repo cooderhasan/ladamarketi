@@ -13,6 +13,7 @@ interface OrdersPageProps {
         startDate?: string;
         endDate?: string;
         printed?: string; // "YES" | "NO" | "ALL"
+        customer?: string; // "MEMBER" | "GUEST"
     }>;
 }
 
@@ -26,6 +27,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     const status = params.status as OrderStatus | string | undefined;
     const cargo = params.cargo;
     const printed = params.printed; // "YES" | "NO" | undefined/"ALL"
+    const customer = params.customer;
     // Tarihler Türkiye saatine göre gün başı/sonu (sunucu UTC; önceden 00:00-03:00 arası siparişler önceki güne düşüyordu)
     const trDay = (s: string, end: boolean) =>
         /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(`${s}T${end ? "23:59:59.999" : "00:00:00"}+03:00`) : new Date(s);
@@ -91,6 +93,13 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
         where.isPrinted = true;
     } else if (printed === "NO") {
         where.isPrinted = false;
+    }
+
+    // Üye / misafir (misafir: üyelik olmadan verilen sipariş)
+    if (customer === "MEMBER") {
+        where.userId = { not: null };
+    } else if (customer === "GUEST") {
+        where.userId = null;
     }
 
     // Date Filtering
@@ -163,9 +172,31 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
     const totalPages = Math.ceil(totalCount / limit);
 
+    // Üye siparişlerinde "kaçıncı siparişi" (Bardakçı Bike ile aynı): iptal edilenler sayılmaz
+    // (terk edilen kart ödemeleri sayıyı şişirmesin)
+    const memberIds = [...new Set(orders.map((o: any) => o.userId).filter(Boolean))] as string[];
+    const memberOrders = memberIds.length
+        ? await prisma.order.findMany({
+            where: { userId: { in: memberIds } },
+            select: { id: true, userId: true, createdAt: true, status: true },
+            orderBy: { createdAt: "asc" },
+        })
+        : [];
+    const memberStats = new Map<string, { nth: number; total: number }>();
+    for (const uid of memberIds) {
+        const list = memberOrders.filter((o) => o.userId === uid);
+        const valid = list.filter((o) => o.status !== "CANCELLED");
+        for (const o of list) {
+            const nth = valid.filter((v) => v.createdAt <= o.createdAt).length + (o.status === "CANCELLED" ? 1 : 0);
+            memberStats.set(o.id, { nth, total: valid.length });
+        }
+    }
+
     const serializedOrders = orders.map((order: any) => ({
         ...order,
         guestEmail: order.guestEmail,
+        memberOrderNth: memberStats.get(order.id)?.nth ?? null,
+        memberOrderTotal: memberStats.get(order.id)?.total ?? null,
         isPrinted: order.isPrinted ?? false,
         printedAt: order.printedAt ? order.printedAt.toISOString() : null,
         subtotal: Number(order.subtotal),

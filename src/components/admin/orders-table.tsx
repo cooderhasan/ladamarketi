@@ -1,5 +1,7 @@
 "use client";
 
+import { describeVisitSource, orderAttribution } from "@/lib/visit-source";
+
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -71,6 +73,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
     const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "ALL");
     const [cargoFilter, setCargoFilter] = useState(searchParams.get("cargo") || "ALL");
     const [printedFilter, setPrintedFilter] = useState(searchParams.get("printed") || "ALL");
+    const [customerFilter, setCustomerFilter] = useState(searchParams.get("customer") || "ALL");
     const [startDate, setStartDate] = useState(searchParams.get("startDate") || "");
     const [endDate, setEndDate] = useState(searchParams.get("endDate") || "");
 
@@ -107,6 +110,9 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
         if (printedFilter && printedFilter !== "ALL") params.set("printed", printedFilter);
         else params.delete("printed");
 
+        if (customerFilter && customerFilter !== "ALL") params.set("customer", customerFilter);
+        else params.delete("customer");
+
         if (startDate) params.set("startDate", startDate);
         else params.delete("startDate");
 
@@ -125,6 +131,7 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
         setStatusFilter("ALL");
         setCargoFilter("ALL");
         setPrintedFilter("ALL");
+        setCustomerFilter("ALL");
         setStartDate("");
         setEndDate("");
         router.push("/admin/orders");
@@ -455,6 +462,21 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                         </Select>
                     </div>
 
+                    {/* Üye / Misafir */}
+                    <div className="min-w-0 w-full md:w-[140px] space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Müşteri</label>
+                        <Select value={customerFilter} onValueChange={setCustomerFilter}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Tümü" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="ALL">Tümü</SelectItem>
+                                <SelectItem value="MEMBER">Üye</SelectItem>
+                                <SelectItem value="GUEST">Misafir</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     {/* Date Range */}
                     <div className="contents md:flex md:items-center md:gap-2 md:w-auto">
                         <div className="space-y-2 min-w-0 md:w-[140px]">
@@ -775,6 +797,19 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                             </p>
                                             <p>{selectedOrder.user?.email || selectedOrder.guestEmail}</p>
                                             <p>{selectedOrder.user?.phone || "-"}</p>
+                                            {/* Üye / misafir; üyede kaçıncı siparişi */}
+                                            {(selectedOrder as any).userId ? (
+                                                <span className="inline-flex items-center gap-1 mt-1 text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 px-2 py-0.5 rounded-full">
+                                                    Üye
+                                                    {(selectedOrder as any).memberOrderNth
+                                                        ? ` · ${(selectedOrder as any).memberOrderNth}. siparişi${(selectedOrder as any).memberOrderTotal > 1 ? ` (toplam ${(selectedOrder as any).memberOrderTotal})` : ""}`
+                                                        : ""}
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 mt-1 text-xs font-semibold bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 px-2 py-0.5 rounded-full">
+                                                    Misafir
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                     <div>
@@ -783,6 +818,32 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                             {selectedOrder.notes || "Not yok."}
                                         </p>
                                     </div>
+                                    {/* Müşterinin siteye nereden geldiği ve cihazı (bu özellikten sonraki siparişlerde) */}
+                                    {(() => {
+                                        const at = orderAttribution(selectedOrder as any);
+                                        return (
+                                            <div>
+                                                <h4 className="font-semibold mb-2 text-sm">Ziyaret Kaynağı</h4>
+                                                {at ? (
+                                                    <div className="text-sm space-y-1 text-gray-600 dark:text-gray-300 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                                                        <p className="font-medium text-gray-900 dark:text-gray-100">{describeVisitSource(at)}</p>
+                                                        {at.device && (
+                                                            <p>{[at.device, at.os, at.browser].filter(Boolean).join(" · ")}</p>
+                                                        )}
+                                                        {at.utmCampaign && <p className="text-xs">Kampanya: {at.utmCampaign}</p>}
+                                                        {at.landing && <p className="text-xs break-all">İlk sayfa: {at.landing}</p>}
+                                                        {at.at && (
+                                                            <p className="text-xs">
+                                                                Geliş: {new Date(at.at).toLocaleString("tr-TR", { timeZone: "Europe/Istanbul", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs text-gray-500">Bu özellikten önceki sipariş; kaynak bilgisi yok.</p>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
 
                                 {/* Column 2: Shipping Address */}
