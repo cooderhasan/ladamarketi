@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,26 @@ export function BulkStockForm({ categories, brands }: BulkStockFormProps) {
     // Execution State
     const [loading, setLoading] = useState(false);
     const [previewResults, setPreviewResults] = useState<StockPreviewResult[] | null>(null);
+    // Önizlemenin hangi ayarlarla yapıldığı: onay her zaman bu ayarlarla çalışır
+    const [previewRequest, setPreviewRequest] = useState<{ criteria: any; params: any } | null>(null);
+
+    // Ayar değişince önizleme temizlenir (önceden önizlemeden sonra değer/kategori değişirse onay yeni ayarla çalışıyordu)
+    useEffect(() => {
+        setPreviewResults(null);
+        setPreviewRequest(null);
+    }, [selectedBrand, selectedCategories, isAllCategories, operation, value]);
+
+    const buildRequest = () => ({
+        criteria: {
+            brandId: selectedBrand,
+            categoryIds: isAllCategories ? [] : selectedCategories,
+            allCategories: isAllCategories,
+        },
+        params: {
+            operation,
+            value: Number(value),
+        },
+    });
 
     const handlePreview = async () => {
         if (!value || Number(value) < 0) {
@@ -46,24 +66,22 @@ export function BulkStockForm({ categories, brands }: BulkStockFormProps) {
             return;
         }
 
+        if (!isAllCategories && selectedCategories.length === 0) {
+            toast.error("Kategori seçin veya 'Tüm Kategoriler'i açın.");
+            return;
+        }
+
         setLoading(true);
         try {
-            const results = await previewBulkStockUpdate(
-                {
-                    brandId: selectedBrand,
-                    categoryId: isAllCategories ? "ALL" : (selectedCategories.length > 0 ? selectedCategories[0] : undefined),
-                },
-                {
-                    operation,
-                    value: Number(value),
-                }
-            );
+            const request = buildRequest();
+            const results = await previewBulkStockUpdate(request.criteria, request.params);
 
             if (results.length === 0) {
                 toast.warning("Seçilen kriterlere uygun ürün bulunamadı.");
                 setPreviewResults(null);
             } else {
                 setPreviewResults(results);
+                setPreviewRequest(request);
                 toast.success(`${results.length} ürün için önizleme hazırlandı.`);
             }
         } catch (error) {
@@ -74,24 +92,20 @@ export function BulkStockForm({ categories, brands }: BulkStockFormProps) {
     };
 
     const handleExecute = async () => {
-        if (!previewResults) return;
+        if (!previewResults || !previewRequest) return;
         if (!confirm(`${previewResults.length} ürünün stoğu güncellenecek. Bu işlem geri alınamaz. Emin misiniz?`)) return;
 
         setLoading(true);
         try {
-            await executeBulkStockUpdate(
-                {
-                    brandId: selectedBrand,
-                    categoryId: isAllCategories ? "ALL" : (selectedCategories.length > 0 ? selectedCategories[0] : undefined),
-                },
-                {
-                    operation,
-                    value: Number(value),
-                }
-            );
+            const result = await executeBulkStockUpdate(previewRequest.criteria, previewRequest.params, previewResults.length);
+            if (!result.success) {
+                toast.error(result.error);
+                return;
+            }
 
-            toast.success("Stoklar başarıyla güncellendi.");
+            toast.success(`${result.count} ürünün stoğu güncellendi.`);
             setPreviewResults(null);
+            setPreviewRequest(null);
         } catch (error) {
             toast.error("Güncelleme işlemi başarısız oldu.");
         } finally {
@@ -147,10 +161,11 @@ export function BulkStockForm({ categories, brands }: BulkStockFormProps) {
                                         options={categories}
                                         selected={selectedCategories}
                                         onChange={setSelectedCategories}
-                                        placeholder="Kategori Seçin (Opsiyonel)"
+                                        placeholder="Kategori Seçin"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Sadece tek bir kategori seçimi yapınız. Seçilen kategoriye ait ürünler etkilenir.
+                                        Bir veya birden fazla kategori seçin; alt kategorilerdeki ürünler de dahil edilir.
+                                        Tüm ürünler için "Tüm Kategoriler"i açın.
                                     </p>
                                 </>
                             )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +43,28 @@ export function BulkPriceForm({ categories, brands }: BulkPriceFormProps) {
     // Execution State
     const [loading, setLoading] = useState(false);
     const [previewResults, setPreviewResults] = useState<PreviewResult[] | null>(null);
+    // Önizlemenin hangi ayarlarla yapıldığı: onay her zaman bu ayarlarla çalışır
+    const [previewRequest, setPreviewRequest] = useState<{ criteria: any; params: any } | null>(null);
+
+    // Ayar değişince önizleme temizlenir (önceden önizlemeden sonra değer/kategori değişirse onay yeni ayarla çalışıyordu)
+    useEffect(() => {
+        setPreviewResults(null);
+        setPreviewRequest(null);
+    }, [selectedBrand, selectedCategories, isAllCategories, priceFilter, operation, updateType, value]);
+
+    const buildRequest = () => ({
+        criteria: {
+            brandId: selectedBrand,
+            categoryIds: isAllCategories ? [] : selectedCategories,
+            allCategories: isAllCategories,
+            priceFilter,
+        },
+        params: {
+            operation,
+            type: updateType,
+            value: Number(value),
+        },
+    });
 
     const handlePreview = async () => {
         if (!value || Number(value) < 0) {
@@ -50,26 +72,22 @@ export function BulkPriceForm({ categories, brands }: BulkPriceFormProps) {
             return;
         }
 
+        if (!isAllCategories && selectedCategories.length === 0) {
+            toast.error("Kategori seçin veya 'Tüm Kategoriler'i açın.");
+            return;
+        }
+
         setLoading(true);
         try {
-            const results = await previewBulkUpdate(
-                {
-                    brandId: selectedBrand,
-                    categoryId: isAllCategories ? "ALL" : (selectedCategories.length > 0 ? selectedCategories[0] : undefined),
-                    priceFilter,
-                },
-                {
-                    operation,
-                    type: updateType,
-                    value: Number(value),
-                }
-            );
+            const request = buildRequest();
+            const results = await previewBulkUpdate(request.criteria, request.params);
 
             if (results.length === 0) {
                 toast.warning("Seçilen kriterlere uygun ürün bulunamadı.");
                 setPreviewResults(null);
             } else {
                 setPreviewResults(results);
+                setPreviewRequest(request);
                 toast.success(`${results.length} ürün için önizleme hazırlandı.`);
             }
         } catch (error) {
@@ -80,28 +98,20 @@ export function BulkPriceForm({ categories, brands }: BulkPriceFormProps) {
     };
 
     const handleExecute = async () => {
-        if (!previewResults) return;
+        if (!previewResults || !previewRequest) return;
         if (!confirm(`${previewResults.length} ürünün fiyatı güncellenecek. Bu işlem geri alınamaz. Emin misiniz?`)) return;
 
         setLoading(true);
         try {
-            // We re-send criteria to be safe, creating a fresh transaction logic on server ideally,
-            // but for now we trust the state matches the preview.
-            await executeBulkUpdate(
-                {
-                    brandId: selectedBrand,
-                    categoryId: isAllCategories ? "ALL" : (selectedCategories.length > 0 ? selectedCategories[0] : undefined),
-                    priceFilter,
-                },
-                {
-                    operation,
-                    type: updateType,
-                    value: Number(value),
-                }
-            );
+            const result = await executeBulkUpdate(previewRequest.criteria, previewRequest.params, previewResults.length);
+            if (!result.success) {
+                toast.error(result.error);
+                return;
+            }
 
-            toast.success("Fiyatlar başarıyla güncellendi.");
+            toast.success(`${result.count} ürünün fiyatı güncellendi.`);
             setPreviewResults(null);
+            setPreviewRequest(null);
             // Optionally reset form
         } catch (error) {
             toast.error("Güncelleme işlemi başarısız oldu.");
@@ -161,10 +171,11 @@ export function BulkPriceForm({ categories, brands }: BulkPriceFormProps) {
                                         options={categories}
                                         selected={selectedCategories}
                                         onChange={setSelectedCategories}
-                                        placeholder="Kategori Seçin (Opsiyonel)"
+                                        placeholder="Kategori Seçin"
                                     />
                                     <p className="text-xs text-muted-foreground">
-                                        Sadece tek bir kategori seçimi yapınız. Seçilen kategoriye ait ürünler etkilenir.
+                                        Bir veya birden fazla kategori seçin; alt kategorilerdeki ürünler de dahil edilir.
+                                        Tüm ürünler için "Tüm Kategoriler"i açın.
                                     </p>
                                 </>
                             )}
@@ -265,6 +276,9 @@ export function BulkPriceForm({ categories, brands }: BulkPriceFormProps) {
                                     <AlertTitle>Özet</AlertTitle>
                                     <AlertDescription>
                                         Toplam <strong>{previewResults.length}</strong> ürün etkilenecek.
+                                        {previewResults.some((p) => p.oldSalePrice != null && p.oldSalePrice < p.oldPrice) && (
+                                            <> İndirimli fiyatı olan <strong>{previewResults.filter((p) => p.oldSalePrice != null && p.oldSalePrice < p.oldPrice).length}</strong> üründe indirimli fiyat da aynı şekilde güncellenir.</>
+                                        )}
                                     </AlertDescription>
                                 </Alert>
 
@@ -285,12 +299,22 @@ export function BulkPriceForm({ categories, brands }: BulkPriceFormProps) {
                                                         <div className="font-medium">{p.name}</div>
                                                         <div className="text-xs text-muted-foreground">{p.sku}</div>
                                                     </TableCell>
-                                                    <TableCell>{formatPrice(p.oldPrice)}</TableCell>
+                                                    <TableCell>
+                                                        {formatPrice(p.oldPrice)}
+                                                        {p.oldSalePrice != null && p.oldSalePrice < p.oldPrice && (
+                                                            <div className="text-xs text-emerald-600">İnd. {formatPrice(p.oldSalePrice)}</div>
+                                                        )}
+                                                    </TableCell>
                                                     <TableCell>
                                                         <ArrowRight className="h-4 w-4 text-muted-foreground" />
                                                     </TableCell>
                                                     <TableCell className="font-bold text-blue-600">
                                                         {formatPrice(p.newPrice)}
+                                                        {p.oldSalePrice != null && p.oldSalePrice < p.oldPrice && (
+                                                            <div className="text-xs font-semibold text-emerald-600">
+                                                                {p.newSalePrice != null ? `İnd. ${formatPrice(p.newSalePrice)}` : "İndirim kalkar"}
+                                                            </div>
+                                                        )}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
