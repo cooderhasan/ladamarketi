@@ -10,7 +10,7 @@ import { formatPrice, calculatePrice, validateMinQuantity } from "@/lib/helpers"
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart-store";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ShoppingCart, Minus, Plus, Package, Truck, ChevronLeft, ChevronRight, Shield, CreditCard, ChevronRight as ChevronRightIcon, FileText, Star } from "lucide-react";
 import { InstallmentTable } from "./installment-table";
 import { WishlistButton } from "@/components/products/wishlist-button";
@@ -109,6 +109,26 @@ export function ProductDetail({
     const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const addItem = useCartStore((state) => state.addItem);
+    const openAddedToCartModal = useCartStore((state) => state.openAddedToCartModal);
+
+    // Sabit "Sepete Ekle" çubuğu (Bardakçı Bike ile aynı): asıl buton ekranın üstünden çıkınca alttan belirir.
+    // Aşağı inip açıklama/yorumları okuyan müşteri yukarı çıkmadan sepete ekleyebilsin
+    const ctaRef = useRef<HTMLDivElement>(null);
+    const [showStickyCart, setShowStickyCart] = useState(false);
+    useEffect(() => {
+        const el = ctaRef.current;
+        if (!el || typeof IntersectionObserver === "undefined") return;
+        const io = new IntersectionObserver(([entry]) => {
+            setShowStickyCart(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+        });
+        io.observe(el);
+        return () => io.disconnect();
+    }, [product.id]);
+    useEffect(() => {
+        // WhatsApp düğmesi çubuğun üstüne binmesin (globals.css: .has-sticky-cart .wa-float)
+        document.body.classList.toggle("has-sticky-cart", showStickyCart);
+        return () => document.body.classList.remove("has-sticky-cart");
+    }, [showStickyCart]);
 
     // Get unique colors and sizes from variants
     const variants = product.variants || [];
@@ -214,7 +234,7 @@ export function ProductDetail({
             ? ((product.listPrice - product.salePrice) / product.listPrice) * 100
             : 0;
 
-        addItem({
+        const cartItem = {
             productId: product.id,
             name: product.name,
             slug: product.slug,
@@ -229,8 +249,10 @@ export function ProductDetail({
             desi: effectiveDesi,
             variantId: selectedVariant?.id,
             variantInfo: variantInfo,
-        });
-        toast.success("Ürün sepete eklendi!");
+        };
+        addItem(cartItem);
+        // Üstte küçük bildirim yerine ürün kartlarındaki gibi "Sepetinize eklendi" paneli (telefonda alttan açılır)
+        openAddedToCartModal(cartItem);
     };
 
     return (
@@ -264,15 +286,18 @@ export function ProductDetail({
                 <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden mb-8">
                     <div className="grid lg:grid-cols-2 gap-0">
                         {/* Left: Image Gallery */}
-                        <div className="p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800">
+                        {/* Telefonda daha az kenar boşluğu: görsel ekranı daha çok kaplasın */}
+                        <div className="p-3 sm:p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-gray-100 dark:border-gray-800">
                             {/* Main Image */}
-                            <div className="relative aspect-[4/3] bg-gray-50 dark:bg-gray-800/50 rounded-xl overflow-hidden group mb-4">
+                            {/* Kare ve beyaz zemin (Bardakçı Bike ile aynı): ürün fotoğrafları çoğunlukla kare ve beyaz zeminli.
+                                Önceden 4:3 yatay gri kutu + geniş iç boşluk vardı; fotoğraf ortada küçük beyaz bir dikdörtgen gibi kalıyordu */}
+                            <div className="relative aspect-square bg-white dark:bg-gray-800/50 rounded-xl overflow-hidden group mb-4 border border-gray-100 dark:border-gray-800">
                                 {product.images[0] ? (
                                     <Image
                                         src={product.images[activeImageIndex] || product.images[0]}
                                         alt={product.name}
                                         fill
-                                        className="object-contain p-6 group-hover:scale-105 transition-transform duration-500"
+                                        className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                                         priority
                                         sizes="(max-width: 1024px) 100vw, 50vw"
                                     />
@@ -338,7 +363,7 @@ export function ProductDetail({
                                             type="button"
                                             onClick={() => setActiveImageIndex(index)}
                                             className={cn(
-                                                "relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0",
+                                                "relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0 bg-white",
                                                 activeImageIndex === index
                                                     ? "border-[#009AD0] ring-1 ring-[#009AD0]/30"
                                                     : "border-gray-200 dark:border-gray-700 hover:border-gray-300 opacity-60 hover:opacity-100"
@@ -530,7 +555,7 @@ export function ProductDetail({
                                             <span className="text-xs font-medium text-green-600 dark:text-green-400">Stokta Mevcut</span>
                                         </div>
 
-                                        <div className="grid grid-cols-12 gap-3 sm:flex sm:flex-wrap sm:items-center">
+                                        <div ref={ctaRef} className="grid grid-cols-12 gap-3 sm:flex sm:flex-wrap sm:items-center">
                                             {/* Quantity selector */}
                                             <div className="col-span-4 sm:w-auto flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shrink-0">
                                                 <Button
@@ -781,6 +806,46 @@ export function ProductDetail({
                     </div>
                 )}
             </div>
+
+            {/* Sabit Sepete Ekle çubuğu (asıl buton ekranın üstünden çıkınca). Telefonda fiyat + buton; masaüstünde ayrıca
+                küçük görsel, ürün adı ve seçili renk/beden */}
+            {product.stock > 0 && (
+                <div
+                    aria-hidden={!showStickyCart}
+                    className={cn(
+                        "fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur shadow-[0_-4px_16px_rgba(0,0,0,0.08)] transition-transform duration-300",
+                        showStickyCart ? "translate-y-0" : "translate-y-full pointer-events-none"
+                    )}
+                >
+                    <div className="container mx-auto max-w-7xl flex items-center gap-3 md:gap-4 px-4 pt-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] md:py-3">
+                        {product.images[0] && (
+                            <div className="hidden md:block relative w-12 h-12 shrink-0 rounded-lg bg-[#f3f6f9] dark:bg-gray-800 overflow-hidden">
+                                <Image src={product.images[activeImageIndex] || product.images[0]} alt="" fill sizes="48px" className="object-contain p-1 mix-blend-multiply dark:mix-blend-normal" />
+                            </div>
+                        )}
+                        <div className="hidden md:block min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{product.name}</p>
+                            {currentVariant && (
+                                <p className="text-xs text-gray-500 truncate">{[currentVariant.color, currentVariant.size].filter(Boolean).join(" / ")}</p>
+                            )}
+                        </div>
+                        <div className="min-w-0 flex-1 md:flex-none md:text-right">
+                            {showStrikethrough && (
+                                <div className="text-[11px] text-gray-400 line-through leading-none">{formatPrice(strikethroughPrice)}</div>
+                            )}
+                            <div className="text-lg font-extrabold text-[#00739C] dark:text-[#4cc3ec] leading-tight truncate">{formatPrice(displayFinalPrice)}</div>
+                        </div>
+                        <Button
+                            tabIndex={showStickyCart ? 0 : -1}
+                            className="h-11 px-6 md:px-8 text-sm font-bold bg-[#009AD0] hover:bg-[#00739C] text-white rounded-lg shadow-lg shadow-[#009AD0]/20 shrink-0"
+                            onClick={handleAddToCart}
+                        >
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            Sepete Ekle
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

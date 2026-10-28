@@ -209,3 +209,14 @@ html:has(.admin-shell) body[data-scroll-locked] {
   scrollbar-width: thin;
   scrollbar-color: rgb(209 213 219 / 0.8) transparent;
 }
+
+/* Ürün sayfasında sabit "Sepete Ekle" çubuğu açıkken WhatsApp düğmesi çubuğun üstüne çıkar (telefon + masaüstü) */
+body.has-sticky-cart .wa-float {
+  bottom: calc(5.25rem + env(safe-area-inset-bottom)) !important;
+}
+
+/* Açılır pencere varken (Sepetinize eklendi, menü, filtre...) WhatsApp düğmesi gizlenir; telefonda alttan açılan
+   panelin "Sepete Git" düğmesinin üstüne biniyordu. Radix pencereleri açıkken body'ye data-scroll-locked ekliyor. */
+body[data-scroll-locked] .wa-float {
+  display: none !important;
+}
