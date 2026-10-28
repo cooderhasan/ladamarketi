@@ -49,12 +49,11 @@ interface CheckoutFormProps {
             multiplierType: string;
         }[];
     }[];
-    freeShippingLimit: number;
     bankTransferDiscountRate?: number;
     minOrderLimit?: number;
 }
 
-export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, bankTransferDiscountRate = 0, minOrderLimit = 0 }: CheckoutFormProps) {
+export function CheckoutForm({ initialData, cargoCompanies, bankTransferDiscountRate = 0, minOrderLimit = 0 }: CheckoutFormProps) {
     // ...
     const router = useRouter();
     const { items, getSummary, discountRate, clearCart } = useCartStore();
@@ -99,9 +98,9 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, b
     // Calculate shipping cost
     const selectedCargo = cargoCompanies.find(c => c.id === selectedCargoId);
     let shippingCost = 0;
-    const isFreeShipping = summary.total >= freeShippingLimit;
-
-    if (!isFreeShipping && selectedCargo && selectedCargo.isDesiActive && selectedCargo.desiPrices.length > 0) {
+    // Sitede ücretsiz kargo yok: kargo ya desi fiyatıyla eklenir ya da alıcı ödemelidir (teslimatta ödenir).
+    // Önceden sepet Ayarlar'daki limiti geçince "Ücretsiz" yazıyordu
+    if (selectedCargo && selectedCargo.isDesiActive && selectedCargo.desiPrices.length > 0) {
         // Desi 0 ise en az 1 desi üzerinden hesapla (minimum kargo ücreti için)
         const totalDesi = Math.max(1, summary.totalDesi || 0);
         const range = selectedCargo.desiPrices.find(r =>
@@ -627,9 +626,7 @@ export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit, b
                                     )}
                                     <div className="flex justify-between items-center font-medium">
                                         <span className="text-gray-600 dark:text-gray-400">Kargo</span>
-                                        {isFreeShipping ? (
-                                            <span className="text-green-600">Ücretsiz</span>
-                                        ) : selectedCargo && !selectedCargo.isDesiActive ? (
+                                        {shippingCost === 0 ? (
                                             <span className="text-gray-900 dark:text-gray-200 uppercase text-xs font-bold">
                                                 Alıcı Ödemeli
                                             </span>

@@ -53,17 +53,9 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     const isBankTransfer = order.payment?.method === "BANK_TRANSFER";
     const isPaymentPending = order.payment?.status === "PENDING";
 
-    // Kargo ücreti 0 ise: kargo firması desi ile ücret almıyorsa "Alıcı ödemeli" (kargo teslimatta ödenir).
-    // Önceden 0 TL her durumda "Ücretsiz" yazıyordu; sitede kargo alıcı ödemeli olduğu halde müşteri ücretsiz sanıyordu
+    // Sitede ücretsiz kargo yok: kargo ücreti 0 ise alıcı ödemeli (kargo teslimatta ödenir).
+    // Önceden 0 TL "Ücretsiz" yazıyordu; müşteri ücretsiz sanıyordu
     const shippingCost = Number(order.shippingCost || 0);
-    const cargoCompanyDetails = shippingCost === 0 && order.cargoCompany
-        ? await prisma.cargoCompany.findFirst({ where: { name: order.cargoCompany }, select: { isDesiActive: true } })
-        : null;
-    // Ödeme sayfasıyla aynı kural: ürün tutarı Ayarlar'daki ücretsiz kargo limitini geçtiyse kargo ücretsiz
-    const siteSettings = await getSiteSettings();
-    const freeShippingLimit = Number(siteSettings.freeShippingLimit) || 20000;
-    const isFreeByLimit = Number(order.total) - shippingCost >= freeShippingLimit;
-    const isBuyerPays = shippingCost === 0 && !isFreeByLimit && (!cargoCompanyDetails || !cargoCompanyDetails.isDesiActive);
 
     // Banka bilgilerini çek
     let bankInfo: any = undefined;
@@ -208,7 +200,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Kargo</span>
                                 <span className="font-medium">
-                                    {shippingCost > 0 ? formatPrice(shippingCost) : isBuyerPays ? "Alıcı ödemeli" : "Ücretsiz"}
+                                    {shippingCost > 0 ? formatPrice(shippingCost) : "Alıcı ödemeli"}
                                 </span>
                             </div>
                             <Separator className="my-2" />

@@ -61,12 +61,8 @@ export default async function OrderPage({ params }: OrderPageProps) {
     const settings = (generalSettings?.value as Record<string, string>) || {};
     const isBankTransfer = order.payment?.method === "BANK_TRANSFER";
 
-    // Detect if buyer pays (Alıcı Ödemeli)
-    const cargoCompanyDetails = order.cargoCompany
-        ? await prisma.cargoCompany.findFirst({ where: { name: order.cargoCompany } })
-        : null;
-
-    const isBuyerPays = Number((order as any).shippingCost || 0) === 0 && cargoCompanyDetails && !(cargoCompanyDetails as any).isDesiActive;
+    // Sitede ücretsiz kargo yok: kargo ücreti 0 ise alıcı ödemeli (önceden bazı durumlarda "Ücretsiz" yazıyordu)
+    const shippingCost = Number((order as any).shippingCost || 0);
 
     return (
         <div className="container mx-auto px-4 py-12">
@@ -137,12 +133,10 @@ export default async function OrderPage({ params }: OrderPageProps) {
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Kargo Ücreti</span>
                                         <span className="font-medium">
-                                            {isBuyerPays ? (
-                                                <span className="text-blue-600 font-bold uppercase text-[10px]">Alıcı Ödemeli</span>
-                                            ) : Number((order as any).shippingCost || 0) === 0 ? (
-                                                <span className="text-green-600 font-medium">Ücretsiz</span>
+                                            {shippingCost > 0 ? (
+                                                formatPrice(shippingCost)
                                             ) : (
-                                                formatPrice(Number((order as any).shippingCost || 0))
+                                                <span className="text-blue-600 font-bold uppercase text-[10px]">Alıcı Ödemeli</span>
                                             )}
                                         </span>
                                     </div>

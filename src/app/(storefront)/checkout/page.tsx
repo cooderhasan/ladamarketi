@@ -67,7 +67,6 @@ export default async function CheckoutPage() {
     }) as any[]; // Casting to any to bypass Prisma Client lock issues on Windows
 
     const settings = await getSiteSettings();
-    const freeShippingLimit = Number(settings.freeShippingLimit) || 20000;
 
     // Serialize Decimal fields for Client Component
     const serializedCargoCompanies = cargoCompanies.map(company => ({
@@ -89,7 +88,6 @@ export default async function CheckoutPage() {
         <CheckoutForm
             initialData={initialData}
             cargoCompanies={serializedCargoCompanies}
-            freeShippingLimit={freeShippingLimit}
             bankTransferDiscountRate={Number(settings.bankTransferDiscountRate || 0)}
             minOrderLimit={minOrderLimit}
         />

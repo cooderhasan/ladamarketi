@@ -116,8 +116,8 @@ export const OrderConfirmationEmail = ({
                             <Text className="text-gray-900 font-bold m-0 mb-2">
                                 Kargo Ücreti Durumu:
                             </Text>
-                            <Text className={total >= 20000 ? "text-green-600 font-bold m-0" : "text-gray-600 m-0"}>
-                                {total >= 20000 ? "Ücretsiz Kargo" : "Alıcı Öder"}
+                            <Text className="text-gray-600 m-0">
+                                {"Alıcı Öder"}
                             </Text>
                         </Section>
 

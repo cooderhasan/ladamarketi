@@ -87,8 +87,8 @@ export const AdminNewOrderEmail = ({
                             <Row className="mt-4">
                                 <Column>
                                     <Text className="font-bold text-gray-900 m-0">Kargo Durumu:</Text>
-                                    <Text className={total >= 20000 ? "text-green-600 font-bold m-0" : "text-gray-600 m-0"}>
-                                        {total >= 20000 ? "Satıcı Öder (Ücretsiz)" : "Alıcı Öder"}
+                                    <Text className="text-gray-600 m-0">
+                                        {"Alıcı Öder"}
                                     </Text>
                                 </Column>
                             </Row>

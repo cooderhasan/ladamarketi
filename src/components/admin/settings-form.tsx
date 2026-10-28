@@ -604,18 +604,6 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                     <Card>
                         <CardContent className="space-y-4">
                             <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 space-y-2">
-                                <Label>Ücretsiz Kargo Limiti (TL)</Label>
-                                <Input
-                                    type="number"
-                                    placeholder="20000"
-                                    defaultValue={settings.freeShippingLimit || "20000"}
-                                    onChange={(e) => updateField("freeShippingLimit", e.target.value)}
-                                />
-                                <p className="text-xs text-gray-500">
-                                    Sepet tutarı bu limitin üzerindeyse kargo ücretsiz olur.
-                                </p>
-                            </div>
-                            <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 space-y-2">
                                 <Label>Minimum Sipariş Tutarı (TL)</Label>
                                 <Input
                                     type="number"

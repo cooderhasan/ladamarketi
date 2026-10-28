@@ -313,12 +313,20 @@ const OnBilgilendirmeDocument: React.FC<OnBilgilendirmeProps> = (props) => {
                         <Text style={styles.col4}>{formatMoney(item.lineTotal)}</Text>
                     </View>
                 ))}
-                {shippingCost > 0 && (
+                {shippingCost > 0 ? (
                     <View style={styles.tableRow}>
                         <Text style={styles.col1}>Kargo Bedeli</Text>
                         <Text style={styles.col2}>1</Text>
                         <Text style={styles.col3}>{formatMoney(shippingCost)}</Text>
                         <Text style={styles.col4}>{formatMoney(shippingCost)}</Text>
+                    </View>
+                ) : (
+                    // Kargo bedeli siparişe eklenmediyse belgeye açıkça yazılır: alıcı teslimatta kargo firmasına öder
+                    <View style={styles.tableRow}>
+                        <Text style={styles.col1}>Kargo Bedeli: Alıcı ödemeli (teslimatta kargo firmasına ödenir)</Text>
+                        <Text style={styles.col2}>-</Text>
+                        <Text style={styles.col3}>-</Text>
+                        <Text style={styles.col4}>-</Text>
                     </View>
                 )}
 
