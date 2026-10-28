@@ -87,6 +87,53 @@
   --sidebar-ring: #009AD0;
 }
 
+/* Eski tarayıcılar (ör. Windows 7'deki Chrome 109) oklch renklerini tanımıyor: tema renkleri (kenarlık, soluk yazı,
+   kart zemini...) orada geçersiz kalıyordu. Aynı renklerin sRGB karşılıkları; yeni tarayıcılar bu bloğu kullanmaz */
+@supports not (color: oklch(0 0 0)) {
+  :root {
+    --background: #fafafa;
+    --foreground: #04070f;
+    --card: #ffffff;
+    --card-foreground: #04070f;
+    --popover: #ffffff;
+    --popover-foreground: #04070f;
+    --primary-foreground: #fafafa;
+    --secondary: #eef2f9;
+    --secondary-foreground: #132139;
+    --muted: #eef2f9;
+    --muted-foreground: #4f5661;
+    --accent: #e4ecf9;
+    --destructive: #ea0009;
+    --border: #e1e5eb;
+    --input: #e1e5eb;
+    --chart-2: #009689;
+    --chart-3: #104e64;
+    --chart-4: #ffb900;
+    --chart-5: #fe9a00;
+    --sidebar: #fafafa;
+    --sidebar-foreground: #04070f;
+    --sidebar-primary-foreground: #fafafa;
+    --sidebar-accent: #eef2f9;
+    --sidebar-accent-foreground: #132139;
+    --sidebar-border: #e1e5eb;
+  }
+}
+
+/* Eski tarayıcılar degradedeki renk karışım yazımını ("in oklab") tanımıyor; Tailwind'in bg-gradient-to-* sınıfları
+   orada hiç çizilmiyor, mavi zeminli kutu ve butonlarda beyaz yazı beyaz zeminde kayboluyordu (ör. ürün sayfasındaki
+   "Yarın Kargoda" kutusu, Sepete Ekle butonları). Yön aynı, karışım varsayılan */
+@supports not (background-image: linear-gradient(in oklab, red, red)) {
+  .bg-gradient-to-t { --tw-gradient-position: to top; }
+  .bg-gradient-to-tr { --tw-gradient-position: to top right; }
+  .bg-gradient-to-r { --tw-gradient-position: to right; }
+  .bg-gradient-to-br { --tw-gradient-position: to bottom right; }
+  .bg-gradient-to-b { --tw-gradient-position: to bottom; }
+  .bg-gradient-to-bl { --tw-gradient-position: to bottom left; }
+  .bg-gradient-to-l { --tw-gradient-position: to left; }
+  .bg-gradient-to-tl { --tw-gradient-position: to top left; }
+}
+
+
 .dark {
   --background: oklch(0.1 0.02 260);
   /* Dark Navy Background */
