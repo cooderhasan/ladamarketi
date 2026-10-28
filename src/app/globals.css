@@ -215,6 +215,11 @@ body.has-sticky-cart .wa-float {
   bottom: calc(5.25rem + env(safe-area-inset-bottom)) !important;
 }
 
+/* Çerez bildirimi de sabit çubuğun üstüne çıkar: kabul edilene kadar telefonda "Sepete Ekle" çubuğunu kapatıyordu */
+body.has-sticky-cart .cookie-consent {
+  bottom: calc(4.75rem + env(safe-area-inset-bottom));
+}
+
 /* Açılır pencere varken (Sepetinize eklendi, menü, filtre...) WhatsApp düğmesi gizlenir; telefonda alttan açılan
    panelin "Sepete Git" düğmesinin üstüne biniyordu. Radix pencereleri açıkken body'ye data-scroll-locked ekliyor. */
 body[data-scroll-locked] .wa-float {
