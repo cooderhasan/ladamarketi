@@ -70,6 +70,7 @@ async function loadHomeData() {
                 where: { isActive: true, isFeatured: true },
                 orderBy: { order: "asc" },
                 take: 5,
+                include: { children: { select: { id: true } } },
             }),
             // Sidebar categories (all active top-level)
             prisma.category.findMany({
@@ -114,6 +115,15 @@ async function loadHomeData() {
     };
     const saleProducts = [...saleCandidates].sort((a, b) => discountOf(b) - discountOf(a)).slice(0, 8);
 
+    // Kategori kartlarında "X parça": kategori sayfasındaki toplamla aynı hesap (kategori + alt kategorileri, aktif ürünler)
+    const categoryCounts = await Promise.all(
+        categories.map((c) =>
+            prisma.product.count({
+                where: { isActive: true, categories: { some: { id: { in: [c.id, ...c.children.map((ch) => ch.id)] } } } },
+            })
+        )
+    );
+
     const transformProduct = (product: any) => ({
         ...product,
         listPrice: Number(product.listPrice),
@@ -153,7 +163,7 @@ async function loadHomeData() {
         newProducts: newProducts.map(transformProduct),
         bestSellers: bestSellers.map(transformProduct),
         saleProducts: saleProducts.map(transformProduct),
-        categories: categories.map(transformCategory),
+        categories: categories.map((c, i) => ({ ...transformCategory(c), children: undefined, productCount: categoryCounts[i] })),
         sidebarCategories: sidebarCategories,
         banners: banners.map(transformBanner),
         productCount,
@@ -162,7 +172,7 @@ async function loadHomeData() {
 
 // Ana sayfa verisi herkes için aynı (kullanıcıya özel fiyat istemcide hesaplanıyor): 60 sn önbellek.
 // Önceden her ziyarette ~9 sorgu çalışıyordu. Admin'de yapılan değişiklik en geç 1 dakikada görünür.
-const getHomeData = unstable_cache(loadHomeData, ["home-data-v1"], { revalidate: 60, tags: ["home-data"] });
+const getHomeData = unstable_cache(loadHomeData, ["home-data-v2"], { revalidate: 60, tags: ["home-data"] });
 
 export default async function HomePage() {
     const session = await auth();
