@@ -1,10 +1,12 @@
 
 "use server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function getHepsiburadaConfig() {
+    await requireAdmin();
     try {
         const config = await (prisma as any).hepsiburadaConfig.findFirst();
         return { success: true, data: config };
@@ -14,6 +16,7 @@ export async function getHepsiburadaConfig() {
 }
 
 export async function saveHepsiburadaConfig(prevState: any, formData: FormData) {
+    await requireAdmin();
     try {
         const username = formData.get("username") as string; // Usually Merchant ID
         const password = formData.get("password") as string;
@@ -50,6 +53,7 @@ import { HepsiburadaClient } from "@/services/hepsiburada/api";
 // ... (get and save config remain same)
 
 export async function syncProductsToHepsiburada(productId?: string) {
+    await requireAdmin();
     try {
         const config = await (prisma as any).hepsiburadaConfig.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon bulunamadı." };
@@ -133,6 +137,7 @@ export async function syncProductsToHepsiburada(productId?: string) {
 }
 
 export async function syncOrdersFromHepsiburada() {
+    await requireAdmin();
     try {
         const config = await (prisma as any).hepsiburadaConfig.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon bulunamadı." };

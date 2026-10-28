@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
@@ -138,6 +139,7 @@ export async function saveDesiPriceRanges(cargoCompanyId: string, ranges: DesiPr
 }
 
 export async function getDesiPriceRanges(cargoCompanyId: string) {
+    await requireAdmin();
     // Raw query ile verileri çekiyoruz
     const ranges = await prisma.$queryRaw<any[]>`SELECT * FROM "desi_price_ranges" WHERE "cargoCompanyId" = ${cargoCompanyId} ORDER BY "minDesi" ASC`;
 

@@ -1,10 +1,12 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 
 export async function updateSiteSettings(key: string, value: Record<string, string>) {
+    await requireAdmin();
     try {
         await prisma.siteSettings.upsert({
             where: { key },
@@ -21,6 +23,8 @@ export async function updateSiteSettings(key: string, value: Record<string, stri
 }
 
 export async function getSiteSettings(key: string) {
+    // Herhangi bir ayar anahtarını (entegrasyon API anahtarları dahil) okuyabildiği için yetki ister
+    await requireAdmin();
     const settings = await prisma.siteSettings.findUnique({
         where: { key },
     });

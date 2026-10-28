@@ -1,6 +1,7 @@
 
 "use server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { TrendyolClient } from "@/services/trendyol/api";
@@ -9,6 +10,7 @@ import { TrendyolClient } from "@/services/trendyol/api";
 // due to the dev server lock, but the runtime works if DB schema is updated.
 
 export async function getTrendyolConfig() {
+    await requireAdmin();
     try {
         const config = await (prisma as any).trendyolConfig.findFirst();
         return { success: true, data: config };
@@ -18,6 +20,7 @@ export async function getTrendyolConfig() {
 }
 
 export async function saveTrendyolConfig(prevState: any, formData: FormData) {
+    await requireAdmin();
     try {
         const supplierId = formData.get("supplierId") as string;
         const apiKey = formData.get("apiKey") as string;
@@ -51,6 +54,7 @@ export async function saveTrendyolConfig(prevState: any, formData: FormData) {
 }
 
 export async function testTrendyolConnection() {
+    await requireAdmin();
     try {
         const config = await (prisma as any).trendyolConfig.findFirst();
         if (!config) return { success: false, message: "Ayarlar bulunamadı." };
@@ -74,6 +78,7 @@ export async function testTrendyolConnection() {
 }
 
 export async function syncProductsToTrendyol(productId?: string) {
+    await requireAdmin();
     try {
         // 1. Check Config
         const config = await (prisma as any).trendyolConfig.findFirst({
@@ -239,6 +244,7 @@ export async function syncProductsToTrendyol(productId?: string) {
 }
 
 export async function getTrendyolBrands(search: string = "") {
+    await requireAdmin();
     try {
         const config = await (prisma as any).trendyolConfig.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon yok." };
@@ -260,6 +266,7 @@ export async function getTrendyolBrands(search: string = "") {
 }
 
 export async function getTrendyolCategories() {
+    await requireAdmin();
     try {
         const config = await (prisma as any).trendyolConfig.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon yok." };
@@ -281,6 +288,7 @@ export async function getTrendyolCategories() {
 }
 
 export async function syncOrdersFromTrendyol() {
+    await requireAdmin();
     try {
         const config = await (prisma as any).trendyolConfig.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon yok." };

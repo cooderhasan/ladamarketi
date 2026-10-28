@@ -1,9 +1,11 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function getSliders() {
+    await requireAdmin();
     return prisma.slider.findMany({
         orderBy: { order: "asc" },
     });
@@ -17,6 +19,7 @@ export async function createSlider(data: {
     order: number;
     isActive: boolean;
 }) {
+    await requireAdmin();
     try {
         await prisma.slider.create({
             data,
@@ -41,6 +44,7 @@ export async function updateSlider(
         isActive?: boolean;
     }
 ) {
+    await requireAdmin();
     try {
         await prisma.slider.update({
             where: { id },
@@ -57,6 +61,7 @@ export async function updateSlider(
 
 
 export async function deleteSlider(id: string) {
+    await requireAdmin();
     try {
         await prisma.slider.delete({
             where: { id },
@@ -71,6 +76,7 @@ export async function deleteSlider(id: string) {
 }
 
 export async function toggleSliderStatus(id: string, isActive: boolean) {
+    await requireAdmin();
     try {
         await prisma.slider.update({
             where: { id },

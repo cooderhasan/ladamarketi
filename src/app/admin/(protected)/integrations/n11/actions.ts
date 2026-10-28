@@ -1,10 +1,12 @@
 
 "use server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function getN11Config() {
+    await requireAdmin();
     try {
         const config = await (prisma as any).n11Config.findFirst();
         return { success: true, data: config };
@@ -14,6 +16,7 @@ export async function getN11Config() {
 }
 
 export async function saveN11Config(prevState: any, formData: FormData) {
+    await requireAdmin();
     try {
         const apiKey = formData.get("apiKey") as string;
         const apiSecret = formData.get("apiSecret") as string;
@@ -46,6 +49,7 @@ export async function saveN11Config(prevState: any, formData: FormData) {
 import { N11Client } from "@/services/n11/api";
 
 export async function syncProductsToN11(productId?: string) {
+    await requireAdmin();
     try {
         const config = await (prisma as any).n11Config.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon bulunamadı." };
@@ -123,6 +127,7 @@ export async function syncProductsToN11(productId?: string) {
 }
 
 export async function syncOrdersFromN11() {
+    await requireAdmin();
     try {
         const config = await (prisma as any).n11Config.findFirst({ where: { isActive: true } });
         if (!config) return { success: false, message: "Aktif entegrasyon bulunamadı." };

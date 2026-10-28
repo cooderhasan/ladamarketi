@@ -1,9 +1,11 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 
 export async function getCategories() {
+    await requireAdmin();
     return prisma.category.findMany({
         orderBy: { order: "asc" },
         include: {
@@ -15,6 +17,7 @@ export async function getCategories() {
 }
 
 export async function createCategory(data: { name: string; slug: string; order?: number; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null; googleProductCategory?: string | null }) {
+    await requireAdmin();
     await prisma.category.create({
         data: {
             name: data.name,
@@ -36,6 +39,7 @@ export async function createCategory(data: { name: string; slug: string; order?:
 }
 
 export async function updateCategory(id: string, data: { name?: string; slug?: string; order?: number; isActive?: boolean; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null; googleProductCategory?: string | null }) {
+    await requireAdmin();
     console.log("updateCategory called with:", { id, data });
     try {
         const result = await prisma.category.update({
@@ -52,6 +56,7 @@ export async function updateCategory(id: string, data: { name?: string; slug?: s
 }
 
 export async function deleteCategory(id: string) {
+    await requireAdmin();
     await prisma.category.delete({
         where: { id },
     });
@@ -60,6 +65,7 @@ export async function deleteCategory(id: string) {
 }
 
 export async function toggleCategoryStatus(id: string, isActive: boolean) {
+    await requireAdmin();
     await prisma.category.update({
         where: { id },
         data: { isActive },
@@ -68,6 +74,7 @@ export async function toggleCategoryStatus(id: string, isActive: boolean) {
 }
 
 export async function updateCategoriesSidebarOrder(updates: { id: string; order: number }[]) {
+    await requireAdmin();
     await prisma.$transaction(
         updates.map((update) =>
             prisma.category.update({
@@ -81,6 +88,7 @@ export async function updateCategoriesSidebarOrder(updates: { id: string; order:
 }
 
 export async function updateCategoriesHeaderOrder(updates: { id: string; headerOrder: number }[]) {
+    await requireAdmin();
     await prisma.$transaction(
         updates.map((update) =>
             prisma.category.update({

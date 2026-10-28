@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/admin-auth";
 import type { Prisma } from "@prisma/client";
 
 interface BulkUpdateCriteria {
@@ -31,15 +31,6 @@ export interface PreviewResult {
     oldSalePrice: number | null;
     newSalePrice: number | null;
     sku: string | null;
-}
-
-// Önceden sadece giriş yapılmış mı diye bakılıyordu; /admin adres kontrolüne ek olarak işlemin kendisi de yetki ister
-async function requireAdmin() {
-    const session = await auth();
-    if (!session?.user?.id || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
-        throw new Error("Bu işlem için yetkiniz yok.");
-    }
-    return session;
 }
 
 // Seçilen kategoriler + tüm alt kategorileri (her seviye)

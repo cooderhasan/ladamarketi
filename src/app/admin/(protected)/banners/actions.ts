@@ -1,9 +1,11 @@
 "use server";
 
+import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function getBanners() {
+    await requireAdmin();
     return await prisma.banner.findMany({
         orderBy: { order: "asc" },
     });
@@ -16,6 +18,7 @@ export async function createBanner(data: {
     isActive: boolean;
     order: number;
 }) {
+    await requireAdmin();
     try {
         await prisma.banner.create({
             data,
@@ -36,6 +39,7 @@ export async function updateBanner(id: string, data: {
     isActive?: boolean;
     order?: number;
 }) {
+    await requireAdmin();
     try {
         await prisma.banner.update({
             where: { id },
@@ -51,6 +55,7 @@ export async function updateBanner(id: string, data: {
 }
 
 export async function deleteBanner(id: string) {
+    await requireAdmin();
     try {
         await prisma.banner.delete({
             where: { id },
