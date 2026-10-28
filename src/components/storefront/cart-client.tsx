@@ -233,7 +233,7 @@ export function CartClient({ bankTransferDiscountRate = 0, minOrderLimit = 0 }: 
 
                 {/* Order Summary */}
                 <div>
-                    <Card className="sticky top-24">
+                    <Card className="sticky top-32">
                         <CardHeader>
                             <CardTitle>Sipariş Özeti</CardTitle>
                         </CardHeader>

@@ -15,7 +15,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ShoppingCart, ShoppingBag, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap, ChevronDown, Home, Car, Truck, Building2, Mail, Info, Cog, Plus, Minus, ChevronRight } from "lucide-react";
+import { ShoppingCart, ShoppingBag, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap, ChevronDown, Home, Car, Truck, Building2, Mail, Info, Plus, Minus, ChevronRight } from "lucide-react";
 
 
 
@@ -88,6 +88,23 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
         setMounted(true);
     }, []);
 
+    // Akıllı sabit header (Bardakçı Bike ile aynı): aşağı kaydırırken gizlenir (ürünlere yer açılır),
+    // yukarı kaydırınca hemen geri gelir. Sayfanın en üstünde her zaman görünür.
+    const [headerHidden, setHeaderHidden] = useState(false);
+    useEffect(() => {
+        // requestAnimationFrame'e bağlı değil: arka plandaki sekmede rAF durunca header takılı kalmasın
+        let lastY = window.scrollY;
+        const onScroll = () => {
+            const y = window.scrollY;
+            if (y < 160) setHeaderHidden(false);
+            else if (y > lastY + 8) setHeaderHidden(true);
+            else if (y < lastY - 8) setHeaderHidden(false);
+            if (Math.abs(y - lastY) > 8 || y < 160) lastY = y;
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
     const handleMouseEnter = () => {
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
@@ -126,7 +143,13 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
     }, [sidebarCategories, categories]);
 
     return (
-        <header className="sticky top-0 z-50 w-full bg-white/95 supports-[backdrop-filter]:bg-white/80 dark:bg-gray-900/95 supports-[backdrop-filter]:dark:bg-gray-900/80 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
+        <header
+            className={cn(
+                "sticky top-0 z-50 w-full bg-white/95 supports-[backdrop-filter]:bg-white/80 dark:bg-gray-900/95 supports-[backdrop-filter]:dark:bg-gray-900/80 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 transition-transform duration-300",
+                // Mobil menü veya hesap menüsü açıkken gizlenmez
+                headerHidden && !isMobileMenuOpen && !isDropdownOpen ? "-translate-y-full" : "translate-y-0"
+            )}
+        >
 
             {/* Top Row: Logo, Search, User Actions */}
             <div className="border-b dark:border-gray-800/50">
@@ -337,64 +360,36 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                 </div>
             </div>
 
-            {/* Bottom Row: Category Navigation (Desktop) - STRIKING DESIGN */}
-            <div
-                className="hidden md:block relative overflow-hidden bg-[#009AD0] bg-gradient-to-r from-[#0081AF]/95 via-[#009AD0]/95 to-[#0081AF]/95 backdrop-blur-md shadow-lg"
-            >
-                {/* Glowing Line Effect */}
-                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#4FC3F7] to-transparent opacity-50" />
-                <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#4FC3F7] to-transparent opacity-50" />
-
-                <div className="container mx-auto px-4 relative z-10">
-                    <div className="flex items-center">
-
-
-                        <nav className="flex items-center justify-center w-full py-3 gap-2 lg:gap-8">
-                            <Link
-                                href="/"
-                                className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
-                            >
-                                <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
-                                    <Home className="h-5 w-5 text-white group-hover:scale-110 transition-all" />
-                                </div>
-                                <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Ana Sayfa</span>
-                            </Link>
-                            {categories
-                                .filter(c => c.name !== "Home" && c.name !== "Root")
-                                .map((category) => (
-                                    <Link
-                                        key={category.id}
-                                        href={`/category/${category.slug}`}
-                                        className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
-                                    >
-                                        <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
-                                            <Cog className="h-5 w-5 text-white group-hover:scale-110 group-hover:rotate-45 transition-all" />
-                                        </div>
-                                        <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center">
-                                            {category.name}
-                                        </span>
-                                    </Link>
-                                ))}
-                            <Link
-                                href="/about"
-                                className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
-                            >
-                                <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
-                                    <Building2 className="h-5 w-5 text-white group-hover:scale-110 transition-all" />
-                                </div>
-                                <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">Hakkımızda</span>
-                            </Link>
-                            <Link
-                                href="/contact"
-                                className="group flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:-translate-y-0.5"
-                            >
-                                <div className="p-2 rounded-lg bg-white/10 group-hover:bg-white/20 transition-all">
-                                    <Phone className="h-5 w-5 text-white group-hover:scale-110 transition-all" />
-                                </div>
-                                <span className="text-xs font-bold text-white group-hover:text-white transition-colors text-center whitespace-nowrap">İletişim</span>
-                            </Link>
-                        </nav>
-                    </div>
+            {/* Kategori menüsü (masaüstü): tek satır, ikon yazının solunda. Önceden ikon yazının üstündeydi (~64px, header
+                toplamı ~145px) ve her kategoride aynı dişli ikonu vardı; artık ~44px, kategoriler sadece yazı. Bulunulan sayfa
+                ve üzerine gelinen öğe altı beyaz çizgiyle belli olur */}
+            <div className="hidden md:block relative bg-[#009AD0] bg-gradient-to-r from-[#0081AF] via-[#009AD0] to-[#0081AF]">
+                <div className="container mx-auto px-4">
+                    <nav aria-label="Ana menü" className="flex flex-wrap items-center justify-center gap-x-1 lg:gap-x-3">
+                        <Link href="/" className={navItemClass(pathname === "/")}>
+                            <Home className="h-4 w-4 opacity-90" />
+                            Ana Sayfa
+                        </Link>
+                        {categories
+                            .filter(c => c.name !== "Home" && c.name !== "Root")
+                            .map((category) => (
+                                <Link
+                                    key={category.id}
+                                    href={`/category/${category.slug}`}
+                                    className={navItemClass(pathname === `/category/${category.slug}`)}
+                                >
+                                    {category.name}
+                                </Link>
+                            ))}
+                        <Link href="/about" className={navItemClass(pathname === "/about")}>
+                            <Building2 className="h-4 w-4 opacity-90" />
+                            Hakkımızda
+                        </Link>
+                        <Link href="/contact" className={navItemClass(pathname === "/contact")}>
+                            <Phone className="h-4 w-4 opacity-90" />
+                            İletişim
+                        </Link>
+                    </nav>
                 </div>
             </div>
 
@@ -468,6 +463,15 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                 </div>
             )}
         </header>
+    );
+}
+
+// Üst menü öğesi: beyaz yazı, altında ortadan açılan ince beyaz çizgi (bulunulan sayfada hep açık)
+function navItemClass(active: boolean) {
+    return cn(
+        "relative flex items-center gap-1.5 px-3 h-11 text-[13px] font-semibold whitespace-nowrap transition-colors",
+        "after:absolute after:left-3 after:right-3 after:bottom-1.5 after:h-0.5 after:rounded-full after:bg-white after:transition-transform after:duration-200",
+        active ? "text-white after:scale-x-100" : "text-white/85 hover:text-white after:scale-x-0 hover:after:scale-x-100"
     );
 }
 
