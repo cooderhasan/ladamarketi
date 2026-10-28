@@ -381,11 +381,12 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
             {/* Kategori menüsü (masaüstü): tek satır, ikon yazının solunda. Önceden ikon yazının üstündeydi (~64px, header
                 toplamı ~145px) ve her kategoride aynı dişli ikonu vardı; artık ~44px, kategoriler sadece yazı. Bulunulan sayfa
                 ve üzerine gelinen öğe altı beyaz çizgiyle belli olur */}
-            <div className="hidden md:block relative bg-[#009AD0] bg-gradient-to-r from-[#0081AF] via-[#009AD0] to-[#0081AF]">
+            {/* Zemin bir ton koyu: açık mavi (#009AD0) üzerinde beyaz yazı soluk görünüyordu (kontrast ~3:1, şimdi ~4.5:1) */}
+            <div className="hidden md:block relative bg-[#0088BB] bg-gradient-to-r from-[#0077A6] via-[#0088BB] to-[#0077A6]">
                 <div className="container mx-auto px-4">
                     <nav aria-label="Ana menü" className="flex flex-wrap items-center justify-center gap-x-1 lg:gap-x-3">
                         <Link href="/" className={navItemClass(pathname === "/")}>
-                            <Home className="h-4 w-4 opacity-90" />
+                            <Home className="h-4 w-4" />
                             Ana Sayfa
                         </Link>
                         {categories
@@ -400,11 +401,11 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
                                 </Link>
                             ))}
                         <Link href="/about" className={navItemClass(pathname === "/about")}>
-                            <Building2 className="h-4 w-4 opacity-90" />
+                            <Building2 className="h-4 w-4" />
                             Hakkımızda
                         </Link>
                         <Link href="/contact" className={navItemClass(pathname === "/contact")}>
-                            <Phone className="h-4 w-4 opacity-90" />
+                            <Phone className="h-4 w-4" />
                             İletişim
                         </Link>
                     </nav>
@@ -487,9 +488,10 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], sid
 // Üst menü öğesi: beyaz yazı, altında ortadan açılan ince beyaz çizgi (bulunulan sayfada hep açık)
 function navItemClass(active: boolean) {
     return cn(
-        "relative flex items-center gap-1.5 px-3 h-11 text-[13px] font-semibold whitespace-nowrap transition-colors",
+        // Yazılar tam beyaz ve kalın (önceden %85 opak ve yarı kalındı, soluk görünüyordu); hafif gölge okunurluğu artırır
+        "relative flex items-center gap-1.5 px-3 h-11 text-[13.5px] font-bold text-white whitespace-nowrap rounded-lg transition-colors [text-shadow:0_1px_1px_rgba(0,0,0,0.18)] hover:bg-white/10",
         "after:absolute after:left-3 after:right-3 after:bottom-1.5 after:h-0.5 after:rounded-full after:bg-white after:transition-transform after:duration-200",
-        active ? "text-white after:scale-x-100" : "text-white/85 hover:text-white after:scale-x-0 hover:after:scale-x-100"
+        active ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100"
     );
 }
 
