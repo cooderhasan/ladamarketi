@@ -23,6 +23,7 @@ interface CreateOrderData {
         city: string;
         district?: string;
         phone: string;
+        taxNumber?: string; // TC Kimlik (11) / Vergi No (10) — fatura alıcısı
     };
     guestEmail?: string; // For guest checkout
     cargoCompany?: string;
