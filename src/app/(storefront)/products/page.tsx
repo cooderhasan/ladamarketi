@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { findProductsInStockFirst } from "@/lib/product-listing";
+import { findProductIdsBySearch } from "@/lib/product-search";
 import { auth } from "@/lib/auth";
 import { ProductCardModern } from "@/components/storefront/product-card-modern";
 import { ProductFilters } from "@/components/storefront/product-filters";
@@ -86,39 +87,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         }
     }
 
-    // Search - Kelime bazlı çoklu arama (her kelime ayrı AND koşulu ile aranır)
+    // Arama: Türkçe harf / ek / parça numarası duyarsız (ortak modül, eşleşen ürün ID'leri)
     if (params.search) {
-        const searchWords = params.search
-            .trim()
-            .split(/\s+/)
-            .filter(w => w.length > 0);
-
-        if (searchWords.length === 1) {
-            // Tek kelime: isim, sku, barkod içinde ara
-            const word = searchWords[0];
-            where.OR = [
-                { name: { contains: word, mode: "insensitive" } },
-                { sku: { contains: word, mode: "insensitive" } },
-                { barcode: { contains: word, mode: "insensitive" } },
-                {
-                    variants: {
-                        some: {
-                            OR: [
-                                { sku: { contains: word, mode: "insensitive" } },
-                                { barcode: { contains: word, mode: "insensitive" } },
-                            ],
-                        },
-                    },
-                },
-            ];
-        } else {
-            // Çoklu kelime: her kelimenin ürün adında GEÇMESİ gerekiyor (AND mantığı)
-            where.AND = searchWords.map(word => ({
-                name: { contains: word, mode: "insensitive" },
-            }));
-        }
+        const ids = await findProductIdsBySearch(params.search);
+        if (ids) where.id = { in: ids };
     }
-
 
     // Price Range
     if (params.min_price || params.max_price) {
