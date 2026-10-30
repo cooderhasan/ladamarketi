@@ -22,7 +22,8 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { X, Plus, Pencil, Trash2 } from "lucide-react";
+import { X, Plus, Pencil, Trash2, Brain, Loader2 } from "lucide-react";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import {
     Select,
     SelectContent,
@@ -32,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { createCategory, updateCategory, deleteCategory, toggleCategoryStatus, updateCategoriesSidebarOrder, updateCategoriesHeaderOrder } from "@/app/admin/(protected)/categories/actions";
+import { createCategory, updateCategory, deleteCategory, toggleCategoryStatus, updateCategoriesSidebarOrder, updateCategoriesHeaderOrder, getCategoryDescriptionForAdmin, generateCategoryDescription } from "@/app/admin/(protected)/categories/actions";
 import {
     DndContext,
     closestCenter,
@@ -202,6 +203,10 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
     const [n11CategoryId, setN11CategoryId] = useState<number | undefined>(undefined);
     const [hbCategoryId, setHbCategoryId] = useState<string | undefined>(undefined);
     const [googleProductCategory, setGoogleProductCategory] = useState<string | undefined>(undefined);
+    // Kategori sayfasında ürünlerin altında görünen tanıtım metni (site_settings'te saklanır)
+    const [description, setDescription] = useState("");
+    const [descLoading, setDescLoading] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [reorderMode, setReorderMode] = useState<"none" | "sidebar" | "header">("none");
@@ -340,7 +345,8 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                     trendyolCategoryId,
                     n11CategoryId,
                     hbCategoryId,
-                    googleProductCategory
+                    googleProductCategory,
+                    description: descLoading ? undefined : description,
                 });
                 toast.success("Kategori güncellendi.");
             } else {
@@ -356,7 +362,8 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                     trendyolCategoryId,
                     n11CategoryId,
                     hbCategoryId,
-                    googleProductCategory
+                    googleProductCategory,
+                    description,
                 });
                 toast.success("Kategori oluşturuldu.");
             }
@@ -403,7 +410,25 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setN11CategoryId(undefined);
         setHbCategoryId(undefined);
         setGoogleProductCategory(undefined);
+        setDescription("");
         setEditCategory(null);
+    };
+
+    const handleAiDescription = async () => {
+        const hasText = description.replace(/<[^>]+>/g, "").trim().length > 0;
+        if (hasText && !confirm("Mevcut açıklamanın yerine AI ile yeni bir taslak yazılsın mı?")) return;
+        setAiLoading(true);
+        try {
+            const r = await generateCategoryDescription({ categoryId: editCategory?.id, name, parentId });
+            if (r.success) {
+                setDescription(r.html);
+                toast.success("Açıklama taslağı yazıldı. Kontrol edip kaydedin.");
+            } else toast.error(r.error);
+        } catch {
+            toast.error("Açıklama oluşturulamadı.");
+        } finally {
+            setAiLoading(false);
+        }
     };
 
     const openEditDialog = (category: Category) => {
@@ -420,6 +445,12 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setN11CategoryId(category.n11CategoryId ?? undefined);
         setHbCategoryId(category.hbCategoryId ?? undefined);
         setGoogleProductCategory(category.googleProductCategory ?? undefined);
+        setDescription("");
+        setDescLoading(true);
+        getCategoryDescriptionForAdmin(category.id)
+            .then(setDescription)
+            .catch(() => toast.error("Açıklama yüklenemedi."))
+            .finally(() => setDescLoading(false));
         setIsOpen(true);
     };
 
@@ -472,7 +503,7 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                             Yeni Kategori
                         </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>
                                 {editCategory ? "Kategori Düzenle" : "Yeni Kategori"}
@@ -605,6 +636,36 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                                             disabled={uploading}
                                         />
                                     </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <Label>Kategori Açıklaması</Label>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleAiDescription}
+                                            disabled={aiLoading || descLoading || !name}
+                                            className="gap-1.5"
+                                        >
+                                            {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Brain className="w-3.5 h-3.5" />}
+                                            {aiLoading ? "Yazılıyor..." : "AI ile yaz"}
+                                        </Button>
+                                    </div>
+                                    {descLoading ? (
+                                        <div className="h-[200px] rounded-md border flex items-center justify-center text-sm text-gray-500 gap-2">
+                                            <Loader2 className="w-4 h-4 animate-spin" /> Yükleniyor...
+                                        </div>
+                                    ) : (
+                                        <RichTextEditor
+                                            content={description}
+                                            onChange={setDescription}
+                                            placeholder="Kategori sayfasında ürünlerin altında görünecek tanıtım metni..."
+                                        />
+                                    )}
+                                    <p className="text-[10px] text-gray-500">
+                                        Kategori sayfasında ürünlerin altında görünür (Google için). 120-200 kelime yeterli; AI taslağını kontrol edip kaydedin.
+                                    </p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="flex items-center space-x-2">

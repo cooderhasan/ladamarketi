@@ -15,7 +15,7 @@ Son güncelleme: 30.10.2026
 ## Sizin yapmanız gerekenler
 
 - [x] Paylaşım görseli yüklendi (canlıda 1200×630, 85 KB, webp — 30.10.2026 kontrol edildi)
-- [ ] Facebook Hata Ayıklayıcı'da (developers.facebook.com/tools/debug) ana sayfayı **Scrape Again** ile tekrar taratın
+- [x] Facebook Hata Ayıklayıcı'da ana sayfa yeniden tarandı (30.10.2026): yeni paylaşım görseli ve başlık görünüyor
 - [x] Search Console yeni Gmail hesabına DNS TXT ile bağlandı, site haritası gönderildi
 - [x] SEO başlığı düzgün (canlıda: `Lada Yedek Parça ve Aksesuar | Lada Marketi`)
 
@@ -51,11 +51,20 @@ Eski notlar:
 - Kargo: her zaman alıcı ödemeli, ücretsiz kargo yok (Yurtiçi Kargo)
 - **Gerekli:** teslim süresi, iade gün sayısı
 
-### C. Kategori açıklaması
+### C. Kategori açıklaması — YAPILDI 30.10.2026
+- Admin > Kategoriler > düzenle: "Kategori Açıklaması" editörü + "AI ile yaz" (kategorideki gerçek ürün adlarıyla taslak)
+- Kategori sayfasında ürünlerin altında (sadece 1. sayfa, aramasız); meta açıklama da ondan
+- Saklama: site_settings "category-description:<id>" (şema değişmedi)
+- Sıradaki: kategorilere tek tek açıklama girilmesi (önce çok ürünlü kategoriler)
+
+Eski notlar:
 - Kategorilere açıklama alanı (veritabanına boş bırakılabilir sütun + admin alanı)
 - Kategori sayfasında ürünlerin altında kısa metin; taslaklar Gemini ile yazılabilir
 
-### D. http → https → www yönlendirme zinciri
+### D. http → https → www yönlendirme zinciri — YAPILDI 30.10.2026
+- Coolify'da Lada'ya özel `lada-https-301` (kalıcı) yönlendirme; etiketler elle yönetiliyor. Lada'ya alan adı eklenirse etiketler yeniden düzenlenmeli
+
+Eski notlar:
 - `http://ladamarketi.com` iki adımda yönleniyor; tek adıma indirilmeli
 - Sunucu/proxy ayarı (Coolify/hosting paneli), koddan değil
 - **Gerekli:** hosting paneline erişim

@@ -17,6 +17,7 @@ import { ChevronRight } from "lucide-react";
 import { JsonLd } from "@/components/seo/json-ld";
 import { SITE_URL } from "@/lib/site-url";
 import { categoryDisplayName } from "@/lib/category-title";
+import { getCategoryDescription } from "@/lib/category-description";
 
 interface CategoryPageProps {
     params: Promise<{
@@ -39,17 +40,22 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     const { slug } = await params;
     const category = await prisma.category.findUnique({
         where: { slug },
-        select: { name: true, parent: { select: { name: true } } }
+        select: { id: true, name: true, parent: { select: { name: true } } }
     });
 
     if (!category) return { title: "Kategori Bulunamadı" };
 
     // Aynı isimli alt kategoriler (5 ayrı "Hortum Grubu") Google'da ayırt edilsin: model adı başlıkta
     const title = categoryDisplayName(category.name, category.parent?.name);
+    // Kategori açıklaması varsa meta açıklama ondan (ilk ~155 karakter, kelime ortasında kesilmeden)
+    const descText = (await getCategoryDescription(category.id)).replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+    const metaDescription = descText
+        ? descText.length > 155 ? `${descText.slice(0, 155).replace(/\s+\S*$/, "")}…` : descText
+        : `${title} kategorisindeki en kaliteli yedek parça ve aksesuarları inceleyin.`;
 
     return {
         title,
-        description: `${title} kategorisindeki en kaliteli yedek parça ve aksesuarları inceleyin.`,
+        description: metaDescription,
         alternates: {
             canonical: `/category/${slug}`
         }
@@ -222,6 +228,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     const uniqueSizes = Array.from(new Set(variants.map(v => v.size).filter(Boolean))) as string[];
 
     const displayName = categoryDisplayName(category.name, category.parent?.name);
+    // Tanıtım metni sadece ilk sayfada ve arama yokken (sayfa 2, 3... aynı metni tekrar etmesin)
+    const showDescription = currentPage === 1 && !searchParamsValues.search;
+    const categoryDescription = showDescription ? await getCategoryDescription(category.id) : "";
     const breadcrumbSchema = {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -357,6 +366,15 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
                     )}
                 </div>
             </div>
+
+            {categoryDescription && (
+                <section className="mt-14 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 md:p-8">
+                    <div
+                        className="text-[15px] leading-relaxed text-gray-600 dark:text-gray-300 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_h2]:text-lg md:[&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-gray-900 dark:[&_h2]:text-white [&_h2]:mt-5 [&_h2]:mb-2 [&_h2:first-child]:mt-0 [&_h3]:font-bold [&_h3]:text-gray-900 dark:[&_h3]:text-white [&_h3]:mt-4 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-3 [&_li]:mb-1 [&_b]:font-semibold [&_b]:text-gray-800 dark:[&_b]:text-gray-100 [&_strong]:font-semibold [&_strong]:text-gray-800 dark:[&_strong]:text-gray-100"
+                        dangerouslySetInnerHTML={{ __html: categoryDescription }}
+                    />
+                </section>
+            )}
         </div>
     );
 }

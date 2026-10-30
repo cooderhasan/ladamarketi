@@ -3,6 +3,7 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
+import { getCategoryDescription, saveCategoryDescription, deleteCategoryDescription } from "@/lib/category-description";
 
 export async function getCategories() {
     await requireAdmin();
@@ -16,9 +17,9 @@ export async function getCategories() {
     });
 }
 
-export async function createCategory(data: { name: string; slug: string; order?: number; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null; googleProductCategory?: string | null }) {
+export async function createCategory(data: { name: string; slug: string; order?: number; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null; googleProductCategory?: string | null; description?: string }) {
     await requireAdmin();
-    await prisma.category.create({
+    const created = await prisma.category.create({
         data: {
             name: data.name,
             slug: data.slug,
@@ -34,18 +35,22 @@ export async function createCategory(data: { name: string; slug: string; order?:
             googleProductCategory: data.googleProductCategory ?? null,
         },
     });
+    if (data.description !== undefined) await saveCategoryDescription(created.id, data.description);
     revalidatePath("/admin/categories");
     revalidatePath("/");
 }
 
-export async function updateCategory(id: string, data: { name?: string; slug?: string; order?: number; isActive?: boolean; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null; googleProductCategory?: string | null }) {
+export async function updateCategory(id: string, input: { name?: string; slug?: string; order?: number; isActive?: boolean; parentId?: string | null; imageUrl?: string; isFeatured?: boolean; isInHeader?: boolean; headerOrder?: number; trendyolCategoryId?: number | null; n11CategoryId?: number | null; hbCategoryId?: string | null; googleProductCategory?: string | null; description?: string }) {
     await requireAdmin();
+    // Açıklama kategori tablosunda değil, site_settings'te (lib/category-description)
+    const { description, ...data } = input;
     console.log("updateCategory called with:", { id, data });
     try {
         const result = await prisma.category.update({
             where: { id },
             data,
         });
+        if (description !== undefined) await saveCategoryDescription(id, description);
         console.log("updateCategory result:", result);
     } catch (error) {
         console.error("updateCategory error:", error);
@@ -60,6 +65,7 @@ export async function deleteCategory(id: string) {
     await prisma.category.delete({
         where: { id },
     });
+    await deleteCategoryDescription(id);
     revalidatePath("/admin/categories");
     revalidatePath("/");
 }
@@ -245,4 +251,62 @@ export async function applyCategoryRetirements() {
 
     revalidatePath("/", "layout");
     return { success: true, results };
+}
+
+/** Düzenleme penceresi açılınca kategorinin mevcut açıklaması */
+export async function getCategoryDescriptionForAdmin(id: string) {
+    await requireAdmin();
+    return getCategoryDescription(id);
+}
+
+/**
+ * AI ile kategori açıklaması taslağı. Uydurma bilgi olmasın diye kategorideki gerçek ürün adları
+ * (en çok 25) modele verilir; ad + üst kategori (model) başlığı oluşturur.
+ */
+export async function generateCategoryDescription(input: { categoryId?: string | null; name: string; parentId?: string | null }) {
+    await requireAdmin();
+    const { generateAiHtml } = await import("@/lib/ai-generate");
+    const { categoryDisplayName } = await import("@/lib/category-title");
+
+    const parent = input.parentId
+        ? await prisma.category.findUnique({ where: { id: input.parentId }, select: { name: true } })
+        : null;
+    const title = categoryDisplayName(input.name, parent?.name);
+
+    let productNames: string[] = [];
+    let subcategories: string[] = [];
+    if (input.categoryId) {
+        const children = await prisma.category.findMany({
+            where: { parentId: input.categoryId, isActive: true },
+            select: { id: true, name: true },
+        });
+        subcategories = children.map((c) => c.name);
+        const products = await prisma.product.findMany({
+            where: { isActive: true, categories: { some: { id: { in: [input.categoryId, ...children.map((c) => c.id)] } } } },
+            select: { name: true },
+            orderBy: [{ stock: "desc" }, { createdAt: "desc" }],
+            take: 25,
+        });
+        productNames = products.map((p) => p.name);
+    }
+
+    const systemPrompt = `Sen Lada Marketi için Lada yedek parça kategori sayfalarına SEO uyumlu tanıtım metni yazan kurumsal bir içerik uzmanısın.
+
+    KURALLAR:
+    1. UZUNLUK: 120-200 kelime. 2-3 kısa paragraf (<p>). İstersen tek bir ara başlık (<h2>) kullanabilirsin.
+    2. İÇERİK: Kategoride hangi tür parçaların bulunduğunu ve hangi araç/model için olduğunu anlat. Sadece sana verilen kategori adı, alt gruplar ve ürün adlarından çıkarılabilecek bilgileri kullan; uydurma teknik değer, ölçü, parça numarası yazma.
+    3. YASAKLAR: "garanti" / "garantili" ifadeleri, fiyat, indirim, kampanya, "ücretsiz kargo" veya kargo süresi vaadi, telefon, web adresi, link (<a>), kaynak numarası ([1]) kullanma.
+    4. ÜSLUP: Kurumsal, sade, ikna edici Türkçe. "Usta", "tecrübem" gibi kişisel ifadeler yok. Anahtar kelimeyi (kategori başlığı) doğal şekilde 1-2 kez geçir, kelime doldurma yapma.
+    5. HTML: Sadece <p>, <h2>, <b>, <ul>, <li> etiketleri. Markdown yok. Metnin başına kategori adını başlık olarak yazma (sayfada zaten var).`;
+
+    const userPrompt = `Kategori başlığı: ${title}
+${subcategories.length ? `Alt gruplar: ${subcategories.join(", ")}` : ""}
+${productNames.length ? `Kategorideki örnek ürünler:\n- ${productNames.join("\n- ")}` : "Kategoride henüz ürün yok; sadece başlıktan yola çıkarak genel bir tanıtım yaz."}`;
+
+    try {
+        const html = await generateAiHtml(systemPrompt, userPrompt);
+        return { success: true as const, html };
+    } catch (e: any) {
+        return { success: false as const, error: e?.message || "Açıklama oluşturulamadı." };
+    }
 }
