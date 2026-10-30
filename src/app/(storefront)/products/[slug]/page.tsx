@@ -65,6 +65,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     }
                 }
             },
+            // Ürünün bağlı olduğu tüm kategoriler (yol satırı en özel olanından kurulur)
+            categories: {
+                where: { isActive: true },
+                include: { parent: { include: { parent: true } } },
+            },
             brand: true,
             variants: {
                 where: { isActive: true },
@@ -76,15 +81,25 @@ export default async function ProductPage({ params }: ProductPageProps) {
         notFound();
     }
 
+    // Ana kategori: ürünün bağlı olduğu en alt (en özel) kategori. Eski tekil "category" alanı ürün eklenirken
+    // ilk seçilen kategori oluyordu; üst kategori ilk seçildiyse yol satırında alt grup (Şanzıman Grubu vb.) atlanıyordu.
+    // Eşit derinlikte, eski ana kategorinin soyundan olan öne alınır.
+    const depthOf = (c: any) => (c.parent ? (c.parent.parent ? 3 : 2) : 1);
+    const inLegacyLine = (c: any) => [c.id, c.parent?.id, c.parent?.parent?.id].includes(product.categoryId);
+    const mainCategory: any =
+        [...product.categories].sort(
+            (a, b) => depthOf(b) - depthOf(a) || Number(inLegacyLine(b)) - Number(inLegacyLine(a))
+        )[0] ?? product.category;
+
     console.log("Product slug:", slug);
     console.log("Product origin from DB:", product.origin);
     console.log("Product variants count:", product.variants.length);
 
-    // Get related products
+    // Get related products (ana kategoriden)
     const relatedProducts = await prisma.product.findMany({
         where: {
             isActive: true,
-            categoryId: product.categoryId,
+            ...(mainCategory ? { categories: { some: { id: mainCategory.id } } } : { categoryId: product.categoryId }),
             id: { not: product.id },
         },
         include: { category: true, brand: true },
@@ -97,6 +112,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
     // Serialize product with variants
     const serializedProduct = {
         ...product,
+        // Ad üstündeki kategori etiketi ve linkler de ana (en özel) kategoriyi göstersin
+        category: mainCategory ?? product.category,
         listPrice: Number(product.listPrice),
         salePrice: product.salePrice ? Number(product.salePrice) : null,
         weight: product.weight ? Number(product.weight) : null,
@@ -121,7 +138,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
     // Construct breadcrumbs from category tree
     const breadcrumbs = [];
-    let currentCat: any = product.category;
+    let currentCat: any = mainCategory;
     while (currentCat) {
         breadcrumbs.unshift({ name: currentCat.name, slug: currentCat.slug });
         currentCat = currentCat.parent;
