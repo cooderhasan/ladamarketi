@@ -10,7 +10,7 @@ import { ProductSort } from "@/components/storefront/product-sort";
 import { ProductStockToggle } from "@/components/storefront/product-stock-toggle";
 import { Pagination } from "@/components/storefront/pagination";
 import { notFound, permanentRedirect } from "next/navigation";
-import { newCategorySlug } from "@/data/category-slug-map";
+import { newCategorySlug, CATEGORY_RETIRED } from "@/data/category-slug-map";
 import { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -81,6 +81,10 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             else if (v != null) qs.set(k, v);
         }
         permanentRedirect(`/category/${target}${qs.size ? `?${qs}` : ""}`);
+    }
+    // Kaldırılıp pasif yapılmış kategori ("Home"): ilgili sayfaya kalıcı yönlendir
+    if (category && !category.isActive && CATEGORY_RETIRED[slug]) {
+        permanentRedirect(CATEGORY_RETIRED[slug]);
     }
     if (!category) {
         notFound();

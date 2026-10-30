@@ -85,6 +85,15 @@ export const CATEGORY_MERGES: Record<string, string> = {
     "lada-vega-1-5-8v-yedek-parcalari": "lada-vega-1-5-8v",
 };
 
+/**
+ * Kaldırılan kategoriler: adres → yönlenecek sayfa. "Home" eski siteden kalma vitrin kategorisiydi;
+ * içindeki 259 ürünün hepsi asıl kategorilerinde de vardı. Admin > Kategoriler'deki "Boşalt" işlemi
+ * ürünleri bu kategoriden çıkarır (başka kategorisi olmayana dokunmaz) ve kategoriyi pasif yapar.
+ */
+export const CATEGORY_RETIRED: Record<string, string> = {
+    "home-2": "/",
+};
+
 /** Eski / birleştirilmiş kategori adresinin yeni karşılığı (yoksa null) */
 export function newCategorySlug(oldSlug: string): string | null {
     return CATEGORY_SLUG_MAP[oldSlug] ?? CATEGORY_MERGES[oldSlug] ?? null;

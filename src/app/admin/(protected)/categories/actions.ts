@@ -191,3 +191,58 @@ export async function applyCategoryMerges() {
     revalidatePath("/", "layout");
     return { success: true, results };
 }
+
+/**
+ * Tek seferlik: CATEGORY_RETIRED'daki kategoriyi boşaltıp pasif yapar ("Home").
+ * Başka kategorisi olan ürünler çıkarılır; ana (tekil) kategorisi bu olan ürünün ana kategorisi
+ * diğer kategorilerinden birine çevrilir. Başka kategorisi olmayan ürüne dokunulmaz; öyle ürün varsa kategori aktif kalır.
+ */
+export async function applyCategoryRetirements() {
+    await requireAdmin();
+    const { CATEGORY_RETIRED } = await import("@/data/category-slug-map");
+    const results: { slug: string; removed: number; mainFixed: number; orphans: string[]; deactivated: boolean }[] = [];
+
+    for (const slug of Object.keys(CATEGORY_RETIRED)) {
+        const cat = await prisma.category.findUnique({
+            where: { slug },
+            select: {
+                id: true,
+                isActive: true,
+                products: {
+                    select: {
+                        id: true,
+                        name: true,
+                        categoryId: true,
+                        categories: { select: { id: true, isActive: true, _count: { select: { products: true } } } },
+                    },
+                },
+            },
+        });
+        if (!cat || (!cat.isActive && cat.products.length === 0)) continue;
+
+        const others = (p: (typeof cat.products)[number]) =>
+            p.categories
+                .filter((c) => c.id !== cat.id)
+                // Önce aktif, sonra en özel (en az ürünlü) kategori
+                .sort((a, b) => Number(b.isActive) - Number(a.isActive) || a._count.products - b._count.products);
+        const movable = cat.products.filter((p) => others(p).length > 0);
+        const orphans = cat.products.filter((p) => others(p).length === 0);
+        const mainFixes = movable.filter((p) => p.categoryId === cat.id || !p.categoryId);
+        const deactivate = orphans.length === 0;
+
+        await prisma.$transaction([
+            ...mainFixes.map((p) => prisma.product.update({ where: { id: p.id }, data: { categoryId: others(p)[0].id } })),
+            prisma.category.update({
+                where: { id: cat.id },
+                data: {
+                    products: { disconnect: movable.map((p) => ({ id: p.id })) },
+                    ...(deactivate ? { isActive: false, isInHeader: false, isFeatured: false } : {}),
+                },
+            }),
+        ]);
+        results.push({ slug, removed: movable.length, mainFixed: mainFixes.length, orphans: orphans.map((p) => p.name), deactivated: deactivate });
+    }
+
+    revalidatePath("/", "layout");
+    return { success: true, results };
+}

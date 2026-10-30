@@ -11,7 +11,7 @@ import { ProductStockToggle } from "@/components/storefront/product-stock-toggle
 import { Pagination } from "@/components/storefront/pagination";
 import { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
-import { newCategorySlug } from "@/data/category-slug-map";
+import { newCategorySlug, CATEGORY_RETIRED } from "@/data/category-slug-map";
 
 interface ProductsPageProps {
     searchParams: Promise<{
@@ -79,6 +79,16 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
         // Eski kategori adresiyle gelen link (/products?category=eski): yeni adrese kalıcı yönlendir
         const renamed = !category || !category.isActive ? newCategorySlug(params.category) : null;
+        // Kaldırılan kategori ("Home"): kategori filtresi olmadan tüm ürünler
+        if (category && !category.isActive && CATEGORY_RETIRED[params.category]) {
+            const qs = new URLSearchParams();
+            for (const [k, v] of Object.entries(params)) {
+                if (k === "category") continue;
+                if (Array.isArray(v)) v.forEach((x) => qs.append(k, x));
+                else if (v != null) qs.set(k, String(v));
+            }
+            permanentRedirect(`/products${qs.size ? `?${qs}` : ""}`);
+        }
         if (renamed) {
             const qs = new URLSearchParams();
             for (const [k, v] of Object.entries(params)) {

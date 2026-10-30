@@ -2,7 +2,8 @@ import { prisma } from "@/lib/db";
 import { CategoriesTable } from "@/components/admin/categories-table";
 import { CategorySlugMigration } from "@/components/admin/category-slug-migration";
 import { CategoryMergeNotice } from "@/components/admin/category-merge-notice";
-import { CATEGORY_SLUG_MAP, CATEGORY_MERGES } from "@/data/category-slug-map";
+import { CategoryRetireNotice } from "@/components/admin/category-retire-notice";
+import { CATEGORY_SLUG_MAP, CATEGORY_MERGES, CATEGORY_RETIRED } from "@/data/category-slug-map";
 
 export default async function CategoriesPage() {
     const categories = await prisma.category.findMany({
@@ -23,6 +24,10 @@ export default async function CategoriesPage() {
     const pendingMerges = categories
         .filter((c) => CATEGORY_MERGES[c.slug] && c.isActive)
         .map((c) => ({ from: c.slug, into: CATEGORY_MERGES[c.slug], name: c.name }));
+    // Boşaltılmayı bekleyen eski vitrin kategorisi ("Home")
+    const pendingRetire = categories
+        .filter((c) => CATEGORY_RETIRED[c.slug] && (c.isActive || c._count.products > 0))
+        .map((c) => ({ slug: c.slug, name: c.name, count: c._count.products }));
 
     return (
         <div className="space-y-6">
@@ -37,6 +42,7 @@ export default async function CategoriesPage() {
 
             <CategorySlugMigration pending={pendingSlugs} />
             <CategoryMergeNotice pending={pendingMerges} />
+            <CategoryRetireNotice pending={pendingRetire} />
 
             <CategoriesTable categories={categories} />
         </div>
