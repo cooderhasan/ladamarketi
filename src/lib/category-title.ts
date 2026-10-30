@@ -10,8 +10,13 @@ export function categoryDisplayName(name: string, parentName?: string | null): s
     const base = (parentName || "").replace(/\s*yedek\s+par[çc]a(lar[ıi])?\s*$/i, "").trim();
     if (!base) return name;
     // Model kelimesi ("Samara", "Vaz") alt adda zaten geçiyorsa ekleme: "Samara 1300-1500 Samara Kaporta" olmasın
-    const modelWord = normalizeTr(base).split(/\s+/).find((w) => w !== "lada");
-    const child = normalizeTr(name);
-    if (child.includes(normalizeTr(base)) || (modelWord && child.split(/[^a-z0-9]+/).includes(modelWord))) return name;
+    // Alt ad kendisi bir model adıysa ("Lada Vaz 2104", "Lada Samara Kaporta Aksamı") da ekleme
+    const modelWord = normalizeTr(base).split(/[^a-z0-9]+/).find((w) => w && w !== "lada");
+    const childWords = normalizeTr(name).split(/[^a-z0-9]+/);
+    if (
+        normalizeTr(name).includes(normalizeTr(base)) ||
+        childWords.includes("lada") ||
+        (modelWord && childWords.includes(modelWord))
+    ) return name;
     return `${base} ${name}`;
 }

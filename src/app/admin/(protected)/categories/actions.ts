@@ -100,3 +100,51 @@ export async function updateCategoriesHeaderOrder(updates: { id: string; headerO
     revalidatePath("/admin/categories");
     revalidatePath("/");
 }
+
+/**
+ * Tek seferlik: kategori adreslerini onaylı listeye göre günceller (eski bozuk harfli / sayılı adres → yeni).
+ * Eski adresler src/data/category-slug-map.ts ile yeni adrese yönlendirilmeye devam eder.
+ * Tekrar çalıştırılırsa zaten güncel olanları atlar; yeni adresi başka kategori kullanıyorsa onu da atlar.
+ * Slider ve banner linklerindeki eski kategori adresleri de düzeltilir.
+ */
+export async function applyCategorySlugMap() {
+    await requireAdmin();
+    const { CATEGORY_SLUG_MAP } = await import("@/data/category-slug-map");
+    const oldSlugs = Object.keys(CATEGORY_SLUG_MAP);
+
+    const [pending, taken] = await Promise.all([
+        prisma.category.findMany({ where: { slug: { in: oldSlugs } }, select: { id: true, slug: true } }),
+        prisma.category.findMany({ where: { slug: { in: Object.values(CATEGORY_SLUG_MAP) } }, select: { slug: true } }),
+    ]);
+    const takenSet = new Set(taken.map((t) => t.slug));
+    const toUpdate = pending.filter((c) => !takenSet.has(CATEGORY_SLUG_MAP[c.slug]));
+    const skipped = pending.filter((c) => takenSet.has(CATEGORY_SLUG_MAP[c.slug])).map((c) => c.slug);
+
+    // /category/eski-adres → /category/yeni-adres (adresin sonu, ?, / veya # ile biten tam eşleşme)
+    const fixLink = (url: string | null) =>
+        url
+            ? url.replace(/\/category\/([a-z0-9-]+)(?=$|[?#/])/g, (m, s) =>
+                  CATEGORY_SLUG_MAP[s] ? `/category/${CATEGORY_SLUG_MAP[s]}` : m)
+            : url;
+    const [sliders, banners] = await Promise.all([
+        prisma.slider.findMany({ where: { linkUrl: { contains: "/category/" } }, select: { id: true, linkUrl: true } }),
+        prisma.banner.findMany({ where: { linkUrl: { contains: "/category/" } }, select: { id: true, linkUrl: true } }),
+    ]);
+    const sliderFixes = sliders.filter((s) => fixLink(s.linkUrl) !== s.linkUrl);
+    const bannerFixes = banners.filter((b) => fixLink(b.linkUrl) !== b.linkUrl);
+
+    await prisma.$transaction([
+        ...toUpdate.map((c) => prisma.category.update({ where: { id: c.id }, data: { slug: CATEGORY_SLUG_MAP[c.slug] } })),
+        ...sliderFixes.map((s) => prisma.slider.update({ where: { id: s.id }, data: { linkUrl: fixLink(s.linkUrl) } })),
+        ...bannerFixes.map((b) => prisma.banner.update({ where: { id: b.id }, data: { linkUrl: fixLink(b.linkUrl) } })),
+    ]);
+
+    revalidatePath("/", "layout");
+    return {
+        success: true,
+        updated: toUpdate.length,
+        skipped,
+        links: sliderFixes.length + bannerFixes.length,
+    };
+}
+

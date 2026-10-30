@@ -10,6 +10,8 @@ import { ProductSort } from "@/components/storefront/product-sort";
 import { ProductStockToggle } from "@/components/storefront/product-stock-toggle";
 import { Pagination } from "@/components/storefront/pagination";
 import { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
+import { newCategorySlug } from "@/data/category-slug-map";
 
 interface ProductsPageProps {
     searchParams: Promise<{
@@ -74,6 +76,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             where: { slug: params.category },
             include: { children: { select: { id: true } } }
         });
+
+        // Eski kategori adresiyle gelen link (/products?category=eski): yeni adrese kalıcı yönlendir
+        const renamed = !category ? newCategorySlug(params.category) : null;
+        if (renamed) {
+            const qs = new URLSearchParams();
+            for (const [k, v] of Object.entries(params)) {
+                if (Array.isArray(v)) v.forEach((x) => qs.append(k, x));
+                else if (v != null) qs.set(k, k === "category" ? renamed : String(v));
+            }
+            permanentRedirect(`/products?${qs}`);
+        }
 
         if (category) {
             const categoryIds = [category.id, ...category.children.map(c => c.id)];

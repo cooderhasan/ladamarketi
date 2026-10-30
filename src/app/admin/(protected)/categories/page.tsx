@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 import { CategoriesTable } from "@/components/admin/categories-table";
+import { CategorySlugMigration } from "@/components/admin/category-slug-migration";
+import { CATEGORY_SLUG_MAP } from "@/data/category-slug-map";
 
 export default async function CategoriesPage() {
     const categories = await prisma.category.findMany({
@@ -14,6 +16,9 @@ export default async function CategoriesPage() {
         },
     });
 
+    // Onaylı yeni adres listesine henüz geçmemiş kategoriler (tek seferlik güncelleme butonu)
+    const pendingSlugs = categories.filter((c) => CATEGORY_SLUG_MAP[c.slug]).length;
+
     return (
         <div className="space-y-6">
             <div>
@@ -24,6 +29,8 @@ export default async function CategoriesPage() {
                     Ürün kategorilerini yönetin
                 </p>
             </div>
+
+            <CategorySlugMigration pending={pendingSlugs} />
 
             <CategoriesTable categories={categories} />
         </div>

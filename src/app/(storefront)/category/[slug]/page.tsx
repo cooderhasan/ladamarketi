@@ -9,7 +9,8 @@ import { Prisma } from "@prisma/client";
 import { ProductSort } from "@/components/storefront/product-sort";
 import { ProductStockToggle } from "@/components/storefront/product-stock-toggle";
 import { Pagination } from "@/components/storefront/pagination";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { newCategorySlug } from "@/data/category-slug-map";
 import { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -72,6 +73,16 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     });
 
     if (!category) {
+        // Eski (bozuk harfli / sayılı) kategori adresi: yeni adrese kalıcı yönlendir, filtreler korunur
+        const target = newCategorySlug(slug);
+        if (target) {
+            const qs = new URLSearchParams();
+            for (const [k, v] of Object.entries(searchParamsValues)) {
+                if (Array.isArray(v)) v.forEach((x) => qs.append(k, x));
+                else if (v != null) qs.set(k, v);
+            }
+            permanentRedirect(`/category/${target}${qs.size ? `?${qs}` : ""}`);
+        }
         notFound();
     }
 
