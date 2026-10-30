@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import * as cheerio from "cheerio";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { requireAdmin } from "@/lib/admin-auth";
-import { stripAiLinksAndCitations } from "@/lib/ai-output";
+import { stripAiLinksAndCitations, convertAiMarkdown } from "@/lib/ai-output";
 
 export async function POST(req: NextRequest) {
   // /api adresleri middleware'de korunmuyor: AI anahtarı ve sunucudan site çekme sadece yöneticiye açık
@@ -103,7 +103,8 @@ export async function POST(req: NextRequest) {
     5. GARANTİ YASAĞI: Metnin hiçbir yerinde KESİNLİKLE "garanti", "garantilidir", "garantisi vardır" veya benzeri bir garanti taahhüdü içeren ifade kullanma.
     6. TEKNİK TABLO: Her dökümanın sonuna mutlaka STANDART HTML <table> yapısı ekle. Mutlaka <thead> (sütun başlıkları için <th> kullanarak) ve <tbody> (veriler için <td> kullanarak) bölümlerini ayır.
     7. UZUNLUK: İçeriği kısa kesme; her bölümü (paragraf, maddeler, tablo) doyurucu ve teknik olarak zengin tut.
-    8. LİNK VE KAYNAK YASAĞI: Metne kesinlikle link (<a> etiketi), web adresi, kaynak/atıf numarası ([1] gibi) veya dipnot ekleme. Sadece düz ürün açıklaması yaz.`;
+    8. LİNK VE KAYNAK YASAĞI: Metne kesinlikle link (<a> etiketi), web adresi, kaynak/atıf numarası ([1] gibi) veya dipnot ekleme. Sadece düz ürün açıklaması yaz.
+    9. SADECE HTML: Markdown KULLANMA (#, ##, **, - gibi işaretler yok). Başlıklar <h3>, paragraflar <p>, listeler <ul><li>, kalın yazı <b>. Ürün adını başlık olarak en üste yazma.`;
 
     const userPrompt = `Aşağıdaki ham ürün bilgilerini sitemiz için SIFIRDAN, bambaşka bir üslupla yeniden yaz. Kaynak metindeki cümleleri kopyalama.
       Kaynak metinde başka bir firmanın adı, telefonu, adresi veya web sitesi geçiyorsa bunları metne alma.
@@ -190,6 +191,9 @@ export async function POST(req: NextRequest) {
 
     // 3. \u0130nternette arama yapan modellerin ekledi\u011fi linkler ve [1] gibi kaynak numaralar\u0131 kalmas\u0131n
     generatedHtml = stripAiLinksAndCitations(generatedHtml);
+
+    // 4. Model Markdown yazdıysa (# başlık, **kalın**, - madde) HTML'e çevir; sitede # işaretleri görünmesin
+    generatedHtml = convertAiMarkdown(generatedHtml);
 
     return NextResponse.json({ 
         success: true, 

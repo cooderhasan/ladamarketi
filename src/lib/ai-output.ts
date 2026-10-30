@@ -21,3 +21,59 @@ export function stripAiLinksAndCitations(html: string): string {
         .replace(/[ \t]+([.,;:!?])/g, "$1")
         .trim();
 }
+
+const BLOCK_TAG = /^<\/?(p|ul|ol|li|table|thead|tbody|tfoot|tr|th|td|h[1-6]|div|br|hr|blockquote)\b/i;
+
+/**
+ * Model HTML yerine (ya da HTML'le karışık) Markdown yazarsa: "## Avantajları" → <h3>, "- madde" → <ul><li>,
+ * "**kalın**" → <b>, düz metin blokları → <p>. Baştaki "# Ürün Adı" satırı atılır (ürün adı sayfada zaten başlık).
+ * Markdown izi yoksa metne dokunmaz.
+ */
+export function convertAiMarkdown(src: string): string {
+    const hasMarkdown = /^\s*#{1,6}\s/m.test(src) || /\*\*[^*\n]+\*\*/.test(src) || !/<p[\s>]/i.test(src);
+    if (!hasMarkdown) return src;
+
+    const lines = src.replace(/\r\n/g, "\n").split("\n");
+    const first = lines.findIndex((l) => l.trim() !== "");
+    if (first >= 0 && /^#\s+/.test(lines[first].trim())) lines.splice(first, 1);
+
+    const out: string[] = [];
+    let para: string[] = [];
+    let list: string[] = [];
+    const flushPara = () => {
+        if (para.length) out.push(`<p>${para.join(" ")}</p>`);
+        para = [];
+    };
+    const flushList = () => {
+        if (list.length) out.push(`<ul>${list.map((x) => `<li>${x}</li>`).join("")}</ul>`);
+        list = [];
+    };
+
+    for (const raw of lines) {
+        const l = raw.trim();
+        const heading = l.match(/^#{1,6}\s+(.+)$/);
+        const item = l.match(/^[-*•]\s+(.+)$/);
+        if (!l) {
+            flushPara();
+            flushList();
+        } else if (heading) {
+            flushPara();
+            flushList();
+            out.push(`<h3>${heading[1]}</h3>`);
+        } else if (item) {
+            flushPara();
+            list.push(item[1]);
+        } else if (BLOCK_TAG.test(l)) {
+            flushPara();
+            flushList();
+            out.push(l);
+        } else {
+            flushList();
+            para.push(l);
+        }
+    }
+    flushPara();
+    flushList();
+
+    return out.join("\n").replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>");
+}
