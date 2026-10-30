@@ -5,6 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
+import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +55,23 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
                 types: ["heading", "paragraph"],
             }),
             Underline,
+            // AI açıklamalarındaki teknik tablo editörde silinmesin (Bardakçı Bike ile aynı)
+            Table.configure({
+                HTMLAttributes: {
+                    class: "border-collapse table-auto w-full my-4 border border-gray-200 dark:border-gray-700",
+                },
+            }),
+            TableRow,
+            TableHeader.configure({
+                HTMLAttributes: {
+                    class: "border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-2.5 font-bold text-left text-sm",
+                },
+            }),
+            TableCell.configure({
+                HTMLAttributes: {
+                    class: "border border-gray-200 dark:border-gray-700 p-2.5 text-sm",
+                },
+            }),
         ],
         content,
         editorProps: {
@@ -69,6 +87,13 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     useEffect(() => {
         setIsMounted(true);
     }, []);
+
+    // İçerik dışarıdan değişince (AI ile oluşturma gibi) editöre yansıt; yoksa sayfa yenilenene kadar görünmüyordu
+    useEffect(() => {
+        if (editor && content !== editor.getHTML()) {
+            editor.commands.setContent(content || "", { emitUpdate: false });
+        }
+    }, [content, editor]);
 
     const setLink = useCallback(() => {
         if (!editor) return;
