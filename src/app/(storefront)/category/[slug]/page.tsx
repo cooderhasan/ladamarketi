@@ -11,6 +11,11 @@ import { ProductStockToggle } from "@/components/storefront/product-stock-toggle
 import { Pagination } from "@/components/storefront/pagination";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { JsonLd } from "@/components/seo/json-ld";
+import { SITE_URL } from "@/lib/site-url";
+import { categoryDisplayName } from "@/lib/category-title";
 
 interface CategoryPageProps {
     params: Promise<{
@@ -33,14 +38,17 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     const { slug } = await params;
     const category = await prisma.category.findUnique({
         where: { slug },
-        select: { name: true }
+        select: { name: true, parent: { select: { name: true } } }
     });
 
     if (!category) return { title: "Kategori Bulunamadı" };
 
+    // Aynı isimli alt kategoriler (5 ayrı "Hortum Grubu") Google'da ayırt edilsin: model adı başlıkta
+    const title = categoryDisplayName(category.name, category.parent?.name);
+
     return {
-        title: category.name,
-        description: `${category.name} kategorisindeki en kaliteli yedek parça ve aksesuarları inceleyin.`,
+        title,
+        description: `${title} kategorisindeki en kaliteli yedek parça ve aksesuarları inceleyin.`,
         alternates: {
             canonical: `/category/${slug}`
         }
@@ -198,14 +206,42 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     const uniqueColors = Array.from(new Set(variants.map(v => v.color).filter(Boolean))) as string[];
     const uniqueSizes = Array.from(new Set(variants.map(v => v.size).filter(Boolean))) as string[];
 
+    const displayName = categoryDisplayName(category.name, category.parent?.name);
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Ana Sayfa", item: SITE_URL },
+            ...(category.parent
+                ? [{ "@type": "ListItem", position: 2, name: category.parent.name, item: `${SITE_URL}/category/${category.parent.slug}` }]
+                : []),
+            { "@type": "ListItem", position: category.parent ? 3 : 2, name: displayName, item: `${SITE_URL}/category/${category.slug}` },
+        ],
+    };
+
     return (
         <div className="container mx-auto px-4 py-8">
+            <JsonLd id="breadcrumb-jsonld" data={breadcrumbSchema} />
+            {/* Yol satırı: müşteri hangi modelin kategorisinde olduğunu görsün */}
+            <nav aria-label="breadcrumb" className="flex items-center gap-1.5 text-sm text-gray-500 mb-4 overflow-x-auto whitespace-nowrap no-scrollbar">
+                <Link href="/" className="hover:text-[#009AD0] transition-colors">Ana Sayfa</Link>
+                {category.parent && (
+                    <>
+                        <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+                        <Link href={`/category/${category.parent.slug}`} className="hover:text-[#009AD0] transition-colors">
+                            {category.parent.name}
+                        </Link>
+                    </>
+                )}
+                <ChevronRight className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+                <span className="text-gray-800 dark:text-gray-200 font-medium">{category.name}</span>
+            </nav>
             {/* Telefonda "Filtrele" başlığın yanında; altta "Sadece Stoktakiler" + sıralama tek satır (üçü yan yana sığmıyordu) */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
                 <div className="flex items-start justify-between gap-3 w-full md:w-auto">
                     <div className="min-w-0">
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                            {category.name}
+                            {displayName}
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400">
                             Toplam <span className="font-semibold text-gray-900 dark:text-white">{totalCount}</span> ürün listeleniyor
