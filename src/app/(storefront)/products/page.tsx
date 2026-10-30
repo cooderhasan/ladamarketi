@@ -78,7 +78,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         });
 
         // Eski kategori adresiyle gelen link (/products?category=eski): yeni adrese kalıcı yönlendir
-        const renamed = !category ? newCategorySlug(params.category) : null;
+        const renamed = !category || !category.isActive ? newCategorySlug(params.category) : null;
         if (renamed) {
             const qs = new URLSearchParams();
             for (const [k, v] of Object.entries(params)) {

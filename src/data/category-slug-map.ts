@@ -7,7 +7,7 @@
 export const CATEGORY_SLUG_MAP: Record<string, string> = {
     "lada-samarayedek-paralar-23": "lada-samara-1300-1500-yedek-parcalari",
     "lada-vega-16v-yedek-paralar-37": "lada-vega-16v-yedek-parcalari",
-    "lada-vega-500-8v-36": "lada-vega-1-5-8v-yedek-parcalari",
+    "lada-vega-500-8v-36": "lada-vega-1-5-8v", // alt kopya üstteki kategoriyle birleştirildi
     "lada-samara-sport-tek-kapi-34": "lada-samara-sport-tek-kapi",
     "lada-niva-1600-yedek-paralar-39": "lada-niva-1600-yedek-parcalari",
     "lada-niva-100-karb-yedek-paralar-40": "lada-niva-1600-karb-yedek-parcalari",
@@ -76,7 +76,16 @@ export const CATEGORY_SLUG_MAP: Record<string, string> = {
     "motor-aksam-67": "lada-kalina-motor-aksami",
 };
 
-/** Eski kategori adresinin yeni karşılığı (yoksa null) */
+/**
+ * Birleştirilen kategoriler: kaynak (pasif yapılan) → hedef. Admin > Kategoriler'deki "Birleştir" işlemi
+ * kaynağın ürünlerini ve alt gruplarını hedefe taşır; kaynak pasif olunca adresi hedefe yönlenir.
+ * "Lada Vega 1.5 8V" altında aynı adlı ikinci bir "Lada Vega 1.5 8V" vardı (eski aktarımdan çift kayıt).
+ */
+export const CATEGORY_MERGES: Record<string, string> = {
+    "lada-vega-1-5-8v-yedek-parcalari": "lada-vega-1-5-8v",
+};
+
+/** Eski / birleştirilmiş kategori adresinin yeni karşılığı (yoksa null) */
 export function newCategorySlug(oldSlug: string): string | null {
-    return CATEGORY_SLUG_MAP[oldSlug] ?? null;
+    return CATEGORY_SLUG_MAP[oldSlug] ?? CATEGORY_MERGES[oldSlug] ?? null;
 }

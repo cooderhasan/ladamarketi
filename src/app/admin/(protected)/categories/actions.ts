@@ -148,3 +148,46 @@ export async function applyCategorySlugMap() {
     };
 }
 
+
+/**
+ * Tek seferlik: CATEGORY_MERGES'teki kaynak kategoriyi hedefe birleştirir.
+ * Kaynağın ürünleri hedefe eklenir (ürün kategorisiz kalmaz), alt grupları hedefin altına taşınır,
+ * kaynak silinmez: boşaltılıp pasif yapılır ve adresi hedefe yönlenir. Tekrar çalıştırılırsa yapılmışları atlar.
+ */
+export async function applyCategoryMerges() {
+    await requireAdmin();
+    const { CATEGORY_MERGES } = await import("@/data/category-slug-map");
+    const results: { from: string; into: string; products: number; groups: number }[] = [];
+
+    for (const [fromSlug, intoSlug] of Object.entries(CATEGORY_MERGES)) {
+        const [from, into] = await Promise.all([
+            prisma.category.findUnique({
+                where: { slug: fromSlug },
+                select: { id: true, isActive: true, products: { select: { id: true } }, children: { select: { id: true } } },
+            }),
+            prisma.category.findUnique({ where: { slug: intoSlug }, select: { id: true, products: { select: { id: true } } } }),
+        ]);
+        if (!from || !into || from.id === into.id) continue;
+        if (!from.isActive && from.products.length === 0 && from.children.length === 0) continue; // zaten birleştirilmiş
+
+        const already = new Set(into.products.map((p) => p.id));
+        const toConnect = from.products.map((p) => p.id).filter((id) => !already.has(id));
+
+        await prisma.$transaction([
+            prisma.category.update({ where: { id: into.id }, data: { products: { connect: toConnect.map((id) => ({ id })) } } }),
+            // Alt gruplar (Motor Aksamı vb.) doğrudan hedefin altına
+            prisma.category.updateMany({ where: { parentId: from.id }, data: { parentId: into.id } }),
+            // Ürün sayfasındaki yol satırı eski (tekil) kategori alanından okunuyor
+            prisma.product.updateMany({ where: { categoryId: from.id }, data: { categoryId: into.id } }),
+            // Kaynak: boş, pasif, üst kategorisiz (menülerde ve listelerde görünmesin)
+            prisma.category.update({
+                where: { id: from.id },
+                data: { isActive: false, parentId: null, isInHeader: false, isFeatured: false, products: { set: [] } },
+            }),
+        ]);
+        results.push({ from: fromSlug, into: intoSlug, products: toConnect.length, groups: from.children.length });
+    }
+
+    revalidatePath("/", "layout");
+    return { success: true, results };
+}

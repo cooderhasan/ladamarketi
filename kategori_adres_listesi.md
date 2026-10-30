@@ -8,7 +8,7 @@ Hazırlanma: 30.10.2026 · Kaynak: canlı admin kategori listesi (salt okunur) �
 
 ## Kararlar (onaylandı)
 
-1. **İki ayrı "Lada Vega 1.5 8V" var:** ana kategori (`lada-vega-1-5-8v`, 127 ürün) ve onun altında aynı adlı bir alt kategori (`lada-vega-500-8v-36`, 636 ürün). İkisi aynı adresi alamaz. Karar: ana kategori kalır, alt kategori `lada-vega-1-5-8v-yedek-parcalari` olur.
+1. **İki ayrı "Lada Vega 1.5 8V" var:** ana kategori (`lada-vega-1-5-8v`, 127 ürün) ve onun altında aynı adlı bir alt kategori (`lada-vega-500-8v-36`, 636 ürün). İkisi aynı adresi alamaz. Karar: ana kategori kalır, alt kategori `lada-vega-1-5-8v-yedek-parcalari` olur. Sonra (30.10.2026) ikisi birleştirildi: alt kategorinin ürünleri ve alt grupları üste taşındı, alt kategori pasif, adresi `lada-vega-1-5-8v`'ye yönleniyor.
 2. **"Home" (`home-2`, 266 ürün):** eski aktarımdan kalma görünüyor; karar: adresine dokunulmaz.
 
 ## Liste

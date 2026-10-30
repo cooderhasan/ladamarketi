@@ -72,17 +72,17 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         }
     });
 
-    if (!category) {
-        // Eski (bozuk harfli / sayılı) kategori adresi: yeni adrese kalıcı yönlendir, filtreler korunur
-        const target = newCategorySlug(slug);
-        if (target) {
-            const qs = new URLSearchParams();
-            for (const [k, v] of Object.entries(searchParamsValues)) {
-                if (Array.isArray(v)) v.forEach((x) => qs.append(k, x));
-                else if (v != null) qs.set(k, v);
-            }
-            permanentRedirect(`/category/${target}${qs.size ? `?${qs}` : ""}`);
+    // Eski (bozuk harfli / sayılı) ya da birleştirilip pasif yapılmış kategori adresi: yeni adrese kalıcı yönlendir, filtreler korunur
+    const target = !category || !category.isActive ? newCategorySlug(slug) : null;
+    if (target) {
+        const qs = new URLSearchParams();
+        for (const [k, v] of Object.entries(searchParamsValues)) {
+            if (Array.isArray(v)) v.forEach((x) => qs.append(k, x));
+            else if (v != null) qs.set(k, v);
         }
+        permanentRedirect(`/category/${target}${qs.size ? `?${qs}` : ""}`);
+    }
+    if (!category) {
         notFound();
     }
 

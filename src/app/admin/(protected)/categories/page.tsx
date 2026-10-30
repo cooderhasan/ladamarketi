@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/db";
 import { CategoriesTable } from "@/components/admin/categories-table";
 import { CategorySlugMigration } from "@/components/admin/category-slug-migration";
-import { CATEGORY_SLUG_MAP } from "@/data/category-slug-map";
+import { CategoryMergeNotice } from "@/components/admin/category-merge-notice";
+import { CATEGORY_SLUG_MAP, CATEGORY_MERGES } from "@/data/category-slug-map";
 
 export default async function CategoriesPage() {
     const categories = await prisma.category.findMany({
@@ -18,6 +19,10 @@ export default async function CategoriesPage() {
 
     // Onaylı yeni adres listesine henüz geçmemiş kategoriler (tek seferlik güncelleme butonu)
     const pendingSlugs = categories.filter((c) => CATEGORY_SLUG_MAP[c.slug]).length;
+    // Birleştirilmeyi bekleyen (hâlâ aktif) kopya kategoriler
+    const pendingMerges = categories
+        .filter((c) => CATEGORY_MERGES[c.slug] && c.isActive)
+        .map((c) => ({ from: c.slug, into: CATEGORY_MERGES[c.slug], name: c.name }));
 
     return (
         <div className="space-y-6">
@@ -31,6 +36,7 @@ export default async function CategoriesPage() {
             </div>
 
             <CategorySlugMigration pending={pendingSlugs} />
+            <CategoryMergeNotice pending={pendingMerges} />
 
             <CategoriesTable categories={categories} />
         </div>
