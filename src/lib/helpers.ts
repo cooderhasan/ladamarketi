@@ -132,17 +132,19 @@ export function roundPrice(price: number): number {
 }
 
 /**
- * Generate unique order number
+ * Sipariş numarası: LDM + yıl(2) + ay + gün + 4 rastgele rakam, ör. LDM2610296892 (Lada Marketi, 29.10.2026).
+ * Tarih Türkiye saatine göre (sunucu UTC olsa da gece 00:00-03:00 siparişleri doğru güne düşer).
+ * Eski siparişler "SP..." numarasıyla kalır.
  */
 export function generateOrderNumber(): string {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
+    const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Istanbul", year: "2-digit", month: "2-digit", day: "2-digit",
+    }).formatToParts(new Date());
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
     const random = Math.floor(Math.random() * 10000)
         .toString()
         .padStart(4, "0");
-    return `SP${year}${month}${day}${random}`;
+    return `LDM${get("year")}${get("month")}${get("day")}${random}`;
 }
 
 /**

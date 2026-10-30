@@ -237,7 +237,11 @@ export async function createOrder(data: CreateOrderData) {
         const total = grandTotal + (data.shippingCost || 0); // Include shipping cost in final total
         const discountAmount = totalDiscountAmount; // For record keeping
         const vatAmount = totalVatAmount;
-        const orderNumber = generateOrderNumber();
+        // Aynı gün aynı rastgele numara denk gelirse (benzersiz alan) sipariş hata vermesin: yenisi seçilir
+        let orderNumber = generateOrderNumber();
+        for (let i = 0; i < 5 && (await prisma.order.findUnique({ where: { orderNumber }, select: { id: true } })); i++) {
+            orderNumber = generateOrderNumber();
+        }
 
         // Create order with transaction
         // Ziyaret kaynağı (tarayıcıdan, temizlenmiş) + cihaz (User-Agent'tan)
