@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     Select,
@@ -445,27 +446,30 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                     <span>AI İçerik Asistanı (Opsiyonel)</span>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="referenceUrl" className="text-xs">Referans Ürün Linki (Toptancı / Rakip)</Label>
-                                    <div className="flex gap-2">
-                                        <Input
+                                    <Label htmlFor="referenceUrl" className="text-xs">Referans Ürün Bilgisi / Ham Metin</Label>
+                                    {/* Ham metin yapıştırılır (Bardakçı Bike ile aynı); sadece link yazılırsa sayfa sunucudan çekilir */}
+                                    <div className="flex flex-col gap-3">
+                                        <Textarea
                                             id="referenceUrl"
                                             value={formData.referenceUrl}
                                             onChange={(e) => handleChange("referenceUrl", e.target.value)}
-                                            placeholder="https://rakipsite.com/urun-detay"
-                                            className="bg-white dark:bg-gray-800"
+                                            placeholder="Toptancı / üretici / rakip sitedeki ürün bilgilerini kopyalayıp buraya yapıştırın (karışık olabilir). Yapay zeka metni özgün ve düzenli hale getirir, önemli kısımları kalın yazar ve en alta teknik tablo ekler. Link de yazabilirsiniz ama bazı siteler engellediği için metin yapıştırmak daha garantilidir."
+                                            className="bg-white dark:bg-gray-800 min-h-[120px] resize-y"
                                         />
                                         <Button
                                             type="button"
                                             onClick={async () => {
-                                                if (!formData.referenceUrl) {
-                                                    toast.error("Lütfen bir referans linki girin.");
+                                                const ref = (formData.referenceUrl || "").trim();
+                                                if (!ref) {
+                                                    toast.error("Lütfen ham metni yapıştırın veya bir referans linki girin.");
                                                     return;
                                                 }
+                                                const isUrl = /^https?:\/\/\S+$/.test(ref);
                                                 setLoading(true);
                                                 try {
                                                     const res = await fetch("/api/admin/ai/generate-description", {
                                                         method: "POST",
-                                                        body: JSON.stringify({ url: formData.referenceUrl }),
+                                                        body: JSON.stringify(isUrl ? { url: ref } : { text: ref, productName: formData.name }),
                                                     });
                                                     const result = await res.json();
                                                     if (result.success && result.data) {
@@ -486,13 +490,23 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                                 }
                                             }}
                                             disabled={loading}
-                                            className="bg-indigo-600 hover:bg-indigo-700 shrink-0"
+                                            className="bg-indigo-600 hover:bg-indigo-700 w-full md:w-auto self-end font-semibold flex items-center justify-center gap-2"
                                         >
-                                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "AI ile Yaz"}
+                                            {loading ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                    <span>İçerik Oluşturuluyor...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Brain className="w-4 h-4" />
+                                                    <span>AI ile Açıklama ve Teknik Tablo Oluştur</span>
+                                                </>
+                                            )}
                                         </Button>
                                     </div>
                                     <p className="text-[10px] text-gray-500 italic">
-                                        * Linkten ürün ismi ve açıklaması çekilip AI ile özgünleştirilir.
+                                        * Yapıştırılan metin (veya linkten çekilen bilgi) AI ile özgünleştirilir, önemli kısımlar vurgulanır ve teknik tablo eklenir. Oluşan metin aşağıdaki Ürün Açıklaması alanına yazılır.
                                     </p>
                                 </div>
                             </div>

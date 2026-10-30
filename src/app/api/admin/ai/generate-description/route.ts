@@ -2,13 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import * as cheerio from "cheerio";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { requireAdmin } from "@/lib/admin-auth";
 
 export async function POST(req: NextRequest) {
+  // /api adresleri middleware'de korunmuyor: AI anahtarı ve sunucudan site çekme sadece yöneticiye açık
   try {
-    const { url } = await req.json();
+    await requireAdmin();
+  } catch {
+    return NextResponse.json({ error: "Yetkisiz" }, { status: 401 });
+  }
+  try {
+    // text: üretici/rakip sayfasından kopyalanıp yapıştırılan ham metin (Bardakçı Bike ile aynı); url: sadece link verilirse sayfa çekilir
+    const { url, text, productName: reqProductName } = await req.json();
 
-    if (!url) {
-      return NextResponse.json({ error: "URL gerekli" }, { status: 400 });
+    let productName = String(reqProductName || "").trim();
+    let productDescription = String(text || "").trim();
+
+    if (!productDescription && !url) {
+      return NextResponse.json({ error: "Lütfen ham metni yapıştırın veya bir referans linki girin." }, { status: 400 });
     }
 
     // 1. Get AI Configuration
@@ -20,63 +31,64 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Yapay Zeka (AI) yapılandırılmamış veya aktif değil." }, { status: 400 });
     }
 
-    // 2. Fetch Page Content
-    let response;
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 saniye timeout
+    // 2. Metin yapıştırılmadıysa linkteki sayfayı çek
+    if (!productDescription && url) {
+        let response;
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 saniye timeout
 
-        response = await fetch(url, {
-            signal: controller.signal,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
-                'Referer': 'https://www.google.com/',
-                'Cache-Control': 'no-cache',
-            },
-            cache: 'no-store',
-        });
-        clearTimeout(timeoutId);
-    } catch (err: any) {
-        const isTimeout = err.name === 'AbortError' || err.cause?.code === 'UND_ERR_CONNECT_TIMEOUT';
-        const isBlocked = err.cause?.code === 'ECONNREFUSED';
-        console.error(`[AI_FETCH_ERROR] URL: ${url} | Hata: ${err.message} | Kod: ${err.cause?.code || err.name}`);
+            response = await fetch(url, {
+                signal: controller.signal,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                    'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+                    'Referer': 'https://www.google.com/',
+                    'Cache-Control': 'no-cache',
+                },
+                cache: 'no-store',
+            });
+            clearTimeout(timeoutId);
+        } catch (err: any) {
+            const isTimeout = err.name === 'AbortError' || err.cause?.code === 'UND_ERR_CONNECT_TIMEOUT';
+            const isBlocked = err.cause?.code === 'ECONNREFUSED';
+            console.error(`[AI_FETCH_ERROR] URL: ${url} | Hata: ${err.message} | Kod: ${err.cause?.code || err.name}`);
 
-        let userMessage = `Kaynak siteye erişilirken ağ hatası oluştu: ${err.message}`;
-        if (isTimeout) userMessage = `Bu site sunucumuzdan yanıt vermiyor (zaman aşımı). Site geçici olarak erişilemez veya sunucu IP'mizi engelliyor olabilir.`;
-        if (isBlocked) userMessage = `Bu site sunucumuzun bağlantısını reddetti. Site bot koruması kullanıyor olabilir.`;
+            let userMessage = `Kaynak siteye erişilirken ağ hatası oluştu: ${err.message}`;
+            if (isTimeout) userMessage = `Bu site sunucumuzdan yanıt vermiyor (zaman aşımı). Site geçici olarak erişilemez veya sunucu IP'mizi engelliyor olabilir. Ürün sayfasındaki metni kopyalayıp kutuya yapıştırarak deneyin.`;
+            if (isBlocked) userMessage = `Bu site sunucumuzun bağlantısını reddetti. Site bot koruması kullanıyor olabilir. Ürün sayfasındaki metni kopyalayıp kutuya yapıştırarak deneyin.`;
 
-        return NextResponse.json({ success: false, error: userMessage }, { status: 500 });
-    }
+            return NextResponse.json({ success: false, error: userMessage }, { status: 500 });
+        }
 
-    if (!response.ok) {
-        return NextResponse.json({ 
-            success: false, 
-            error: `Kaynak siteye ulaşılamadı (Hata Kodu: ${response.status}). Site botu engellemi olabilir.` 
-        }, { status: 400 });
-    }
+        if (!response.ok) {
+            return NextResponse.json({ 
+                success: false, 
+                error: `Kaynak siteye ulaşılamadı (Hata Kodu: ${response.status}). Site botu engellemiş olabilir. Ürün sayfasındaki metni kopyalayıp kutuya yapıştırarak deneyin.` 
+            }, { status: 400 });
+        }
 
-    const html = await response.text();
-    const $ = cheerio.load(html);
+        const html = await response.text();
+        const $ = cheerio.load(html);
 
-    // 3. Extract Data
-    let productName = $("h1").first().text().trim();
-    let productDescription = "";
+        // 3. Extract Data
+        productName = productName || $("h1").first().text().trim();
 
-    if (url.includes("ladaci.com")) {
-        productDescription = $("#tab-description").text().trim() || $(".product-description").text().trim();
-    } else if (url.includes("aslaneroto.com")) {
-        productDescription = $("#tabs-1").text().trim() || $(".product-description").text().trim();
-    } else {
-        productDescription = $(".product-description").text().trim() || 
-                             $("#description").text().trim() || 
-                             $("article").text().trim() || 
-                             $("meta[name='description']").attr("content") || "";
-    }
+        if (url.includes("ladaci.com")) {
+            productDescription = $("#tab-description").text().trim() || $(".product-description").text().trim();
+        } else if (url.includes("aslaneroto.com")) {
+            productDescription = $("#tabs-1").text().trim() || $(".product-description").text().trim();
+        } else {
+            productDescription = $(".product-description").text().trim() || 
+                                 $("#description").text().trim() || 
+                                 $("article").text().trim() || 
+                                 $("meta[name='description']").attr("content") || "";
+        }
 
-    if (!productName && !productDescription) {
-        return NextResponse.json({ error: "Sayfadan ürün bilgisi ayıklanamadı." }, { status: 400 });
+        if (!productName && !productDescription) {
+            return NextResponse.json({ error: "Sayfadan ürün bilgisi ayıklanamadı. Ürün sayfasındaki metni kopyalayıp kutuya yapıştırarak deneyin." }, { status: 400 });
+        }
     }
 
     const systemPrompt = `Sen profesyonel bir Lada Yedek Parça Teknik Danışmanı ve Kurumsal İçerik Uzmanısın. 
@@ -91,10 +103,11 @@ export async function POST(req: NextRequest) {
     6. TEKNİK TABLO: Her dökümanın sonuna mutlaka STANDART HTML <table> yapısı ekle. Mutlaka <thead> (sütun başlıkları için <th> kullanarak) ve <tbody> (veriler için <td> kullanarak) bölümlerini ayır.
     7. UZUNLUK: İçeriği kısa kesme; her bölümü (paragraf, maddeler, tablo) doyurucu ve teknik olarak zengin tut.`;
 
-    const userPrompt = `USTA, bu parçayı bizim için SIFIRDAN, bambaşka bir üslupla anlat. Rakip metnin gölgesi bile kalmasın. 
-      
-      ÜRÜN ADI: ${productName}
-      KAYNAK METİN: ${productDescription || "Rakip sitede açıklama metni bulunamadı. Lütfen sadece ürün adını ve tecrübeni kullanarak (30 yıllık Lada ustası gibi) araca ne gibi bir fayda sağlayacağını anlatan özgün bir tanıtım yaz."}`;
+    const userPrompt = `Aşağıdaki ham ürün bilgilerini sitemiz için SIFIRDAN, bambaşka bir üslupla yeniden yaz. Kaynak metindeki cümleleri kopyalama.
+      Kaynak metinde başka bir firmanın adı, telefonu, adresi veya web sitesi geçiyorsa bunları metne alma.
+
+      ${productName ? `ÜRÜN ADI: ${productName}` : ""}
+      KAYNAK METİN: ${productDescription || "Kaynakta açıklama metni bulunamadı. Sadece ürün adından yola çıkarak parçanın görevini ve araca sağladığı faydayı anlatan özgün bir tanıtım yaz."}`;
 
     let generatedHtml = "";
 
