@@ -297,7 +297,8 @@ export async function generateCategoryDescription(input: { categoryId?: string |
     2. İÇERİK: Kategoride hangi tür parçaların bulunduğunu ve hangi araç/model için olduğunu anlat. Sadece sana verilen kategori adı, alt gruplar ve ürün adlarından çıkarılabilecek bilgileri kullan; uydurma teknik değer, ölçü, parça numarası yazma.
     3. YASAKLAR: "garanti" / "garantili" ifadeleri, fiyat, indirim, kampanya, "ücretsiz kargo" veya kargo süresi vaadi, telefon, web adresi, link (<a>), kaynak numarası ([1]) kullanma.
     4. ÜSLUP: Kurumsal, sade, ikna edici Türkçe. "Usta", "tecrübem" gibi kişisel ifadeler yok. Anahtar kelimeyi (kategori başlığı) doğal şekilde 1-2 kez geçir, kelime doldurma yapma.
-    5. HTML: Sadece <p>, <h2>, <b>, <ul>, <li> etiketleri. Markdown yok. Metnin başına kategori adını başlık olarak yazma (sayfada zaten var).`;
+    5. VURGULAMA: Önemli ifadeleri <b>...</b> ile kalın yaz: kategori başlığı (ilk geçtiği yerde), araç/model adları ve ana parça türleri. Her paragrafta 1-3 vurgu yeterli; tüm cümleyi kalın yapma.
+    6. HTML: Sadece <p>, <h2>, <b>, <ul>, <li> etiketleri. Markdown yok. Metnin başına kategori adını başlık olarak yazma (sayfada zaten var).`;
 
     const userPrompt = `Kategori başlığı: ${title}
 ${subcategories.length ? `Alt gruplar: ${subcategories.join(", ")}` : ""}
