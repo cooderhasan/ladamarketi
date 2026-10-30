@@ -83,13 +83,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
     // Ana kategori: ürünün bağlı olduğu en alt (en özel) kategori. Eski tekil "category" alanı ürün eklenirken
     // ilk seçilen kategori oluyordu; üst kategori ilk seçildiyse yol satırında alt grup (Şanzıman Grubu vb.) atlanıyordu.
+    // Önce ürünün kendi modelinin (eski ana kategoriyle aynı kök) alt grupları: Samara 1500i grupları ağaçta bir basamak
+    // derin olduğu için yoksa Vega ürünlerinde de Samara yolu çıkıyordu. Kendi modelinde alt grup yoksa en derin kategori.
     // Eşit derinlikte, eski ana kategorinin soyundan olan öne alınır.
     const depthOf = (c: any) => (c.parent ? (c.parent.parent ? 3 : 2) : 1);
+    const rootOf = (c: any) => c.parent?.parent?.id ?? c.parent?.id ?? c.id;
     const inLegacyLine = (c: any) => [c.id, c.parent?.id, c.parent?.parent?.id].includes(product.categoryId);
+    const deepest = (list: any[]) =>
+        [...list].sort((a, b) => depthOf(b) - depthOf(a) || Number(inLegacyLine(b)) - Number(inLegacyLine(a)))[0];
+    const legacyRoot = product.category ? rootOf(product.category) : null;
+    const ownModel = deepest(product.categories.filter((c) => rootOf(c) === legacyRoot));
     const mainCategory: any =
-        [...product.categories].sort(
-            (a, b) => depthOf(b) - depthOf(a) || Number(inLegacyLine(b)) - Number(inLegacyLine(a))
-        )[0] ?? product.category;
+        (ownModel && depthOf(ownModel) > 1 ? ownModel : deepest(product.categories)) ?? product.category;
 
     console.log("Product slug:", slug);
     console.log("Product origin from DB:", product.origin);
