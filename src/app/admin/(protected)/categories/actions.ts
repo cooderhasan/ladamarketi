@@ -311,3 +311,52 @@ ${productNames.length ? `Kategorideki örnek ürünler:\n- ${productNames.join("
         return { success: false as const, error: e?.message || "Açıklama oluşturulamadı." };
     }
 }
+
+/** Alt grup ataması: henüz eklenmemiş (ürün, alt grup) eşleşmeleri */
+async function pendingGroupAssignments() {
+    const { CATEGORY_GROUP_ASSIGNMENTS } = await import("@/data/category-group-assignments");
+    const productSlugs = [...new Set(Object.values(CATEGORY_GROUP_ASSIGNMENTS).flat())];
+    const [products, cats] = await Promise.all([
+        prisma.product.findMany({
+            where: { slug: { in: productSlugs } },
+            select: { id: true, slug: true, categories: { select: { slug: true } } },
+        }),
+        prisma.category.findMany({ where: { slug: { in: Object.keys(CATEGORY_GROUP_ASSIGNMENTS) } }, select: { id: true, slug: true } }),
+    ]);
+    const bySlug = new Map(products.map((p) => [p.slug, p]));
+    const pending: { categoryId: string; productIds: string[] }[] = [];
+    let missing = 0;
+    for (const cat of cats) {
+        const ids: string[] = [];
+        for (const s of CATEGORY_GROUP_ASSIGNMENTS[cat.slug] || []) {
+            const p = bySlug.get(s);
+            if (!p) { missing++; continue; }
+            if (!p.categories.some((c) => c.slug === cat.slug)) ids.push(p.id);
+        }
+        if (ids.length) pending.push({ categoryId: cat.id, productIds: ids });
+    }
+    return { pending, missing };
+}
+
+/** Admin sayfasındaki bildirim için: eklenmeyi bekleyen eşleşme sayısı */
+export async function countPendingGroupAssignments() {
+    await requireAdmin();
+    const { pending } = await pendingGroupAssignments();
+    return pending.reduce((n, x) => n + x.productIds.length, 0);
+}
+
+/**
+ * Tek seferlik: onaylı alt grup önerilerini uygular (ürünü alt gruba da ekler, ana kategoriden çıkarmaz).
+ * Silinmiş / adresi değişmiş ürünler atlanır; tekrar çalışırsa eklenmişleri atlar.
+ */
+export async function applyGroupAssignments() {
+    await requireAdmin();
+    const { pending, missing } = await pendingGroupAssignments();
+    await prisma.$transaction(
+        pending.map((x) =>
+            prisma.category.update({ where: { id: x.categoryId }, data: { products: { connect: x.productIds.map((id) => ({ id })) } } })
+        )
+    );
+    revalidatePath("/", "layout");
+    return { success: true, added: pending.reduce((n, x) => n + x.productIds.length, 0), groups: pending.length, missing };
+}

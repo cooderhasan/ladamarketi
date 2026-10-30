@@ -3,6 +3,8 @@ import { CategoriesTable } from "@/components/admin/categories-table";
 import { CategorySlugMigration } from "@/components/admin/category-slug-migration";
 import { CategoryMergeNotice } from "@/components/admin/category-merge-notice";
 import { CategoryRetireNotice } from "@/components/admin/category-retire-notice";
+import { CategoryGroupAssignNotice } from "@/components/admin/category-group-assign-notice";
+import { countPendingGroupAssignments } from "./actions";
 import { CATEGORY_SLUG_MAP, CATEGORY_MERGES, CATEGORY_RETIRED } from "@/data/category-slug-map";
 
 export default async function CategoriesPage() {
@@ -24,6 +26,8 @@ export default async function CategoriesPage() {
     const pendingMerges = categories
         .filter((c) => CATEGORY_MERGES[c.slug] && c.isActive)
         .map((c) => ({ from: c.slug, into: CATEGORY_MERGES[c.slug], name: c.name }));
+    // Onaylı alt grup önerilerinden henüz eklenmemiş olanlar
+    const pendingAssignments = await countPendingGroupAssignments();
     // Boşaltılmayı bekleyen eski vitrin kategorisi ("Home")
     const pendingRetire = categories
         .filter((c) => CATEGORY_RETIRED[c.slug] && (c.isActive || c._count.products > 0))
@@ -43,6 +47,7 @@ export default async function CategoriesPage() {
             <CategorySlugMigration pending={pendingSlugs} />
             <CategoryMergeNotice pending={pendingMerges} />
             <CategoryRetireNotice pending={pendingRetire} />
+            <CategoryGroupAssignNotice pending={pendingAssignments} />
 
             <CategoriesTable categories={categories} />
         </div>
