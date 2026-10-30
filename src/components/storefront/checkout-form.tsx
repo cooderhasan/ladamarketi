@@ -669,9 +669,9 @@ export function CheckoutForm({ initialData, cargoCompanies, bankTransferDiscount
                                         className="mt-0.5 h-4 w-4 shrink-0 accent-[#009AD0]"
                                     />
                                     <span>
-                                        <Link href="/policies/sat-s-zle-mesi" target="_blank" className="font-semibold underline">Ön Bilgilendirme Koşulları ve Mesafeli Satış Sözleşmesi</Link>
+                                        <Link href="/policies/satis-sozlesmesi" target="_blank" className="font-semibold underline">Ön Bilgilendirme Koşulları ve Mesafeli Satış Sözleşmesi</Link>
                                         {"'ni ve "}
-                                        <Link href="/policies/i-ptal-ve-i-ade" target="_blank" className="font-semibold underline">İptal ve İade Koşulları</Link>
+                                        <Link href="/policies/iptal-ve-iade" target="_blank" className="font-semibold underline">İptal ve İade Koşulları</Link>
                                         {"'nı okudum, onaylıyorum."}
                                     </span>
                                 </label>

@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/site-url";
+import { policyPublicSlug } from "@/lib/policy-slugs";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = SITE_URL;
@@ -65,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     const policyUrls = policies.map((policy) => ({
-        url: `${baseUrl}/policies/${policy.slug}`,
+        url: `${baseUrl}/policies/${policyPublicSlug(policy.slug)}`,
         lastModified: policy.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.3,

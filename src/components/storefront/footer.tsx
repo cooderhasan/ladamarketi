@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { policyPublicSlug } from "@/lib/policy-slugs";
 import Image from "next/image";
 
 interface Policy {
@@ -145,7 +146,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                         <ul className="space-y-3 text-sm">
                             {footerPolicies.map((policy) => (
                                 <li key={policy.slug}>
-                                    <Link href={`/policies/${policy.slug}`} className="text-gray-400 hover:text-white hover:translate-x-1 transition-all duration-300 flex items-center gap-2">
+                                    <Link href={`/policies/${policyPublicSlug(policy.slug)}`} className="text-gray-400 hover:text-white hover:translate-x-1 transition-all duration-300 flex items-center gap-2">
                                         <span className="h-1 w-1 bg-[#009AD0] rounded-full opacity-0 hover:opacity-100 transition-opacity"></span>
                                         {policy.title}
                                     </Link>

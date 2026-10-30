@@ -1,5 +1,6 @@
 import { getPolicy } from "@/app/actions/policy";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { policyDbSlug, policyRedirectSlug } from "@/lib/policy-slugs";
 
 interface PolicyPageProps {
     params: Promise<{
@@ -9,7 +10,10 @@ interface PolicyPageProps {
 
 export default async function DynamicPolicyPage({ params }: PolicyPageProps) {
     const { slug } = await params;
-    const policy = await getPolicy(slug);
+    // Eski bozuk adres ("i-ptal-ve-i-ade") → düzgün adres ("iptal-ve-iade")
+    const better = policyRedirectSlug(slug);
+    if (better) permanentRedirect(`/policies/${better}`);
+    const policy = await getPolicy(policyDbSlug(slug));
 
     if (!policy) {
         notFound();

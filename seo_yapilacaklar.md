@@ -21,7 +21,12 @@ Son güncelleme: 30.10.2026
 
 ## Sonra yapılacaklar (2. grup — dikkat isteyen)
 
-### A. Kategori adresleri (en önemlisi)
+### A. Kategori adresleri (en önemlisi) — YAPILDI 30.10.2026
+- 69 adres güncellendi (liste: kategori_adres_listesi.md), eski adresler 308 ile yönleniyor
+- İç içe aynı adlı "Lada Vega 1.5 8V" birleştirildi; eski "Home" vitrin kategorisi boşaltılıp pasif yapıldı (/category/home-2 → /)
+- Yönlendirme listesi: src/data/category-slug-map.ts (silinmemeli)
+
+Eski notlar:
 - 74 kategorinin 70'inde sonda sayı var (`...-on-duzen-grubu-12`), 11 grupta aynı isim tekrar ediyor
 - 74 kategorinin 48'inde Türkçe harfler adresten düşmüş (eski aktarımdan): `n-dzen-grubu` (Ön Düzen), `anzman-grubu` (Şanzıman), `sspansiyon-grubu`, `motor-aksam`, `i-trim-grubu`, `...-yedek-paralar`, `lada-vega-500-8v` (1.5 8V) — 30.10.2026 tespit
 - Başlıklara model adı eklendi (30.10.2026, adres değişmeden): "Samara 1300-1500 Hortum Grubu"
@@ -33,7 +38,12 @@ Son güncelleme: 30.10.2026
   4. `redirects.json` hedefleri ve slider/banner linkleri de güncellenir
 - **Gerekli:** adres biçimi onayı
 
-### B. Ürün yapısal verisi (Google zengin sonuçlar)
+### B. Ürün yapısal verisi (Google zengin sonuçlar) — YAPILDI 30.10.2026
+- İade politikası (14 gün, kargoyla, iade kargosu müşteride), marka yoksa marka yok, yorum puanı, sadece geçerli GTIN alanı (barkodlar rastgele 460..., kullanılmıyor), MPN stok koduyla aynıysa yok
+- Kargo (shippingDetails) eklenmedi: alıcı ödemeli, tutar belli değil; 0 TL Google'da "ücretsiz kargo" sayılır
+- Politika adresleri düzeltildi (iptal-ve-iade, satis-sozlesmesi, guvenli-alisveris, gizlilik-ilkelerimiz), eskiler yönleniyor
+
+Eski notlar:
 - Barkoddan GTIN (yalnız geçerli EAN-13 olanlar)
 - Kargo bilgisi (`shippingDetails`) ve iade politikası (`hasMerchantReturnPolicy`) — Search Console uyarılarını giderir
 - Markası olmayan üründe boş marka gönderilmesin

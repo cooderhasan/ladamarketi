@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db"
 import { revalidatePath } from "next/cache"
+import { policyPublicSlug } from "@/lib/policy-slugs"
 
 export async function getPolicy(slug: string) {
     const policy = await prisma.policy.findUnique({
@@ -19,6 +20,7 @@ export async function updatePolicy(slug: string, title: string, content: string)
         })
 
         revalidatePath(`/policies/${slug}`)
+        revalidatePath(`/policies/${policyPublicSlug(slug)}`)
         // Also revalidate the specific path mapping if differs
         // e.g. /policies/membership might map to slug 'membership-agreement'
 

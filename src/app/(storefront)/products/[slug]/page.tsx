@@ -6,7 +6,7 @@ import { ProductDetail } from "@/components/storefront/product-detail";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Metadata } from "next";
 import { getProductReviews, getReviewStats } from "@/app/actions/review";
-import { stripHtmlToText } from "@/lib/helpers";
+import { stripHtmlToText, validGtin } from "@/lib/helpers";
 import { SITE_URL, absoluteUrl } from "@/lib/site-url";
 
 interface ProductPageProps {
@@ -135,6 +135,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
     const salePrice = product.salePrice != null ? Number(product.salePrice) : null;
     const schemaPrice = salePrice != null && salePrice > 0 && salePrice < listPrice ? salePrice : listPrice;
 
+    // GTIN: sadece panelde GTIN alanına girilmiş, sağlama basamağı doğru numara. Barkod alanı kullanılmaz:
+    // sistemin ürettiği barkodlar rastgele ("460..."), Google'a gerçek GTIN gibi gönderilirse ürün uyuşmazlığı olur.
+    const gtin = validGtin((product as any).gtin);
+    // MPN: üretici parça numarası; bizim stok kodumuzla (LDM-...) aynıysa gönderilmez
+    const mpn = (product as any).mpn && (product as any).mpn !== product.sku ? (product as any).mpn : undefined;
+
     const schema = {
         "@context": "https://schema.org",
         "@type": "Product",
@@ -142,11 +148,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
         image: absoluteImages,
         description: stripHtmlToText(product.description) || product.name,
         sku: product.sku,
-        mpn: product.sku,
-        brand: {
-            "@type": "Brand",
-            name: product.brand?.name || "Lada Marketi",
-        },
+        ...(mpn ? { mpn } : {}),
+        ...(gtin ? { [`gtin${gtin.length}`]: gtin } : {}),
+        // Markası olmayan üründe marka gönderilmez (mağaza adı marka değildir)
+        ...(product.brand?.name ? { brand: { "@type": "Brand", name: product.brand.name } } : {}),
+        ...(reviewStats.totalReviews > 0
+            ? {
+                  aggregateRating: {
+                      "@type": "AggregateRating",
+                      ratingValue: Number(reviewStats.averageRating.toFixed(1)),
+                      reviewCount: reviewStats.totalReviews,
+                      bestRating: 5,
+                      worstRating: 1,
+                  },
+              }
+            : {}),
         offers: {
             "@type": "Offer",
             url: `${baseUrl}/products/${product.slug}`,
@@ -158,6 +174,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
             seller: {
                 "@type": "Organization",
                 name: "Lada Marketi",
+            },
+            // İade politikası (İptal ve İade sayfası): teslimden itibaren 14 gün, kargoyla, iade kargo ücreti
+            // müşteriye ait (ayıplı üründe firma öder). Kargo ücreti (shippingDetails) gönderilmiyor: kargo alıcı
+            // ödemeli ve tutarı belli değil; Google 0 TL'yi "ücretsiz kargo" sayar.
+            hasMerchantReturnPolicy: {
+                "@type": "MerchantReturnPolicy",
+                applicableCountry: "TR",
+                returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+                merchantReturnDays: 14,
+                returnMethod: "https://schema.org/ReturnByMail",
+                returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
             },
         },
     };

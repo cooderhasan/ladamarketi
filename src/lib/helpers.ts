@@ -315,3 +315,19 @@ export function getUserStatusColor(status: string): string {
     };
     return statusColors[status] || "bg-slate-500 text-white";
 }
+
+/**
+ * Geçerli GTIN (8/12/13/14 hane, sağlama basamağı doğru) ise rakamları döner, değilse null.
+ * Ürün yapısal verisinde (Google) sadece gerçek GTIN gönderilsin diye.
+ */
+export function validGtin(value?: string | null): string | null {
+    const digits = String(value || "").replace(/\s/g, "");
+    if (!/^(\d{8}|\d{12}|\d{13}|\d{14})$/.test(digits) || /^0+$/.test(digits)) return null;
+    const body = digits.slice(0, -1);
+    let sum = 0;
+    for (let i = 0; i < body.length; i++) {
+        // Sağdan sola: sağlama basamağının solundaki rakam ×3, sonraki ×1 ...
+        sum += Number(body[body.length - 1 - i]) * (i % 2 === 0 ? 3 : 1);
+    }
+    return (10 - (sum % 10)) % 10 === Number(digits[digits.length - 1]) ? digits : null;
+}
