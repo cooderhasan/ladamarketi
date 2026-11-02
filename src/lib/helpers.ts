@@ -331,3 +331,17 @@ export function validGtin(value?: string | null): string | null {
     }
     return (10 - (sum % 10)) % 10 === Number(digits[digits.length - 1]) ? digits : null;
 }
+
+/**
+ * Ad soyad / firma alanında en az iki kelime (her biri en az 2 harf) olmalı. Sadece ad yazılan siparişlerde
+ * ("HÜSEYİN") kargo gönderisi ve e-fatura alıcısı eksik kalıyordu.
+ */
+export const FULL_NAME_ERROR = "Lütfen adınızı ve soyadınızı birlikte yazın (Örn: Ahmet Yılmaz). Kargo ve fatura için gereklidir.";
+
+export function hasFullName(name: string | null | undefined): boolean {
+    const words = String(name || "")
+        .trim()
+        .split(/\s+/)
+        .filter((w) => w.replace(/[^\p{L}]/gu, "").length >= 2);
+    return words.length >= 2;
+}

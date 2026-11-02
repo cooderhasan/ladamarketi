@@ -14,6 +14,7 @@ import { CheckCircle2 } from "lucide-react";
 import { registerUser } from "@/app/register/actions";
 import { SearchablePicker } from "@/components/ui/searchable-picker";
 import { getDistrictsOfCity, getCityNames } from "@/lib/cities";
+import { hasFullName, FULL_NAME_ERROR } from "@/lib/helpers";
 
 interface RegisterFormProps {
     logoUrl?: string;
@@ -35,6 +36,12 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
         setLoading(true);
 
         const formData = new FormData(e.currentTarget);
+        if (!hasFullName(String(formData.get("name") || ""))) {
+            toast.error(FULL_NAME_ERROR);
+            document.getElementById("name")?.focus();
+            setLoading(false);
+            return;
+        }
         const phoneRaw = String(formData.get("phone")).replace(/\D/g, "");
 
         if (phoneRaw.length < 10) {

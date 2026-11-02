@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { headers } from "next/headers";
 import { sanitizeVisitSource, parseUserAgent, type VisitSource } from "@/lib/visit-source";
 import { auth } from "@/lib/auth";
-import { generateOrderNumber } from "@/lib/helpers";
+import { generateOrderNumber, hasFullName, FULL_NAME_ERROR } from "@/lib/helpers";
 import { sendOrderConfirmationEmail, sendAdminNewOrderEmail } from "@/lib/email";
 
 interface OrderItem {
@@ -45,6 +45,10 @@ export async function createOrder(data: CreateOrderData) {
     // Guest checkout requires email
     if (!userId && !data.guestEmail) {
         return { success: false, error: "E-posta adresi gereklidir." };
+    }
+
+    if (!hasFullName(data.shippingAddress?.name)) {
+        return { success: false, error: FULL_NAME_ERROR };
     }
 
     try {
