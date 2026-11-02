@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatPrice, calculatePrice } from "@/lib/helpers";
 import { useMemo } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck } from "lucide-react";
 
 interface CartClientProps {
     bankTransferDiscountRate?: number;
@@ -253,7 +253,8 @@ export function CartClient({ bankTransferDiscountRate = 0, minOrderLimit = 0 }: 
                                         Alıcı Ödemeli
                                     </span>
                                 </div>
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="flex items-start gap-1.5 mt-2 p-2 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 text-xs font-medium text-blue-700 dark:text-blue-300">
+                                    <Truck className="h-4 w-4 shrink-0" />
                                     Kargo ücreti toplama dahil değildir, teslimatta kargo firmasına ödenir.
                                 </p>
                             </div>
