@@ -64,13 +64,13 @@ export function LoginForm({ logoUrl, siteName }: LoginFormProps) {
                 {/* Header Section */}
                 <div className="bg-gradient-to-r from-[#009AD0] to-[#007EA8] px-8 py-10 text-center">
                     {/* Logo */}
-                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transform hover:scale-105 transition-transform overflow-hidden relative">
+                    <div className="w-64 max-w-full h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transform hover:scale-105 transition-transform overflow-hidden relative">
                         {logoUrl ? (
                             <Image
                                 src={logoUrl}
                                 alt={siteName || "Logo"}
                                 fill
-                                className="object-contain p-2"
+                                className="object-contain px-4 py-3"
                             />
                         ) : (
                             <span className="text-[#009AD0] font-black text-3xl">

@@ -108,16 +108,16 @@ export function RegisterForm({ logoUrl, siteName }: RegisterFormProps) {
     return (
         <Card className="w-full max-w-lg">
             <CardHeader className="text-center">
-                <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden relative shadow-md">
+                <div className="w-64 max-w-full h-20 bg-white border rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden relative shadow-md">
                     {logoUrl ? (
                         <Image
                             src={logoUrl}
                             alt={siteName || "Logo"}
                             fill
-                            className="object-contain p-2 bg-white"
+                            className="object-contain px-4 py-3"
                         />
                     ) : (
-                        <span className="text-white font-bold text-2xl">
+                        <span className="text-[#009AD0] font-bold text-2xl">
                             {(siteName || "M").charAt(0).toUpperCase()}
                         </span>
                     )}

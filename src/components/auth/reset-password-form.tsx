@@ -106,13 +106,13 @@ export function ResetPasswordForm({ logoUrl, siteName }: ResetPasswordFormProps)
             <div className="backdrop-blur-xl bg-white/80 dark:bg-gray-800/80 rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700/50 overflow-hidden">
                 {/* Header Section */}
                 <div className="bg-gradient-to-r from-[#009AD0] to-[#007EA8] px-8 py-10 text-center">
-                    <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden relative">
+                    <div className="w-64 max-w-full h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg overflow-hidden relative">
                         {logoUrl ? (
                             <Image
                                 src={logoUrl}
                                 alt={siteName || "Logo"}
                                 fill
-                                className="object-contain p-2"
+                                className="object-contain px-4 py-3"
                             />
                         ) : (
                             <span className="text-[#009AD0] font-black text-3xl">
