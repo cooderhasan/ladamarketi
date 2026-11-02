@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { productSchema } from "@/lib/validations";
-import { generateSlug } from "@/lib/helpers";
+import { generateSlug, generateSKU, generateBarcode } from "@/lib/helpers";
 import { syncProductsToTrendyol } from "../integrations/trendyol/actions";
 import { syncProductsToN11 } from "../integrations/n11/actions";
 import { syncProductsToHepsiburada } from "../integrations/hepsiburada/actions";
@@ -485,4 +485,74 @@ export async function searchProductsForBundle(query: string, excludeProductId?: 
         salePrice: p.salePrice ? Number(p.salePrice) : null,
         image: p.images[0] || null,
     }));
+}
+
+/**
+ * Ürünü kopyalar (benzer ürünleri hızlı eklemek için).
+ * Kopyalanan: ad (+ " (Kopya)"), açıklama, fiyatlar, KDV, ölçüler, görseller, kategoriler, marka, menşei, varyant yapısı, paket içeriği.
+ * Stok kodu ve barkod yeni üretilir (benzersiz olmalı); GTIN/MPN kopyalanmaz, stok 0, öne çıkan / yeni / çok satan işaretleri kapalı.
+ * Kopya PASİF oluşur: kullanıcı adı, görseli ve stoğu düzenleyip aktif eder; yarım ürün mağazada görünmez.
+ */
+export async function duplicateProduct(productId: string): Promise<{ success: boolean; id?: string; error?: string }> {
+    const session = await auth();
+    if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+        return { success: false, error: "Yetkisiz işlem." };
+    }
+    try {
+        const src: any = await prisma.product.findUnique({
+            where: { id: productId },
+            include: { categories: { select: { id: true } }, variants: true, bundleItems: true },
+        });
+        if (!src) return { success: false, error: "Ürün bulunamadı." };
+
+        const name = `${src.name} (Kopya)`;
+        const baseSlug = generateSlug(name);
+        let slug = baseSlug;
+        for (let i = 1; await prisma.product.findFirst({ where: { slug }, select: { id: true } }); i++) slug = `${baseSlug}-${i}`;
+
+        let sku = generateSKU();
+        while (await prisma.product.findFirst({ where: { sku }, select: { id: true } })) sku = generateSKU();
+
+        const {
+            id: _id, slug: _slug, sku: _sku, barcode: _barcode, gtin: _gtin, mpn: _mpn, createdAt: _c, updatedAt: _u,
+            categories, variants, bundleItems, name: _name, stock: _stock,
+            isActive: _a, isFeatured: _f, isNew: _n, isBestSeller: _b,
+            ...rest
+        } = src;
+
+        const created = await prisma.product.create({
+            data: {
+                ...rest,
+                name,
+                slug,
+                sku,
+                barcode: generateBarcode(),
+                stock: 0,
+                isActive: false,
+                isFeatured: false,
+                isNew: false,
+                isBestSeller: false,
+                categories: { connect: (categories || []).map((c: any) => ({ id: c.id })) },
+                variants: {
+                    create: (variants || []).map((v: any) => ({
+                        color: v.color,
+                        size: v.size,
+                        priceAdjustment: v.priceAdjustment,
+                        isActive: v.isActive,
+                        stock: 0,
+                    })),
+                },
+                bundleItems: {
+                    create: (bundleItems || []).map((b: any) => ({ childProductId: b.childProductId, quantity: b.quantity })),
+                },
+            } as any,
+            select: { id: true },
+        });
+
+        revalidatePath("/admin/products");
+        return { success: true, id: created.id };
+    } catch (e: any) {
+        console.error("duplicateProduct error:", e);
+        return { success: false, error: "Ürün kopyalanamadı: " + (e?.message || "") };
+    }
 }

@@ -28,10 +28,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash, Star, Sparkles, TrendingUp, Search, Upload, Download, ExternalLink, Package } from "lucide-react";
+import { Edit, MoreHorizontal, Trash, Star, Sparkles, TrendingUp, Search, Upload, Download, ExternalLink, Package, Copy } from "lucide-react";
 import { formatPrice } from "@/lib/helpers";
 import { deleteProduct, toggleProductStatus } from "@/app/admin/(protected)/products/actions";
 import { toast } from "sonner";
+import { useDuplicateProduct } from "@/components/admin/duplicate-product-button";
 
 interface Product {
     id: string;
@@ -99,6 +100,7 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
 
     const [products, setProducts] = useState(initialProducts);
     const [loading, setLoading] = useState<string | null>(null);
+    const duplicate = useDuplicateProduct();
 
     // Sync local product state when props change
     useEffect(() => {
@@ -200,6 +202,10 @@ export function ProductsTable({ products: initialProducts, brands, categories = 
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Görüntüle
                     </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled={duplicate.busy} onClick={() => duplicate.run(product.id)}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Kopyala
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={() =>
