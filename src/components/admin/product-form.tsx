@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/select";
 import { CategoryTreeSelect } from "@/components/ui/category-tree-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createProduct, updateProduct, syncProductToMarketplaces, searchProductsForBundle } from "@/app/admin/(protected)/products/actions";
+import { createProduct, updateProduct, searchProductsForBundle } from "@/app/admin/(protected)/products/actions";
 import { generateSlug, generateSKU, generateBarcode } from "@/lib/helpers";
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package, RefreshCw, Brain, Search } from "lucide-react";
+import { Plus, X, ImageIcon, Trash2, Loader2, RefreshCcw, Package, Brain, Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { calculateDesi } from "@/lib/shipping";
@@ -252,29 +252,6 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                 ? { ...bi, quantity }
                 : bi
         ));
-    };
-
-    const handleMarketplaceSync = async () => {
-        if (!product?.id) {
-            toast.error("Önce ürünü kaydetmelisiniz.");
-            return;
-        }
-
-        if (!window.confirm("Bu ürünün fiyat ve stok bilgileri aktif pazar yerlerine gönderilecek. Onaylıyor musunuz?")) return;
-
-        setLoading(true);
-        try {
-            const result = await syncProductToMarketplaces(product.id);
-            if (result.success) {
-                toast.success(result.message);
-            } else {
-                toast.error(result.message);
-            }
-        } catch (error) {
-            toast.error("Bir hata oluştu.");
-        } finally {
-            setLoading(false);
-        }
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -529,7 +506,8 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                             <CardTitle>Fiyatlandırma & Stok</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            {/* Liste Fiyatı, İndirimli Fiyat, KDV - tek satır (pazaryeri fiyatları kaldırıldı: Lada pazaryerinde satış yapmıyor) */}
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                 <div className="space-y-2">
                                     <Label htmlFor="listPrice">Liste Fiyatı (₺) *</Label>
                                     <Input
@@ -555,50 +533,12 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                     <p className="text-[10px] text-gray-500">Girilirse bu fiyat geçerli olur, liste fiyatı üstü çizili görünür.</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="trendyolPrice" className="text-orange-600">Trendyol Fiyatı (₺)</Label>
-                                    <Input
-                                        id="trendyolPrice"
-                                        type="number"
-                                        step="0.01"
-                                        value={formData.trendyolPrice}
-                                        onChange={(e) => handleChange("trendyolPrice", e.target.value)}
-                                        placeholder="Varsayılan: Liste Fiyatı"
-                                        className="border-orange-200 focus:border-orange-500"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="n11Price" className="text-purple-600">N11 Fiyatı (₺)</Label>
-                                    <Input
-                                        id="n11Price"
-                                        type="number"
-                                        step="0.01"
-                                        value={formData.n11Price}
-                                        onChange={(e) => handleChange("n11Price", e.target.value)}
-                                        placeholder="Varsayılan: Liste Fiyatı"
-                                        className="border-purple-200 focus:border-purple-500"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="hepsiburadaPrice" className="text-orange-600">Hepsiburada Fiyatı (₺)</Label>
-                                    <Input
-                                        id="hepsiburadaPrice"
-                                        type="number"
-                                        step="0.01"
-                                        value={formData.hepsiburadaPrice}
-                                        onChange={(e) => handleChange("hepsiburadaPrice", e.target.value)}
-                                        placeholder="Varsayılan: Liste Fiyatı"
-                                        className="border-orange-200 focus:border-orange-500"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
                                     <Label htmlFor="vatRate">KDV Oranı *</Label>
                                     <Select
                                         value={formData.vatRate}
                                         onValueChange={(val) => handleChange("vatRate", val)}
                                     >
-                                        <SelectTrigger>
+                                        <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -609,17 +549,39 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                 </div>
                             </div>
 
+                            {/* Google Shopping: seçim + fiyat tek yerde (önceden Ayarlar sekmesindeydi) */}
+                            <div className="flex flex-col gap-3 rounded-lg border px-3 py-2.5 bg-gray-50/50 dark:bg-gray-900/30 sm:flex-row sm:items-center">
+                                <label className="flex items-center gap-2 cursor-pointer select-none shrink-0">
+                                    <Checkbox
+                                        checked={Boolean(formData.isGoogleActive)}
+                                        onCheckedChange={(c) => handleChange("isGoogleActive", c === true)}
+                                    />
+                                    <span className="text-sm font-semibold text-blue-700">Google Shopping</span>
+                                    <span className="text-[11px] text-gray-500">(Merchant Center feed'ine ekle)</span>
+                                </label>
+                                <Input
+                                    id="googlePrice"
+                                    type="number"
+                                    step="0.01"
+                                    value={formData.googlePrice}
+                                    onChange={(e) => handleChange("googlePrice", e.target.value)}
+                                    placeholder="Google fiyatı (boş = liste fiyatı)"
+                                    className="h-8 text-sm sm:max-w-xs sm:ml-auto"
+                                />
+                            </div>
+
                             <hr />
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
+                            {/* Kodlar ve stok: iki satır, üçer alan */}
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                 <div className="space-y-2 relative">
                                     <Label htmlFor="sku">Stok Kodu (SKU)</Label>
                                     <Input
                                         id="sku"
                                         value={formData.sku}
                                         onChange={(e) => handleChange("sku", e.target.value)}
-                                        placeholder="PRD-001"
+                                        placeholder="LDM-0000000"
+                                        className="pr-11"
                                     />
                                     <Button
                                         type="button"
@@ -639,7 +601,8 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                         id="barcode"
                                         value={formData.barcode}
                                         onChange={(e) => handleChange("barcode", e.target.value)}
-                                        placeholder="869..."
+                                        placeholder="460..."
+                                        className="pr-11"
                                     />
                                     <Button
                                         type="button"
@@ -651,11 +614,18 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                     >
                                         <RefreshCcw className="h-4 w-4" />
                                     </Button>
-
                                 </div>
-                            </div>
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div className="space-y-2">
+                                    <Label htmlFor="origin">Menşei</Label>
+                                    <Input
+                                        id="origin"
+                                        value={formData.origin}
+                                        onChange={(e) => handleChange("origin", e.target.value)}
+                                        placeholder="Rusya"
+                                    />
+                                </div>
+
                                 <div className="space-y-2">
                                     <Label htmlFor="stock">Stok Adedi</Label>
                                     <Input
@@ -674,7 +644,7 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                         onChange={(e) => handleChange("criticalStock", e.target.value)}
                                         placeholder="10"
                                     />
-                                    <p className="text-xs text-gray-500">Stok bu seviyeye düştüğünde uyarı gösterilir</p>
+                                    <p className="text-xs text-gray-500">Stok bu seviyeye düşünce uyarı verilir</p>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="minQuantity">Min. Sipariş Adedi</Label>
@@ -685,16 +655,6 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                         onChange={(e) => handleChange("minQuantity", e.target.value)}
                                     />
                                 </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="origin">Menşei</Label>
-                                <Input
-                                    id="origin"
-                                    value={formData.origin}
-                                    onChange={(e) => handleChange("origin", e.target.value)}
-                                    placeholder="Türkiye"
-                                />
                             </div>
                         </CardContent>
                     </Card>
@@ -707,12 +667,11 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                                <p className="text-sm text-blue-800 dark:text-blue-200">
-                                    <strong>Bilgi:</strong> Desi = (En × Boy × Yükseklik) / 3000. Kargo firmaları ağırlık ve desi değerlerinden büyük olanı baz alır.
-                                </p>
-                            </div>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <p className="text-xs text-gray-500">
+                                Desi = (En × Boy × Yükseklik) / 3000. Kargo firmaları ağırlık ve desiden büyük olanı baz alır. Desi boş bırakılırsa ölçülerden otomatik hesaplanır.
+                            </p>
+                            {/* Ağırlık, desi ve ölçüler tek satır */}
+                            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
                                 <div className="space-y-2">
                                     <Label htmlFor="weight">Ağırlık (kg)</Label>
                                     <Input
@@ -736,13 +695,7 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                         onChange={(e) => handleChange("desi", e.target.value)}
                                         placeholder={autoDesi > 0 ? `Otomatik: ${autoDesi}` : "Ör: 3.00"}
                                     />
-                                    <p className="text-xs text-gray-500">Boş bırakılırsa boyutlardan otomatik hesaplanır.</p>
                                 </div>
-                            </div>
-
-                            <hr />
-
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                                 <div className="space-y-2">
                                     <Label htmlFor="width">Genişlik (cm)</Label>
                                     <Input
@@ -782,23 +735,13 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                             </div>
 
                             {(autoDesi > 0 || Number(formData.weight) > 0) && (
-                                <div className="bg-gray-50 dark:bg-gray-800 border rounded-lg p-4 mt-2">
-                                    <div className="grid grid-cols-3 gap-4 text-sm">
-                                        <div>
-                                            <span className="text-gray-500">Hacimsel Desi:</span>
-                                            <p className="font-semibold">{autoDesi > 0 ? autoDesi : "-"}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500">Ağırlık:</span>
-                                            <p className="font-semibold">{Number(formData.weight) > 0 ? `${formData.weight} kg` : "-"}</p>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-500">Efektif Desi:</span>
-                                            <p className="font-bold text-blue-600">
-                                                {Math.max(autoDesi, Number(formData.weight) || 0, Number(formData.desi) || 0).toFixed(2)}
-                                            </p>
-                                        </div>
-                                    </div>
+                                <div className="flex flex-wrap gap-x-6 gap-y-1 bg-gray-50 dark:bg-gray-800 border rounded-lg px-4 py-2 text-sm">
+                                    <span><span className="text-gray-500">Hacimsel Desi:</span> <b>{autoDesi > 0 ? autoDesi : "-"}</b></span>
+                                    <span><span className="text-gray-500">Ağırlık:</span> <b>{Number(formData.weight) > 0 ? `${formData.weight} kg` : "-"}</b></span>
+                                    <span>
+                                        <span className="text-gray-500">Efektif Desi:</span>{" "}
+                                        <b className="text-blue-600">{Math.max(autoDesi, Number(formData.weight) || 0, Number(formData.desi) || 0).toFixed(2)}</b>
+                                    </span>
                                 </div>
                             )}
                         </CardContent>
@@ -1157,129 +1100,26 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                             <CardTitle>Görünürlük & Etiketler</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-white dark:bg-gray-800">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base">Aktif Durum</Label>
-                                    <p className="text-sm text-muted-foreground">Ürün mağazada görünür olsun mu?</p>
-                                </div>
-                                <Checkbox
-                                    checked={formData.isActive}
-                                    onCheckedChange={(c) => handleChange("isActive", c)}
-                                />
-                            </div>
-
-                            <hr />
-                            <h3 className="font-semibold text-gray-900 dark:text-white">Pazar Yeri Görünürlüğü</h3>
-
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-orange-50 dark:bg-orange-900/10">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base text-orange-700 dark:text-orange-300">Trendyol Satış</Label>
-                                    <p className="text-sm text-muted-foreground">Bu ürünü Trendyol'a gönder?</p>
-                                </div>
-                                <Checkbox
-                                    checked={formData.isTrendyolActive}
-                                    onCheckedChange={(c) => handleChange("isTrendyolActive", c)}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-purple-50 dark:bg-purple-900/10">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base text-purple-700 dark:text-purple-300">N11 Satış</Label>
-                                    <p className="text-sm text-muted-foreground">Bu ürünü N11'e gönder?</p>
-                                </div>
-                                <Checkbox
-                                    checked={formData.isN11Active}
-                                    onCheckedChange={(c) => handleChange("isN11Active", c)}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-orange-50 dark:bg-orange-900/10">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base text-orange-700 dark:text-orange-300">Hepsiburada Satış</Label>
-                                    <p className="text-sm text-muted-foreground">Bu ürünü Hepsiburada'ya gönder?</p>
-                                </div>
-                                <Checkbox
-                                    checked={formData.isHepsiburadaActive}
-                                    onCheckedChange={(c) => handleChange("isHepsiburadaActive", c)}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/10">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base text-blue-700 dark:text-blue-300">🛒 Google Shopping Feed</Label>
-                                    <p className="text-sm text-muted-foreground">Bu ürünü Google Merchant Center feed'ine ekle?</p>
-                                </div>
-                                <Checkbox
-                                    checked={formData.isGoogleActive}
-                                    onCheckedChange={(c) => handleChange("isGoogleActive", c)}
-                                />
-                            </div>
-
-                            {formData.isGoogleActive && (
-                                <div className="p-4 border border-blue-200 rounded-lg bg-blue-50/50 space-y-3">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="googlePrice" className="text-blue-700">Google Fiyatı (₺) <span className="font-normal text-gray-500">— Boş bırakılırsa liste fiyatı kullanılır</span></Label>
-                                        <Input
-                                            id="googlePrice"
-                                            type="number"
-                                            step="0.01"
-                                            value={formData.googlePrice}
-                                            onChange={(e) => handleChange("googlePrice", e.target.value)}
-                                            placeholder="Varsayılan: Liste Fiyatı"
-                                            className="border-blue-200 focus:border-blue-500"
+                            {/* Aktif + etiketler tek satırda (pazaryeri seçimleri kaldırıldı; Google Shopping Fiyat & Stok sekmesinde) */}
+                            <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+                                {([
+                                    { key: "isActive", label: "Aktif", hint: "Mağazada görünür" },
+                                    { key: "isFeatured", label: "Öne Çıkan", hint: "Ana sayfa vitrini" },
+                                    { key: "isNew", label: "Yeni Ürün", hint: "\"Yeni\" etiketi" },
+                                    { key: "isBestSeller", label: "Çok Satan", hint: "\"Çok Satan\" etiketi" },
+                                ] as const).map((opt) => (
+                                    <label key={opt.key} className="flex items-start gap-2 p-3 border rounded-lg bg-white dark:bg-gray-800 cursor-pointer select-none">
+                                        <Checkbox
+                                            className="mt-0.5"
+                                            checked={Boolean((formData as any)[opt.key])}
+                                            onCheckedChange={(c) => handleChange(opt.key, c === true)}
                                         />
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/10 mt-4">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base text-blue-700 dark:text-blue-300">Pazar Yeri Senkronizasyonu</Label>
-                                    <p className="text-sm text-muted-foreground">Fiyat ve stok bilgisini şimdi pazar yerlerine gönder.</p>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleMarketplaceSync}
-                                    disabled={loading || !product?.id}
-                                    className="border-blue-200 hover:bg-blue-100 hover:text-blue-700 dark:border-blue-800 dark:hover:bg-blue-900"
-                                >
-                                    <RefreshCw className="mr-2 h-4 w-4" />
-                                    Şimdi Güncelle
-                                </Button>
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-white dark:bg-gray-800">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base">Öne Çıkan</Label>
-                                    <p className="text-sm text-muted-foreground">Ana sayfada vitrine eklensin mi?</p>
-                                </div>
-                                <Checkbox
-                                    checked={formData.isFeatured}
-                                    onCheckedChange={(c) => handleChange("isFeatured", c)}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-white dark:bg-gray-800">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base">Yeni Ürün</Label>
-                                    <p className="text-sm text-muted-foreground">"Yeni" etiketi gösterilsin mi?</p>
-                                </div>
-                                <Checkbox
-                                    checked={formData.isNew}
-                                    onCheckedChange={(c) => handleChange("isNew", c)}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 border rounded-lg bg-white dark:bg-gray-800">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base">Çok Satan</Label>
-                                    <p className="text-sm text-muted-foreground">"Çok Satan" etiketi gösterilsin mi?</p>
-                                </div>
-                                <Checkbox
-                                    checked={formData.isBestSeller}
-                                    onCheckedChange={(c) => handleChange("isBestSeller", c)}
-                                />
+                                        <span className="leading-tight">
+                                            <span className="block text-sm font-medium">{opt.label}</span>
+                                            <span className="block text-[11px] text-muted-foreground">{opt.hint}</span>
+                                        </span>
+                                    </label>
+                                ))}
                             </div>
                         </CardContent>
                     </Card>
