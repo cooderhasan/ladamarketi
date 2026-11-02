@@ -150,7 +150,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     }
 
     const baseUrl = SITE_URL;
-    const absoluteImages = product.images?.map(absoluteUrl) || [];
+    const absoluteImages = (product.images || []).filter((img) => img && img.trim()).map(absoluteUrl);
     // Şemadaki fiyat sayfada ziyaretçiye gösterilenle aynı olmalı: indirimli fiyat liste fiyatından düşükse o
     // (önceden hep liste fiyatı yazılıyordu; indirimli üründe Google'da fiyat uyuşmazlığı oluyordu)
     const listPrice = Number(product.listPrice);
@@ -238,7 +238,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
     return (
         <>
-            <JsonLd id="product-jsonld" data={schema} />
+            {/* Google satıcı girişleri görselsiz ürünü kritik hata sayıyor ("image" alanı eksik): görsel yoksa ürün şeması
+                gönderilmez, görsel eklenince kendiliğinden gelir. Yol satırı şeması her zaman gönderilir. */}
+            {absoluteImages.length > 0 && <JsonLd id="product-jsonld" data={schema} />}
             <JsonLd id="breadcrumb-jsonld" data={breadcrumbSchema} />
             <ProductDetail
                 product={serializedProduct}
