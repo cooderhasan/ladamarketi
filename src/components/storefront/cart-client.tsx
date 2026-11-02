@@ -245,6 +245,18 @@ export function CartClient({ bankTransferDiscountRate = 0, minOrderLimit = 0 }: 
                                 <span className="text-gray-500">KDV (fiyatlara dahil)</span>
                                 <span>{formatPrice(summary.vatAmount)}</span>
                             </div>
+                            {/* Kargo her zaman alıcı ödemeli: müşteri bunu ödeme adımında ilk kez görünce tepki veriyordu */}
+                            <div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-500">Kargo</span>
+                                    <span className="uppercase text-xs font-bold text-gray-900 dark:text-gray-200">
+                                        Alıcı Ödemeli
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Kargo ücreti toplama dahil değildir, teslimatta kargo firmasına ödenir.
+                                </p>
+                            </div>
                             <Separator />
                             <div className="flex justify-between text-lg font-bold">
                                 <span>Toplam</span>
