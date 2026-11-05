@@ -9,8 +9,9 @@ import {
     cancelYKShipment,
     queryYKShipment,
     normalizePhone,
-    type YKCredentials,
 } from "@/services/yurtici/api";
+import { recordOrdersShipped } from "@/services/faturika/invoicing";
+import { getYKConfig, syncActiveYKOrders } from "@/services/yurtici/sync";
 
 export async function updateOrderStatus(
     orderId: string,
@@ -32,6 +33,8 @@ export async function updateOrderStatus(
             where: { id: orderId },
             data: { status },
         });
+
+        if (status === "SHIPPED") await recordOrdersShipped([orderId]);
 
         await prisma.adminLog.create({
             data: {
@@ -127,6 +130,8 @@ export async function bulkUpdateOrderStatus(
             data: { status },
         });
 
+        if (status === "SHIPPED") await recordOrdersShipped(orderIds);
+
         // Log the bulk action (simplified log)
         await prisma.adminLog.create({
             data: {
@@ -147,25 +152,6 @@ export async function bulkUpdateOrderStatus(
 }
 
 // ==================== YURTİÇİ KARGO ACTIONS ====================
-
-/**
- * YK DB konfigürasyonunu getirir.
- * Aktif konfigürasyon yoksa null döner.
- */
-async function getYKConfig(): Promise<YKCredentials | null> {
-    const config = await prisma.yurticiKargoConfig.findFirst({
-        where: { isActive: true },
-    });
-    if (!config) return null;
-    return {
-        username: config.username,
-        password: config.password,
-        customerCode: config.customerCode,
-        unitCode: config.unitCode,
-        demandNo: config.demandNo,
-        isTestMode: config.isTestMode,
-    };
-}
 
 /**
  * Siparişi YK sistemine gönderir.
@@ -377,6 +363,8 @@ export async function queryYKOrder(orderId: string) {
             },
         });
 
+        if (newOrderStatus === "SHIPPED") await recordOrdersShipped([orderId]);
+
         revalidatePath("/admin/orders");
         return {
             success: result.success,
@@ -403,96 +391,12 @@ export async function syncAllYKOrders() {
             throw new Error("Unauthorized");
         }
 
-        const creds = await getYKConfig();
-        if (!creds) return { success: false, error: "YK entegrasyonu yapılandırılmamış." };
-
-        // Son 14 günü hesapla
-        const fourteenDaysAgo = new Date();
-        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
-
-        // Güncellenecek siparişleri bul: YK anahtarı olan ama henüz teslim/iptal edilmemişler
-        // Performans için sadece son 14 günün siparişlerine bakıyoruz.
-        const activeOrders = await prisma.order.findMany({
-            where: {
-                ykCargoKey: { not: null },
-                status: {
-                    notIn: ["DELIVERED", "CANCELLED"]
-                },
-                createdAt: {
-                    gte: fourteenDaysAgo
-                }
-            },
-            select: { id: true, ykCargoKey: true, orderNumber: true, ykSyncedAt: true }
-        });
-
-        if (activeOrders.length === 0) {
-            return { success: true, count: 0, message: "Senkronize edilecek aktif kargo bulunamadı." };
-        }
-
-        let updatedCount = 0;
-        let deliveredCount = 0;
-        let errorCount = 0;
-
-        // Performans ve YK limitleri için seri (sequential) işleme
-        for (const order of activeOrders) {
-            try {
-                // Her sipariş arasında kısa bir bekleme (opsiyonel, YK'nın 1dk kısıtlaması aynı key içindir)
-                // Ama sunucuyu yormamak adına ardışık yapıyoruz.
-
-                // ykCargoKey null check (TS için)
-                if (!order.ykCargoKey) continue;
-
-                // Son sorgulama 1 dakikadan kısaysa atla (YK hatası almamak için)
-                if (order.ykSyncedAt) {
-                    const secondsSinceSync = (Date.now() - new Date(order.ykSyncedAt).getTime()) / 1000;
-                    if (secondsSinceSync < 65) continue;
-                }
-
-                const result = await queryYKShipment(order.ykCargoKey, creds);
-                
-                if (result.success) {
-                    let newOrderStatus: any = undefined;
-                    if (result.operationStatus === "IND") {
-                        newOrderStatus = "SHIPPED";
-                    } else if (result.operationStatus === "DLV") {
-                        newOrderStatus = "DELIVERED";
-                        deliveredCount++;
-                    } else if (result.operationStatus === "CNL" || result.operationStatus === "ISC" || result.operationStatus === "BI") {
-                        newOrderStatus = "CANCELLED";
-                    }
-
-                    await prisma.order.update({
-                        where: { id: order.id },
-                        data: {
-                            ykStatus: result.operationStatus ?? null,
-                            ykStatusMessage: result.operationMessage ?? null,
-                            ykDocId: result.docId ?? null,
-                            ykSyncedAt: new Date(),
-                            ...(result.trackingUrl ? { trackingUrl: result.trackingUrl } : {}),
-                            ...(newOrderStatus ? { status: newOrderStatus } : {}),
-                        }
-                    });
-                    updatedCount++;
-                } else {
-                    errorCount++;
-                }
-            } catch (err) {
-                console.error(`[YK Bulk Sync] Error on order ${order.orderNumber}:`, err);
-                errorCount++;
-            }
-        }
-
-        revalidatePath("/admin/orders");
-        return { 
-            success: true, 
-            count: updatedCount, 
-            delivered: deliveredCount, 
-            errors: errorCount,
-            message: `${updatedCount} sipariş güncellendi. (${deliveredCount} teslim edildi)` 
-        };
+        const result = await syncActiveYKOrders();
+        if (result.success) revalidatePath("/admin/orders");
+        return result;
     } catch (error) {
         console.error("[YK] syncAllYKOrders error:", error);
-        return { success: false, error: error instanceof Error ? error.message : "Toplu senkronizasyon başarısız." };
+        return { success: false as const, error: error instanceof Error ? error.message : "Toplu senkronizasyon başarısız." };
     }
 }
 

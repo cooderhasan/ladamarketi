@@ -12,6 +12,8 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CargoSettings } from "@/components/admin/cargo-settings";
+import { FaturikaSettingsCard } from "@/components/admin/faturika-settings-card";
+import type { FaturikaCarriers } from "@/services/faturika/carriers";
 import { Switch } from "@/components/ui/switch";
 
 interface CargoCompany {
@@ -24,9 +26,11 @@ interface CargoCompany {
 interface SettingsFormProps {
     initialSettings: Record<string, string>;
     cargoCompanies: CargoCompany[];
+    faturikaCarriers: FaturikaCarriers;
+    faturikaCarriersSaved: boolean;
 }
 
-export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormProps) {
+export function SettingsForm({ initialSettings, cargoCompanies, faturikaCarriers, faturikaCarriersSaved }: SettingsFormProps) {
     const [loading, setLoading] = useState(false);
     const [settings, setSettings] = useState(initialSettings);
     const [mounted, setMounted] = useState(false);
@@ -69,6 +73,7 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                     <TabsTrigger value="social" className="px-4 py-2">Sosyal Medya</TabsTrigger>
                     <TabsTrigger value="scripts" className="px-4 py-2">Script & Analitik</TabsTrigger>
                     <TabsTrigger value="cargo" className="px-4 py-2">Kargo & Teslimat</TabsTrigger>
+                    <TabsTrigger value="invoice" className="px-4 py-2">e-Fatura</TabsTrigger>
                     <TabsTrigger value="xml" className="px-4 py-2">Entegrasyonlar (XML)</TabsTrigger>
                 </TabsList>
 
@@ -618,6 +623,15 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                             <CargoSettings initialCompanies={cargoCompanies} />
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                {/* Independent e-Fatura Tab - kendi kaydetme düğmesi var */}
+                <TabsContent value="invoice" className="space-y-6">
+                    <FaturikaSettingsCard
+                        cargoNames={cargoCompanies.map((company) => company.name)}
+                        initialCarriers={faturikaCarriers}
+                        carriersSaved={faturikaCarriersSaved}
+                    />
                 </TabsContent>
             </Tabs>
 

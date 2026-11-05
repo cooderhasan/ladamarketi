@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 import { SettingsForm } from "@/components/admin/settings-form";
+import { knownCarrierFor, type FaturikaCarriers } from "@/services/faturika/carriers";
+import { getFaturikaSettings } from "@/services/faturika/invoicing";
 
 
 export default async function SettingsPage() {
@@ -10,6 +12,16 @@ export default async function SettingsPage() {
     const cargoCompanies = await prisma.cargoCompany.findMany({
         orderBy: { name: "asc" },
     });
+
+    const faturikaSettings = await getFaturikaSettings();
+    const savedCarriers = faturikaSettings.carriers;
+
+    // Kaydedilmiş kargo bilgisi yoksa bilinen firmaların unvan ve VKN'si önerilir
+    const faturikaCarriers: FaturikaCarriers = {};
+    for (const { name } of cargoCompanies) {
+        const carrier = savedCarriers ? savedCarriers[name] : knownCarrierFor(name);
+        if (carrier) faturikaCarriers[name] = carrier;
+    }
 
     const defaults = {
         siteName: "",
@@ -66,7 +78,12 @@ export default async function SettingsPage() {
                 </p>
             </div>
 
-            <SettingsForm initialSettings={settings} cargoCompanies={cargoCompanies} />
+            <SettingsForm
+                initialSettings={settings}
+                cargoCompanies={cargoCompanies}
+                faturikaCarriers={faturikaCarriers}
+                faturikaCarriersSaved={Boolean(savedCarriers)}
+            />
         </div>
     );
 }
