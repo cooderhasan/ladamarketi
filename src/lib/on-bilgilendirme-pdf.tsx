@@ -211,6 +211,9 @@ export interface OnBilgilendirmeProps {
     totalAmount: number;
     shippingCost?: number;
     paymentMethod: 'BANK_TRANSFER' | 'CREDIT_CARD' | 'CURRENT_ACCOUNT';
+    /** Karta yansıyan vade farkı; totalAmount bunu içermez */
+    installmentFee?: number;
+    installmentCount?: number;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -222,6 +225,7 @@ const OnBilgilendirmeDocument: React.FC<OnBilgilendirmeProps> = (props) => {
         customerAddress, customerCity, customerDistrict,
         customerPhone, customerEmail,
         items, totalAmount, shippingCost = 0, paymentMethod,
+        installmentFee = 0, installmentCount,
     } = props;
 
     const fullAddress = [customerAddress, customerDistrict, customerCity]
@@ -330,6 +334,17 @@ const OnBilgilendirmeDocument: React.FC<OnBilgilendirmeProps> = (props) => {
                     </View>
                 )}
 
+                {installmentFee > 0 ? (
+                    <View style={styles.tableRow}>
+                        <Text style={styles.col1}>
+                            {installmentCount && installmentCount > 1 ? `Vade Farkı (${installmentCount} taksit)` : 'Vade Farkı'}
+                        </Text>
+                        <Text style={styles.col2}>1</Text>
+                        <Text style={styles.col3}>{formatMoney(installmentFee)}</Text>
+                        <Text style={styles.col4}>{formatMoney(installmentFee)}</Text>
+                    </View>
+                ) : null}
+
                 <View style={[styles.totalArea, { marginTop: 6 }]}>
                     <Text style={styles.totalLabel}>Ödeme Şekli:</Text>
                     <Text style={[styles.totalValue, { fontWeight: 'normal' }]}>
@@ -338,7 +353,7 @@ const OnBilgilendirmeDocument: React.FC<OnBilgilendirmeProps> = (props) => {
                 </View>
                 <View style={[styles.totalArea, { marginTop: 2 }]}>
                     <Text style={styles.totalLabel}>TOPLAM TUTAR:</Text>
-                    <Text style={styles.totalValue}>{formatMoney(totalAmount)}</Text>
+                    <Text style={styles.totalValue}>{formatMoney(totalAmount + installmentFee)}</Text>
                 </View>
 
                 {/* ── 5. Teslimat ── */}

@@ -1,25 +1,32 @@
 import { Resend } from 'resend';
 import { OrderConfirmationEmail } from '@/emails/order-confirmation';
 import { AdminNewOrderEmail } from '@/emails/admin-new-order';
+import { ORDER_BRAND } from '@/emails/order-email-shared';
 import { ShippingNotificationEmail } from '@/emails/shipping-notification';
 import { AbandonedCartNotificationEmail } from '@/emails/abandoned-cart-notification';
 import { generateOnBilgilendirmePdf } from '@/lib/on-bilgilendirme-pdf';
 import { generateSatisSozlesmesiPdf } from '@/lib/satis-sozlesmesi-pdf';
 import { generateIptalIadePdf } from '@/lib/iptal-iade-pdf';
+import { getSiteSettings } from '@/lib/settings';
+import { SITE_URL } from '@/lib/site-url';
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789");
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "ladamarketi@gmail.com";
 
+interface OrderEmailItemProps {
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    lineTotal: number;
+    variantInfo?: string;
+}
+
 interface SendOrderConfirmationProps {
     to: string;
     orderNumber: string;
+    orderId: string;
     customerName: string;
-    items: {
-        productName: string;
-        quantity: number;
-        unitPrice: number;
-        lineTotal: number;
-    }[];
+    items: OrderEmailItemProps[];
     totalAmount: number;
     paymentMethod: "BANK_TRANSFER" | "CREDIT_CARD" | "CURRENT_ACCOUNT";
     bankInfo?: {
@@ -36,6 +43,9 @@ interface SendOrderConfirmationProps {
     };
     shippingCost?: number;
     cargoCompany?: string;
+    /** Karta yansıyan vade farkı; totalAmount bunu içermez */
+    installmentFee?: number;
+    installmentCount?: number;
 }
 
 interface SendAdminNewOrderProps {
@@ -45,6 +55,19 @@ interface SendAdminNewOrderProps {
     totalAmount: number;
     orderId: string;
     cargoCompany?: string;
+    items: OrderEmailItemProps[];
+    paymentMethod: "BANK_TRANSFER" | "CREDIT_CARD" | "CURRENT_ACCOUNT";
+    shippingAddress: {
+        address: string;
+        city: string;
+        district?: string;
+        phone?: string;
+    };
+    customerEmail?: string;
+    isGuest: boolean;
+    shippingCost?: number;
+    installmentFee?: number;
+    installmentCount?: number;
 }
 
 export async function sendOrderConfirmationEmail(props: SendOrderConfirmationProps) {
@@ -79,6 +102,8 @@ export async function sendOrderConfirmationEmail(props: SendOrderConfirmationPro
                 totalAmount: props.totalAmount,
                 shippingCost: props.shippingCost,
                 paymentMethod: props.paymentMethod,
+                installmentFee: props.installmentFee,
+                installmentCount: props.installmentCount,
             }),
             generateSatisSozlesmesiPdf({
                 ...pdfCommonProps,
@@ -109,8 +134,10 @@ export async function sendOrderConfirmationEmail(props: SendOrderConfirmationPro
             console.error('İptal/iade PDF hatası:', iptalIadeResult.reason);
         }
 
+        const settings = await getSiteSettings();
+
         const { data, error } = await resend.emails.send({
-            from: 'Sipariş <siparis@ladamarketi.com>',
+            from: `${ORDER_BRAND.name} <siparis@ladamarketi.com>`,
             to: [props.to],
             subject: `Siparişiniz Alındı - #${props.orderNumber}`,
             react: OrderConfirmationEmail({
@@ -120,6 +147,15 @@ export async function sendOrderConfirmationEmail(props: SendOrderConfirmationPro
                 totalAmount: props.totalAmount,
                 paymentMethod: props.paymentMethod,
                 bankInfo: props.bankInfo,
+                orderUrl: `${SITE_URL}/orders/${props.orderId}`,
+                shippingAddress: props.shippingAddress,
+                cargoCompany: props.cargoCompany,
+                shippingCost: props.shippingCost,
+                contactPhone: settings.phone,
+                contactEmail: settings.email,
+                hasContracts: attachments.length > 0,
+                installmentFee: props.installmentFee,
+                installmentCount: props.installmentCount,
             }),
             attachments: attachments.length > 0 ? attachments : undefined,
         });
@@ -158,6 +194,15 @@ export async function sendAdminNewOrderEmail(props: SendAdminNewOrderProps) {
                 customerName: props.customerName,
                 companyName: props.companyName,
                 totalAmount: props.totalAmount,
+                items: props.items,
+                paymentMethod: props.paymentMethod,
+                shippingAddress: props.shippingAddress,
+                customerEmail: props.customerEmail,
+                isGuest: props.isGuest,
+                cargoCompany: props.cargoCompany,
+                shippingCost: props.shippingCost,
+                installmentFee: props.installmentFee,
+                installmentCount: props.installmentCount,
             }),
         });
 

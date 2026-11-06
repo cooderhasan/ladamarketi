@@ -74,19 +74,24 @@ export async function POST(req: NextRequest) {
             try {
                 const shippingAddress = order.shippingAddress as any; // Cast JSON to any
                 const emailTo = order.user?.email || order.guestEmail;
+                // PayTR'nin total_amount'u karta yansıyan tutardır; aradaki fark taksit vade farkıdır
+                const installmentFee = Math.max(Math.round(Number(total_amount) - Number(order.total) * 100) / 100, 0) || 0;
+                const installmentCount = Number(params.installment_count) || undefined;
+                const emailItems = order.items.map((item) => ({
+                    productName: item.productName,
+                    quantity: item.quantity,
+                    unitPrice: Number(item.unitPrice),
+                    lineTotal: Number(item.lineTotal),
+                    variantInfo: item.variantInfo || undefined,
+                }));
 
                 if (emailTo) {
                     await sendOrderConfirmationEmail({
                         to: emailTo,
                         orderNumber: order.orderNumber,
+                        orderId: order.id,
                         customerName: shippingAddress?.name || "Değerli Müşterimiz",
-                        items: order.items.map((item) => ({
-                            productName: item.productName,
-                            quantity: item.quantity,
-                            unitPrice: Number(item.unitPrice),
-                            lineTotal: Number(item.lineTotal),
-                            variantInfo: item.variantInfo || undefined,
-                        })),
+                        items: emailItems,
                         totalAmount: Number(order.total),
                         paymentMethod: "CREDIT_CARD",
                         shippingAddress: {
@@ -98,6 +103,8 @@ export async function POST(req: NextRequest) {
                         },
                         shippingCost: Number(order.shippingCost) || 0,
                         cargoCompany: order.cargoCompany || undefined,
+                        installmentFee,
+                        installmentCount,
                     });
                 }
 
@@ -109,6 +116,19 @@ export async function POST(req: NextRequest) {
                     totalAmount: Number(order.total),
                     orderId: order.id,
                     cargoCompany: order.cargoCompany || undefined,
+                    items: emailItems,
+                    paymentMethod: "CREDIT_CARD",
+                    shippingAddress: {
+                        address: shippingAddress?.address || "",
+                        city: shippingAddress?.city || "",
+                        district: shippingAddress?.district || "",
+                        phone: shippingAddress?.phone || "",
+                    },
+                    customerEmail: emailTo || undefined,
+                    isGuest: !order.userId,
+                    shippingCost: Number(order.shippingCost) || 0,
+                    installmentFee,
+                    installmentCount,
                 });
 
                 console.log(`Emails sent for Order ${orderId}`);

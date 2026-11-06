@@ -406,18 +406,21 @@ export async function createOrder(data: CreateOrderData) {
         // For Credit Card, we will send email in the PayTR Callback (success)
         if (paymentMethod !== "CREDIT_CARD") {
             const emailTo = userForEmail?.email || data.guestEmail;
+            const emailItems = orderItems.map((item) => ({
+                productName: item.productName,
+                quantity: item.quantity,
+                unitPrice: Number(item.unitPrice),
+                lineTotal: item.lineTotal,
+                variantInfo: item.variantInfo || undefined,
+            }));
+
             if (emailTo) {
                 sendOrderConfirmationEmail({
                     to: emailTo,
                     orderNumber: order.orderNumber,
+                    orderId: order.id,
                     customerName: data.shippingAddress.name,
-                    items: orderItems.map((item) => ({
-                        productName: item.productName,
-                        quantity: item.quantity,
-                        unitPrice: Number(item.unitPrice),
-                        lineTotal: item.lineTotal,
-                        variantInfo: item.variantInfo || undefined,
-                    })),
+                    items: emailItems,
                     totalAmount: total,
                     paymentMethod: paymentMethod,
                     bankInfo: paymentMethod === "BANK_TRANSFER" ? {
@@ -447,6 +450,17 @@ export async function createOrder(data: CreateOrderData) {
                 totalAmount: total,
                 orderId: order.id,
                 cargoCompany: data.cargoCompany,
+                items: emailItems,
+                paymentMethod: paymentMethod,
+                shippingAddress: {
+                    address: data.shippingAddress.address,
+                    city: data.shippingAddress.city,
+                    district: data.shippingAddress.district,
+                    phone: data.shippingAddress.phone,
+                },
+                customerEmail: emailTo || undefined,
+                isGuest: !userId,
+                shippingCost: data.shippingCost,
             }).catch((err) => {
                 console.error("Failed to send admin notification email:", err);
             });
