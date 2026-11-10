@@ -3,7 +3,7 @@ import { OrderConfirmationEmail } from '@/emails/order-confirmation';
 import { AdminNewOrderEmail } from '@/emails/admin-new-order';
 import { ORDER_BRAND } from '@/emails/order-email-shared';
 import { ShippingNotificationEmail } from '@/emails/shipping-notification';
-import { AbandonedCartNotificationEmail } from '@/emails/abandoned-cart-notification';
+import { AbandonedCartNotificationEmail, type AbandonedCartEmailItem } from '@/emails/abandoned-cart-notification';
 import { generateOnBilgilendirmePdf } from '@/lib/on-bilgilendirme-pdf';
 import { generateSatisSozlesmesiPdf } from '@/lib/satis-sozlesmesi-pdf';
 import { generateIptalIadePdf } from '@/lib/iptal-iade-pdf';
@@ -261,16 +261,16 @@ export async function sendShippingNotificationEmail(props: SendShippingNotificat
 
 interface SendAbandonedCartNotificationProps {
     to: string;
-    customerName: string;
-    items: {
-        productName: string;
-        quantity: number;
-        unitPrice: number;
-        lineTotal: number;
-        imageUrl?: string;
-    }[];
+    /** Üyenin Ad Soyad'ı; yoksa mailde sadece "Merhaba," yazar */
+    customerName?: string;
+    items: AbandonedCartEmailItem[];
     totalAmount: number;
-    continueShoppingUrl: string;
+    cartUrl: string;
+    contactPhone?: string;
+    contactEmail?: string;
+    unsubscribeUrl: string;
+    /** List-Unsubscribe başlığı (posta programının kendi "aboneliği iptal et" düğmesi) */
+    oneClickUnsubscribeUrl: string;
 }
 
 export async function sendAbandonedCartEmail(props: SendAbandonedCartNotificationProps) {
@@ -281,14 +281,21 @@ export async function sendAbandonedCartEmail(props: SendAbandonedCartNotificatio
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Lada Marketi <satis@ladamarketi.com>',
+            from: `${ORDER_BRAND.name} <satis@ladamarketi.com>`,
             to: [props.to],
-            subject: 'Sepetinizde Ürünler Sizi Bekliyor!',
+            subject: 'Sepetinizdeki ürünler sizi bekliyor',
+            headers: {
+                'List-Unsubscribe': `<${props.oneClickUnsubscribeUrl}>`,
+                'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+            },
             react: AbandonedCartNotificationEmail({
                 customerName: props.customerName,
                 items: props.items,
                 totalAmount: props.totalAmount,
-                continueShoppingUrl: props.continueShoppingUrl,
+                cartUrl: props.cartUrl,
+                contactPhone: props.contactPhone,
+                contactEmail: props.contactEmail,
+                unsubscribeUrl: props.unsubscribeUrl,
             }),
         });
 

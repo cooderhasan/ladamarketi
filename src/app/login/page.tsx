@@ -1,13 +1,23 @@
 import { getSiteSettings } from "@/lib/settings";
 import { LoginForm } from "@/components/auth/login-form";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
 export const metadata = {
     title: "Giriş Yap",
     description: "Hesabınıza giriş yapın.",
 };
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string }> }) {
+    // Zaten giriş yapmış kişi dönüş adresine gider (ör. sepet hatırlatma mailindeki "Sepetime Git");
+    // yalnızca site içi göreli adresler kabul edilir
+    const { callbackUrl } = await searchParams;
+    if (callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//") && !callbackUrl.startsWith("/\\")) {
+        const session = await auth();
+        if (session?.user) redirect(callbackUrl);
+    }
+
     const settings = await getSiteSettings();
     const logoUrl = settings.logoUrl as string | undefined;
     const siteName = settings.siteName as string | undefined;

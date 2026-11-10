@@ -14,7 +14,7 @@ import { AbandonedCartNotificationEmail } from './src/emails/abandoned-cart-noti
             }
         ],
         totalAmount: 200,
-        continueShoppingUrl: "https://ladamarketi.com"
+        cartUrl: "https://www.ladamarketi.com/login?callbackUrl=%2Fcart"
     }));
     console.log(html);
 })();

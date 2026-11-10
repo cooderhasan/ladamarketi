@@ -94,7 +94,7 @@ export default function AbandonedCartsPage() {
                 <CardHeader>
                     <CardTitle className="text-lg">Sepeti Terk Edenler</CardTitle>
                     <CardDescription>
-                        Son 2 saatten daha eski aktif sepetleri listeliyorsunuz.
+                        Son 2 saattir dokunulmamış sepetler. Satın alınmış ürünler ve sonradan sipariş verenler listelenmez.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -119,15 +119,13 @@ export default function AbandonedCartsPage() {
                                 </TableHeader>
                                 <TableBody>
                                     {carts.map((cart) => {
-                                        const customerName = cart.user?.companyName || cart.user?.email || "Bilinmiyor";
+                                        const customerName = cart.user?.name || cart.user?.companyName || cart.user?.email || "Bilinmiyor";
                                         const email = cart.user?.email;
                                         const phone = cart.user?.phone;
-                                        
+
                                         const totalItems = cart.items.reduce((acc: number, cur: any) => acc + cur.quantity, 0);
-                                        const totalAmount = cart.items.reduce((acc: number, cur: any) => {
-                                            const price = Number(cur.product.salePrice || cur.product.listPrice);
-                                            return acc + (price * cur.quantity);
-                                        }, 0);
+                                        // Müşteri iskontosu ve varyant farkı dahil, satışta olmayan ürünler hariç (sunucuda hesaplanır)
+                                        const totalAmount = cart.totalAmount;
 
                                         return (
                                             <TableRow key={cart.id}>
@@ -153,22 +151,23 @@ export default function AbandonedCartsPage() {
                                                             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
                                                                 {cart.items.map((item: any) => (
                                                                     <div key={item.id} className="flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0">
-                                                                        {item.product.images?.[0] ? (
-                                                                            <img 
-                                                                                src={item.product.images[0]} 
-                                                                                alt={item.product.name} 
+                                                                        {item.image ? (
+                                                                            <img
+                                                                                src={item.image}
+                                                                                alt={item.productName}
                                                                                 className="w-16 h-16 object-cover rounded-md border"
                                                                             />
                                                                         ) : (
                                                                             <div className="w-16 h-16 bg-gray-100 rounded-md border flex items-center justify-center text-xs text-gray-400">Görsel Yok</div>
                                                                         )}
                                                                         <div className="flex-1">
-                                                                            <h4 className="font-semibold text-sm">{item.product.name}</h4>
-                                                                            {item.variant && <p className="text-xs text-gray-500">{item.variant.size} - {item.variant.color}</p>}
+                                                                            <h4 className="font-semibold text-sm">{item.productName}</h4>
+                                                                            {item.variantInfo && <p className="text-xs text-gray-500">{item.variantInfo}</p>}
+                                                                            {!item.available && <Badge variant="outline" className="mt-1 text-amber-700 border-amber-300">Satışta değil, mailde gösterilmez</Badge>}
                                                                         </div>
                                                                         <div className="text-right">
                                                                             <p className="font-medium text-sm">
-                                                                                {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(Number(item.product.salePrice || item.product.listPrice))}
+                                                                                {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(item.unitPrice)}
                                                                             </p>
                                                                             <p className="text-xs text-gray-500">Adet: {item.quantity}</p>
                                                                         </div>
@@ -191,6 +190,9 @@ export default function AbandonedCartsPage() {
                                                     {formatDistanceToNow(new Date(cart.updatedAt), { addSuffix: true, locale: tr })}
                                                 </TableCell>
                                                 <TableCell className="text-center">
+                                                    {cart.unsubscribed && (
+                                                        <Badge variant="outline" className="mb-1 text-gray-500">Mail istemiyor</Badge>
+                                                    )}
                                                     {cart.reminderSentAt ? (
                                                         <div className="flex flex-col items-center gap-1">
                                                             <Badge variant="secondary" className="gap-1 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400">
@@ -201,7 +203,7 @@ export default function AbandonedCartsPage() {
                                                                 {formatDistanceToNow(new Date(cart.reminderSentAt), { addSuffix: true, locale: tr })}
                                                             </span>
                                                         </div>
-                                                    ) : (
+                                                    ) : cart.unsubscribed ? null : (
                                                         <Badge variant="outline" className="text-gray-400">Gönderilmedi</Badge>
                                                     )}
                                                 </TableCell>
@@ -210,7 +212,7 @@ export default function AbandonedCartsPage() {
                                                         variant={cart.reminderSentAt ? "outline" : "default"}
                                                         size="sm"
                                                         onClick={() => handleSendReminder(cart.id)}
-                                                        disabled={sendingId === cart.id || !email}
+                                                        disabled={sendingId === cart.id || !email || cart.unsubscribed}
                                                         className="w-full sm:w-auto"
                                                     >
                                                         {sendingId === cart.id ? (
